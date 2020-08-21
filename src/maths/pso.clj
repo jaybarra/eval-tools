@@ -29,7 +29,7 @@
                              :opt [::swarm]))
 
 ;; Code ==============================================================
-(defn compute-fitness
+#_(defn compute-fitness
   "Glove Problem [[https://en.wikipedia.org/wiki/Glove_problem]]
   optimization
 
@@ -49,7 +49,7 @@
       m1? n
       :else (- (+ m n) 2))))
 
-#_(defn compute-fitness
+(defn compute-fitness
   "10 is optimimum"
   [pos]
   {:pre [(spec/valid? ::pos pos)]}
@@ -67,11 +67,6 @@
                                          #(> (m-compute-fitness %1)
                                              (m-compute-fitness %2))))
 
-(defn- generate-n-random
-  [n]
-  {:pre [(spec/valid? (spec/and pos? int?) n)]}
-  (repeatedly n rand))
-
 (defn compute-velocity!
   "v_next = (+ (* omega v_dim)
                (* phi_self  r1 (- self_best  self_current) 
@@ -85,6 +80,7 @@
        (* phi-s r2 (- sb cp)))))
 
 (defn next-particle-velocity!
+  "Returns a velocity array following the PSO velocy computation."
   [state particle]
   (let [{::keys [pos vel best-pos]} particle
         opts (get state ::opts)
@@ -93,13 +89,16 @@
                    vel best-pos swarm-best pos)]
     (assoc particle ::vel n-vel)))
 
-(defn next-particle-pos
+(defn update-particle-pos
+  "Return particle with the position updated based on its velocity."
   [particle]
   (let [{::keys [pos vel]} particle
         n-pos (map #(+ %1 %2) pos vel)]
     (assoc particle ::pos n-pos)))
 
-(defn next-particle-bkp
+(defn update-particle-bkp
+  "Compares the particles current position score to the previous best
+  known score and updates the best-known-position."
   [particle]
   (if (> (m-compute-fitness (::pos particle))
          (m-compute-fitness (::best-pos particle)))
@@ -107,12 +106,14 @@
     particle))
 
 (defn next-particle
+  "Returns a particles next state that is the aggregate of updated
+  velocity, position, and best-known-position."
   [state particle]
   (let [next-vel (partial next-particle-velocity! state)]
     (->> particle
          next-vel
-         next-particle-pos
-         next-particle-bkp)))
+         update-particle-pos
+         update-particle-bkp)))
 
 ;; Swarm Functions ===================================================
 (defn generate-particle!
@@ -195,8 +196,8 @@
     (throw (ex-info "Invalid options"
                     (spec/explain-data ::state init-state))))
   (log/info "Running Optimization")
-  (let [swarm (generate-swarm! {::size 2
-                                ::dims [[1 10]
+  (let [swarm (generate-swarm! {::size 3
+                                ::dims [[-50 50]
                                         [1 10]]})]
     (loop [state (assoc init-state ::swarm swarm)
            iteration 0]
@@ -206,7 +207,7 @@
         (recur (next-state state)
                (inc iteration))))))
 
-(clojure.pprint/pprint (run {::opts {::max-iterations 10
+#_(clojure.pprint/pprint (run {::opts {::max-iterations 1000
                                      ::omega 0.8
                                      ::phi-p 0.8
                                      ::phi-s 0.5}}))
