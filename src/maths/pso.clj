@@ -94,7 +94,7 @@
   "Return particle with the position updated based on its velocity."
   [particle]
   (let [{::keys [pos vel]} particle
-        n-pos (map #(+ %1 %2) pos vel)]
+        n-pos (map + pos vel)]
     (assoc particle ::pos n-pos)))
 
 (defn update-particle-bkp
