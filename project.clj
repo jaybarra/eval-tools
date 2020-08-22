@@ -6,10 +6,10 @@
   :dependencies [[com.taoensso/timbre "4.10.0"]
                  [org.clojure/clojure "1.10.1"]
                  [org.clojure/math.numeric-tower "0.0.4"]]
-  :profiles {:dev {:dependencies [[midje "1.9.9"]
-                                  [org.clojure/test.check "0.9.0"]
+  :profiles {:dev {:dependencies [[org.clojure/test.check "0.9.0"]
                                   [slamhound "1.5.5"]]
-                   :plugins [[jonase/eastwood "0.3.10"]
+                   :plugins [[lein-cloverage "1.2.0"]
+                             [jonase/eastwood "0.3.10"]
                              [lein-kibit "0.1.8"]]}
              :kaocha {:dependencies [[lambdaisland/kaocha "1.0.663"]]}}
   :repl-options {:init-ns maths.core}

@@ -10,8 +10,8 @@
 (spec/def ::best-pos ::num-array-type)
 (spec/def ::vel ::num-array-type)
 (spec/def ::particle (spec/keys :req [::pos
-                                      ::vel]
-                                :opt [::best-pos]))
+                                      ::best-pos
+                                      ::vel]))
 (spec/def ::particles (spec/* ::particle))
 (spec/def ::swarm (spec/keys :req [::particles
                                    ::best-pos]))
@@ -20,11 +20,12 @@
 (spec/def ::phi-p (spec/and number? pos?))
 (spec/def ::phi-s (spec/and number? pos?))
 (spec/def ::iterations (spec/and int? pos?))
+(spec/def ::max-iterations (spec/and int? pos?))
 
-(spec/def ::opts (spec/keys :req [::omega
+(spec/def ::opts (spec/keys :req [::max-iterations
+                                  ::omega
                                   ::phi-p
-                                  ::phi-s]
-                            :opt [::max-iterations]))
+                                  ::phi-s]))
 (spec/def ::state (spec/keys :req [::opts]
                              :opt [::swarm]))
 
