@@ -86,16 +86,13 @@
   contain both Temporal and Spatial"
   [state]
   (let [opts {:page_num 1
-              :page_size 100}]
-    (->> (get-collections! state opts) 
-      (map :id)
-      (map (partial get-granule-v2-facets! state))
-      flatten
-      (filterv facets-contains-temporal-and-spatial?) 
-      pprint)))
-
-(def state {:connections
-            {::cmr {::env :prod
-                    ::url "https://cmr.earthdata.nasa.gov"}}})
-
+              :page_size 10}
+        fetch-collections! (partial get-collections! state)
+        fetch-coll-granules! (partial get-granule-v2-facets! state)]
+    (->> opts
+         fetch-collections!
+         (map :id)
+         (map fetch-coll-granules!)
+         (filterv facets-contains-temporal-and-spatial?) 
+         pprint)))
 
