@@ -4,8 +4,8 @@
             [maths.cmr :as cmr :refer [state->cmr-opts]]))
 
 (def state {:connections
-            {::cmr/cmr {::cmr/env :sit
-                        ::cmr/url "https://cmr.sit.earthdata.nasa.gov"}}})
+            {::cmr/cmr {::cmr/env :local
+                        ::cmr/url "http://localhost:3000"}}})
 
 (deftest state->cmr-opts-test
   (let [result (state->cmr-opts state)]

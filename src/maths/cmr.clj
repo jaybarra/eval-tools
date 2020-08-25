@@ -9,7 +9,7 @@
 
 (def scheme-pattern "https?:\\/\\/")
 (def cmr-url-pattern "cmr\\.((uat|sit)\\.)?earthdata\\.nasa\\.gov")
-(def cmr-local-pattern "localhost:\\d4}")
+(def cmr-local-pattern "localhost:\\d{4}")
 (def cmr-rx (re-pattern (format "%s(%s|%s)"
                                 scheme-pattern
                                 cmr-local-pattern
