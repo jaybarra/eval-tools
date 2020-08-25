@@ -72,13 +72,13 @@
   "v_next = (+ (* omega v_dim)
                (* phi_self  r1 (- self_best  self_current) 
                (* phi_swarm r2 (- swarm_best self_current))"
-  [opts vel pb sb cp]
+  [opts cur-vel current-pos self-best-pos swarm-best-pos]
   (let [{::keys [omega phi-p phi-s]} opts
         r1 (rand)
         r2 (rand)]
-    (+ (* omega vel)
-       (* phi-p r1 (- pb cp))
-       (* phi-s r2 (- sb cp)))))
+    (+ (* omega cur-vel)
+       (* phi-p r1 (- self-best-pos current-pos))
+       (* phi-s r2 (- swarm-best-pos current-pos)))))
 
 (defn next-particle-velocity!
   "Returns a velocity array following the PSO velocy computation."
@@ -87,7 +87,7 @@
         opts (get state ::opts)
         swarm-best (get-in state [::swarm ::best-pos])
         n-vel (map (partial compute-velocity! opts)
-                   vel best-pos swarm-best pos)]
+                    pos vel best-pos swarm-best)]
     (assoc particle ::vel n-vel)))
 
 (defn update-particle-pos
