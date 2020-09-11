@@ -1,14 +1,17 @@
-# maths
+# Eval Tools
 
-A Clojure library designed to ... well, that part is up to you.
+A Clojure library designed to assist with evalutating and testing REST
+APIs and tools.
 
 ## Usage
 
-FIXME
+Currently best run from within a REPL. Emacs + Cider is recommended.
+
+```M-x cider-jack-in
 
 ## License
 
-Copyright © 2020 FIXME
+Copyright © 2020 Jay Barra
 
 This program and the accompanying materials are made available under the
 terms of the Eclipse Public License 2.0 which is available at
