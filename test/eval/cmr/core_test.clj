@@ -1,8 +1,8 @@
-(ns maths.cmr.core-test
+(ns eval.cmr.core-test
   (:require
    [clojure.test :refer :all]
    [clojure.spec.alpha :as spec]
-   [maths.cmr :as cmr :refer [state->cmr-opts]]))
+   [eval.cmr :as cmr :refer [state->cmr-opts]]))
 
 (def state {:connections
             {::cmr/cmr {::cmr/env :local

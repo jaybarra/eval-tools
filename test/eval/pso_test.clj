@@ -1,8 +1,9 @@
-(ns maths.pso-test
-  (:require [clojure.test :refer :all]
-            [clojure.spec.alpha :as spec]
-            [clojure.spec.gen.alpha :as gen]
-            [maths.pso :as pso :refer [compute-velocity!]])
+(ns eval.pso-test
+  (:require
+   [clojure.test :refer :all]
+   [clojure.spec.alpha :as spec]
+   [clojure.spec.gen.alpha :as gen]
+   [eval.pso :as pso :refer [compute-velocity!]])
   (:import (clojure.lang ExceptionInfo)))
 
 (def valid-opts {::pso/max-iterations 100

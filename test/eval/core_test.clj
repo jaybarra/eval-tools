@@ -1,6 +1,7 @@
-(ns maths.core-test
-  (:require [clojure.test :refer :all]
-            [maths.core :as core]))
+(ns eval.core-test
+  (:require
+   [clojure.test :refer :all]
+   [eval.core :as core]))
 
 (deftest fibo-test
   (is (not= nil core/fib 1))
