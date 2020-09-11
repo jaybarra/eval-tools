@@ -7,6 +7,7 @@
                  [clj-http "3.10.1"]
                  [crouton "0.1.2"]
                  [com.taoensso/timbre "4.10.0"]
+                 [environ "1.2.0"]
                  [org.clojure/clojure "1.10.1"]
                  [org.clojure/math.numeric-tower "0.0.4"]]
   :profiles {:dev {:dependencies [[org.clojure/test.check "0.9.0"]

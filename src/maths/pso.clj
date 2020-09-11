@@ -1,7 +1,8 @@
 (ns maths.pso
-  (:require [clojure.math.numeric-tower :as math]
-            [clojure.spec.alpha :as spec]
-            [taoensso.timbre :as log]))
+  (:require
+   [clojure.math.numeric-tower :as math]
+   [clojure.spec.alpha :as spec]
+   [taoensso.timbre :as log]))
 
 ;; Specs =============================================================
 (spec/def ::num-array-type (spec/+ number?))
