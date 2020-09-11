@@ -1,7 +1,7 @@
 (ns eval.cmr.orbit
   (:require
    [cheshire.core :as json]
-   [maths.cmr.core :as cmr]))
+   [eval.cmr.core :as cmr]))
 
 
 (defn get-orbit-granules!

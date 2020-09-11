@@ -1,4 +1,4 @@
-(defproject maths "0.1.0-SNAPSHOT"
+(defproject eval-tools "0.1.0-SNAPSHOT"
   :description "Evaluation and Testing Tools"
   :url "https://github.com/jaybarra/eval-tools"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
