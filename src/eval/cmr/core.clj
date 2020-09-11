@@ -1,4 +1,4 @@
-(ns maths.cmr.core
+(ns eval.cmr.core
   (:require
    [cheshire.core :as json]
    [clj-http.client :as client]

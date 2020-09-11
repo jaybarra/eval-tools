@@ -1,4 +1,4 @@
-(ns maths.pso
+(ns eval.pso
   (:require
    [clojure.math.numeric-tower :as math]
    [clojure.spec.alpha :as spec]

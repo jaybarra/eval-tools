@@ -1,4 +1,4 @@
-(ns maths.core)
+(ns eval.core)
 
 ;; Factorial
 (defn factorial
