@@ -7,8 +7,6 @@ APIs and tools.
 
 Currently best run from within a REPL. Emacs + Cider is recommended.
 
-```M-x cider-jack-in
-
 ## License
 
 Copyright © 2020 Jay Barra
