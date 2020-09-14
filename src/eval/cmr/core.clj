@@ -2,7 +2,6 @@
   (:require
    [cheshire.core :as json]
    [clj-http.client :as client]
-   [clojure.pprint :refer [pprint]]
    [clojure.spec.alpha :as spec]
    [clojure.string :as string]
    [environ.core :refer [env]]
@@ -93,23 +92,38 @@
          (map :title)
          (= ["Temporal" "Spatial"]))))
 
-(defn print-facets-with-temporal-and-spatial!
+(defn get-facets-with-temporal-and-spatial!
   "Query CMR for collections and associated granules, print any that 
   contain both Temporal and Spatial"
-  [state m-opts]
-  (let [opts (merge {:page_num 1
-                     :page_size 500
-                     :has_granules true}
-                    m-opts)
-        fetch-collections! (partial get-collections! state)
-        fetch-coll-granules! (partial get-granule-v2-facets! state)]
-    (log/debug "Fetching Collections" opts)
-    (->> opts
-         fetch-collections!
-         (map :id)
-         (pmap fetch-coll-granules!)
-         (filterv facets-contains-temporal-and-spatial?) 
-         pprint)))
+  ([state]
+   (get-facets-with-temporal-and-spatial! state nil))
+  ([state m-opts]
+   (let [opts (merge {:page_num 1
+                      :page_size 500
+                      :has_granules true}
+                     m-opts)
+         fetch-collections! (partial get-collections! state)
+         fetch-coll-granules! (partial get-granule-v2-facets! state)]
+     (log/debug "Fetching facets" opts)
+     (->> (fetch-collections! opts)
+          (map :id)
+          (pmap fetch-coll-granules!)
+          (filterv facets-contains-temporal-and-spatial?)))))
+
+(defn get-collections-with-temporal-and-spatial!
+  ([state]
+   (get-collections-with-temporal-and-spatial! state nil))
+  ([state m-opts]
+   (let [opts (merge {:page_num 1
+                      :page_size 500
+                      :has_granules true}
+                     m-opts)
+         fetch-collections! (partial get-collections! state)
+         fetch-coll-granules! (partial get-granule-v2-facets! state)]
+     (log/debug "Fetching collections" opts)
+     (->> (fetch-collections! opts)
+          (pmap #(merge % {:granules (fetch-coll-granules! (:id %))}))
+          (filterv #(facets-contains-temporal-and-spatial? (:granules %)))))))
 
 (defn cmr
   "Return a CMR connection object."
@@ -122,6 +136,18 @@
           ::url "https://cmr.uat.earthdata.nasa.gov"}
     :prod {::env cmr-env
            ::url "https://cmr.earthdata.nasa.gov"}
+    ;; default
     {::env :local
      ::url "http://localhost:3003"}))
+
+(defn cmr-state
+  "Return a CMR enabled state"
+  ([cmr-env]
+   (cmr-state {} cmr-env))
+  ([state cmr-env]
+   (let [cmr-opts (cmr cmr-env)
+         cons (merge (:connections state)
+                     {::cmr cmr-opts})]
+     (merge state {:connections cons }))))
+
 
