@@ -87,10 +87,21 @@
   "Return true if a faceted query result contains temporal and spatial
   facets."
   [facets]
-  (when-let [cn (seq (:children facets))]
-    (->> cn
+  (when-let [nodes (seq (:children facets))]
+    (->> nodes
          (map :title)
-         (= ["Temporal" "Spatial"]))))
+         (fn [titles]
+           (and (some #{"Temporal"} titles)
+                (some #{"Spatial"} titles))))))
+
+(defn facets-contains-type?
+  "Return true if a faceted query result contains temporal and spatial
+  facets."
+  [type facets]
+  (when-let [nodes (seq (:children facets))]
+    (->> nodes
+         (map :title)
+         (some #{type}))))
 
 (defn get-facets-with-temporal-and-spatial!
   "Query CMR for collections and associated granules, print any that 
@@ -103,12 +114,15 @@
                       :has_granules true}
                      m-opts)
          fetch-collections! (partial get-collections! state)
-         fetch-coll-granules! (partial get-granule-v2-facets! state)]
+         fetch-coll-granules! (partial get-granule-v2-facets! state)
+         contains-spatial? (partial facets-contains-type? "Spatial")
+         contains-temporal? (partial facets-contains-type? "Temporal")]
      (log/debug "Fetching facets" opts)
      (->> (fetch-collections! opts)
           (map :id)
           (pmap fetch-coll-granules!)
-          (filterv facets-contains-temporal-and-spatial?)))))
+          (filterv contains-spatial?)
+          (filterv contains-temporal?)))))
 
 (defn get-collections-with-temporal-and-spatial!
   ([state]
@@ -149,5 +163,4 @@
          cons (merge (:connections state)
                      {::cmr cmr-opts})]
      (merge state {:connections cons }))))
-
 
