@@ -21,6 +21,13 @@
                                 cmr-local-pattern
                                 cmr-url-pattern)))
 
+(spec/def :v2-facets/title string?)
+(spec/def :v2-facets/facet (spec/keys :req-un [:v2-facets/title]))
+(spec/def :v2-facets/children (spec/* :v2-facets/facet))
+(spec/def :v2-facets/facets (spec/keys :req-un [:v2-facets/title]
+                                       :opt-un [:v2-facets/children]))
+
+
 (spec/def ::url (spec/and string?
                           #(re-matches cmr-rx %)))
 
@@ -146,13 +153,15 @@
         (get-in [:feed :facets]))))
 
 (defn facets-contains-type?
-  "Return true if a faceted query result contains temporal and spatial
-  facets."
+  "Return true if a faceted query result contains a facet with the
+  given name."
   [type facets]
+  {:pre [(spec/valid? :v2-facets/facets facets)]}
   (when-let [nodes (seq (:children facets))]
     (->> nodes
          (map :title)
-         (some #{type}))))
+         (some #{type})
+         some?)))
 
 (defn get-facets-with-temporal-and-spatial!
   "Query CMR for collections and associated granules, print any that 
@@ -194,7 +203,9 @@
           (filterv contains-spatial?)
           (filterv contains-temporal?)))))
 
-(defn find-fast!
+(defn find-all-collections-with-spatial-and-temporal!
+  "Crawls through CMR to find any collection with facets that have
+  temporal and spatial facets."
   [state]
   (let [n-coll (cmr-hits! state :collection {:has_granules true})
         page-size 100

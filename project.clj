@@ -17,5 +17,6 @@
                              [lein-kibit "0.1.8"]]}
              :kaocha {:dependencies [[lambdaisland/kaocha "1.0.663"]]}}
   :repl-options {:init-ns eval.core}
-  :aliases {"slamhound" ["run" "-m" "slam.hound"]
-            "kaocha" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner"]})
+  :aliases {"kaocha" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner"]
+            "slamhound" ["run" "-m" "slam.hound"]
+            "test" "kaocha"})
