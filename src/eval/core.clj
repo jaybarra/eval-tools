@@ -1,4 +1,6 @@
-(ns eval.core)
+(ns eval.core
+  (:require
+   [clojure.spec.alpha :as spec]))
 
 ;; Factorial
 (defn factorial
@@ -21,6 +23,7 @@
 (def collatz
   (memoize
     (fn [n]
+      {:pre [(spec/valid? (spec/and pos?) n)]}
       (let [big-n (bigint n)]
         (if (= 1 big-n)
           1

@@ -1,8 +1,6 @@
 (ns eval.pso-test
   (:require
    [clojure.test :refer :all]
-   [clojure.spec.alpha :as spec]
-   [clojure.spec.gen.alpha :as gen]
    [eval.pso :as pso :refer [compute-velocity!]])
   (:import (clojure.lang ExceptionInfo)))
 
@@ -14,9 +12,9 @@
 (deftest pso
   (testing "validates options"
     (is (thrown? ExceptionInfo
-                 (pso/run {})))
+                 (pso/run-optimization {})))
     (is (thrown? ExceptionInfo
-                 (pso/run
+                 (pso/run-optimization
                    {::pso/opts
                     (merge valid-opts
                            {::pso/max-iterations -1})})))))

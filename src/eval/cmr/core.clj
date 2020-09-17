@@ -77,7 +77,9 @@
    {:pre [(spec/valid? ::concept-type concept-type)]}
    (let [{cmr-url ::url
           cmr-env ::env} (state->cmr state)
-         target-url (format "%s/search/%ss" cmr-url (name concept-type))
+         target-url (format "%s/search/%ss"
+                            cmr-url
+                            (name concept-type))
          query-params (merge {:page_size 0} m-opts)
          opts {:query-params query-params
                :headers {"Echo-Token" (get-echo-token cmr-env)}
@@ -145,7 +147,8 @@
                                    :include_facets "v2"}
                     :headers {"Echo-Token" (get-echo-token cmr-env)}
                     :cookie-policy :standard}]
-    (log/debug "Fetching granules with v2 facets for collection" coll-id)
+    (log/debug "Fetching granules with v2 facets for collection"
+               coll-id)
     (-> coll-search-url
         (client/get query-opts)
         :body
@@ -192,11 +195,13 @@
          fetch-collections! (partial get-collections! state)
          fetch-coll-granules! (partial get-granule-v2-facets! state)
          contains-spatial? (fn [c-with-g]
-                             (facets-contains-type? "Spatial"
-                                                    (:granules c-with-g)))
+                             (facets-contains-type?
+                               "Spatial"
+                               (:granules c-with-g)))
          contains-temporal? (fn [c-with-g]
-                              (facets-contains-type? "Temporal"
-                                                     (:granules c-with-g)))]
+                              (facets-contains-type?
+                                "Temporal"
+                                (:granules c-with-g)))]
      (log/debug "Fetching collections" opts)
      (->> (fetch-collections! opts)
           (pmap #(merge % {:granules (fetch-coll-granules! (:id %))}))
@@ -215,7 +220,9 @@
       (if (< max-page page-num)
         colls
         (do
-          (log/debug (format "Searching page %d of %d" page-num max-page))
+          (log/debug (format "Searching page %d of %d"
+                             page-num
+                             max-page))
           (recur (inc page-num)
                  (if-let [results (seq (get-collections-with-temporal-and-spatial!
                                          state
