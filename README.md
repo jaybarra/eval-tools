@@ -7,6 +7,12 @@ APIs and tools.
 
 Currently best run from within a REPL. Emacs + Cider is recommended.
 
+In your local environment set the following Echo token
+
+* CMR_ECHO_TOKEN_SIT
+* CMR_ECHO_TOKEN_UAT
+* CMR_ECHO_TOKEN_PROD
+
 ## License
 
 Copyright © 2020 Jay Barra

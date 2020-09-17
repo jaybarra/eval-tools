@@ -5,10 +5,13 @@
    [clojure.spec.alpha :as spec]
    [clojure.string :as string]
    [environ.core :refer [env]]
-   [taoensso.timbre :as log]))
+   [taoensso.timbre :as log])
+  (:import
+   [clojure.lang ExceptionInfo]))
 
 ;; Specs =============================================================
 (spec/def ::env #{:local :sit :uat :prod})
+(spec/def ::concept-type #{:collection :granule})
 
 (def scheme-pattern "https?:\\/\\/")
 (def cmr-url-pattern "cmr\\.((uat|sit)\\.)?earthdata\\.nasa\\.gov")
@@ -24,121 +27,6 @@
 (spec/def ::cmr (spec/keys :req [::env
                                  ::url]))
 ;; Functions =========================================================
-(defn state->cmr
-  "Extract CMR connection options from state."
-  [state]
-  {:post [(spec/valid? ::cmr %)]}
-  (get-in state [:connections ::cmr]))
-
-(defn get-echo-token
-  [cmr-env]
-  (env (str "CMR_ECHO_TOKEN_" (string/upper-case (name cmr-env)))))
-
-(defn get-collections!
-  "GET the collections from the specified CMR collections."
-  ([context]
-   (get-collections! context nil))
-  ([context opts]
-   (let [coll-search-url (format "%s/search/collections.json"
-                                 (::url (state->cmr context)))
-         echo-token (get-echo-token (::env (state->cmr context)))
-         query-opts {:query-params opts
-                     :headers {"Echo-Token" echo-token}}]
-     (-> coll-search-url
-         (client/get query-opts)
-         :body
-         (json/parse-string true)
-         (get-in [:feed :entry])))))
-
-(defn get-granules!
-  "GET the granules from the specified CMR collections for a given
-  collection."
-  ([context coll-id]
-   (get-granules! context coll-id nil))
-  ([context coll-id opts]
-   (let [coll-search-url (format "%s/search/granules.json"
-                                 (::url (state->cmr context)))
-         echo-token (get-echo-token (::env (state->cmr context)))
-         query-opts {:query-params
-                     (merge {:collection_concept_id coll-id}
-                            opts)
-                     :headers {"Echo-Token" echo-token}}]
-     (-> coll-search-url
-         (client/get query-opts)
-         :body
-         (json/parse-string true)
-         (get-in [:feed :entry])))))
-
-(defn get-granule-v2-facets!
-  "GET granule v2 facets for a collection."
-  [context coll-id]
-  (let [coll-search-url (format "%s/search/granules.json"
-                                (::url (state->cmr context)))
-        query-opts {:query-params {:collection_concept_id coll-id
-                                   :include_facets "v2"
-                                   :page_size 100}}]
-    (-> coll-search-url
-        (client/get query-opts)
-        :body
-        (json/parse-string true)
-        (get-in [:feed :facets]))))
-
-(defn facets-contains-temporal-and-spatial?
-  "Return true if a faceted query result contains temporal and spatial
-  facets."
-  [facets]
-  (when-let [nodes (seq (:children facets))]
-    (->> nodes
-         (map :title)
-         (fn [titles]
-           (and (some #{"Temporal"} titles)
-                (some #{"Spatial"} titles))))))
-
-(defn facets-contains-type?
-  "Return true if a faceted query result contains temporal and spatial
-  facets."
-  [type facets]
-  (when-let [nodes (seq (:children facets))]
-    (->> nodes
-         (map :title)
-         (some #{type}))))
-
-(defn get-facets-with-temporal-and-spatial!
-  "Query CMR for collections and associated granules, print any that 
-  contain both Temporal and Spatial"
-  ([state]
-   (get-facets-with-temporal-and-spatial! state nil))
-  ([state m-opts]
-   (let [opts (merge {:page_num 1
-                      :page_size 500
-                      :has_granules true}
-                     m-opts)
-         fetch-collections! (partial get-collections! state)
-         fetch-coll-granules! (partial get-granule-v2-facets! state)
-         contains-spatial? (partial facets-contains-type? "Spatial")
-         contains-temporal? (partial facets-contains-type? "Temporal")]
-     (log/debug "Fetching facets" opts)
-     (->> (fetch-collections! opts)
-          (map :id)
-          (pmap fetch-coll-granules!)
-          (filterv contains-spatial?)
-          (filterv contains-temporal?)))))
-
-(defn get-collections-with-temporal-and-spatial!
-  ([state]
-   (get-collections-with-temporal-and-spatial! state nil))
-  ([state m-opts]
-   (let [opts (merge {:page_num 1
-                      :page_size 500
-                      :has_granules true}
-                     m-opts)
-         fetch-collections! (partial get-collections! state)
-         fetch-coll-granules! (partial get-granule-v2-facets! state)]
-     (log/debug "Fetching collections" opts)
-     (->> (fetch-collections! opts)
-          (pmap #(merge % {:granules (fetch-coll-granules! (:id %))}))
-          (filterv #(facets-contains-temporal-and-spatial? (:granules %)))))))
-
 (defn cmr
   "Return a CMR connection object."
   [cmr-env]
@@ -163,4 +51,165 @@
          cons (merge (:connections state)
                      {::cmr cmr-opts})]
      (merge state {:connections cons }))))
+
+(defn state->cmr
+  "Extract CMR connection options from state."
+  [state]
+  {:post [(spec/valid? ::cmr %)]}
+  (get-in state [:connections ::cmr]))
+
+(defn get-echo-token
+  [cmr-env]
+  (env (str "CMR_ECHO_TOKEN_" (string/upper-case (name cmr-env)))))
+
+(defn cmr-hits!
+  "Query CMR for count of available concepts."
+  ([state concept-type]
+   (cmr-hits! state concept-type nil))
+  ([state concept-type m-opts]
+   {:pre [(spec/valid? ::concept-type concept-type)]}
+   (let [{cmr-url ::url
+          cmr-env ::env} (state->cmr state)
+         target-url (format "%s/search/%ss" cmr-url (name concept-type))
+         query-params (merge {:page_size 0} m-opts)
+         opts {:query-params query-params
+               :headers {"Echo-Token" (get-echo-token cmr-env)}
+               :cookie-policy :standard}]
+     (try 
+       (-> (client/get target-url opts)
+           (get-in [:headers "CMR-Hits"] 0)
+           (Integer/parseInt))
+       (catch ExceptionInfo e
+         (log/error e)
+         0)))))
+
+(defn cmr-granule-hits!
+  "Query CMR for count of available granules in a collection."
+  [state coll-id]
+  (cmr-hits! state :granule {:collection_concept_id coll-id}))
+
+(defn get-collections!
+  "GET the collections from the specified CMR collections."
+  ([state]
+   (get-collections! state nil))
+  ([state m-opts]
+   (let [{cmr-url ::url
+          cmr-env ::env} (state->cmr state)
+         coll-search-url (format "%s/search/collections.json" cmr-url)
+         echo-token (get-echo-token cmr-env)
+         query-opts {:query-params m-opts
+                     :cookie-policy :standard
+                     :headers {"Echo-Token" echo-token}}]
+     (-> coll-search-url
+         (client/get query-opts)
+         :body
+         (json/parse-string true)
+         (get-in [:feed :entry])))))
+
+(defn get-granules!
+  "GET the granules from the specified CMR collections for a given
+  collection."
+  ([state coll-id]
+   (get-granules! state coll-id nil))
+  ([state coll-id m-opts]
+   (let [{cmr-url ::url
+          cmr-env ::env} (state->cmr state)
+         coll-search-url (format "%s/search/granules.json" cmr-url)
+         echo-token (get-echo-token cmr-env)
+         query-opts {:query-params
+                     (merge {:collection_concept_id coll-id}
+                            m-opts)
+                     :headers {"Echo-Token" echo-token}
+                     :cookie-policy :standard}]
+     (-> coll-search-url
+         (client/get query-opts)
+         :body
+         (json/parse-string true)
+         (get-in [:feed :entry])))))
+
+(defn get-granule-v2-facets!
+  "GET granule v2 facets for a collection, ignoring granules."
+  [state coll-id]
+  (let [{cmr-url ::url
+         cmr-env ::env} (state->cmr state)
+        coll-search-url (format "%s/search/granules.json" cmr-url)
+        query-opts {:query-params {:collection_concept_id coll-id
+                                   :page_size 0
+                                   :include_facets "v2"}
+                    :headers {"Echo-Token" (get-echo-token cmr-env)}
+                    :cookie-policy :standard}]
+    (log/debug "Fetching granules with v2 facets for collection" coll-id)
+    (-> coll-search-url
+        (client/get query-opts)
+        :body
+        (json/parse-string true)
+        (get-in [:feed :facets]))))
+
+(defn facets-contains-type?
+  "Return true if a faceted query result contains temporal and spatial
+  facets."
+  [type facets]
+  (when-let [nodes (seq (:children facets))]
+    (->> nodes
+         (map :title)
+         (some #{type}))))
+
+(defn get-facets-with-temporal-and-spatial!
+  "Query CMR for collections and associated granules, print any that 
+  contain both Temporal and Spatial"
+  ([state]
+   (get-facets-with-temporal-and-spatial! state nil))
+  ([state m-opts]
+   (let [opts (merge {:page_num 1
+                      :has_granules true}
+                     m-opts)
+         fetch-collections! (partial get-collections! state)
+         fetch-coll-granules! (partial get-granule-v2-facets! state)
+         contains-spatial? (partial facets-contains-type? "Spatial")
+         contains-temporal? (partial facets-contains-type? "Temporal")]
+     (log/debug "Fetching facets" opts)
+     (->> (fetch-collections! opts)
+          (map :id)
+          (pmap fetch-coll-granules!)
+          (filterv contains-spatial?)
+          (filterv contains-temporal?)))))
+
+(defn get-collections-with-temporal-and-spatial!
+  ([state]
+   (get-collections-with-temporal-and-spatial! state nil))
+  ([state m-opts]
+   (let [opts (merge {:has_granules true}
+                     m-opts)
+         fetch-collections! (partial get-collections! state)
+         fetch-coll-granules! (partial get-granule-v2-facets! state)
+         contains-spatial? (fn [c-with-g]
+                             (facets-contains-type? "Spatial"
+                                                    (:granules c-with-g)))
+         contains-temporal? (fn [c-with-g]
+                              (facets-contains-type? "Temporal"
+                                                     (:granules c-with-g)))]
+     (log/debug "Fetching collections" opts)
+     (->> (fetch-collections! opts)
+          (pmap #(merge % {:granules (fetch-coll-granules! (:id %))}))
+          (filterv contains-spatial?)
+          (filterv contains-temporal?)))))
+
+(defn find-fast!
+  [state]
+  (let [n-coll (cmr-hits! state :collection {:has_granules true})
+        page-size 100
+        max-page (int (Math/ceil (/ n-coll page-size)))]
+    (loop [page-num 1
+           colls []]
+      (if (< max-page page-num)
+        colls
+        (do
+          (log/debug (format "Searching page %d of %d" page-num max-page))
+          (recur (inc page-num)
+                 (if-let [results (seq (get-collections-with-temporal-and-spatial!
+                                         state
+                                         {:page_num page-num
+                                          :page_size page-size}))]
+                   (into colls (map #(select-keys % [:id]) results))
+                   colls)))))))
 
