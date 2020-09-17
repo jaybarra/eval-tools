@@ -13,6 +13,10 @@ In your local environment set the following Echo token
 * CMR_ECHO_TOKEN_UAT
 * CMR_ECHO_TOKEN_PROD
 
+### Testing
+
+Prefer ```lein kaocha``` to ```lein test```
+
 ## License
 
 Copyright © 2020 Jay Barra

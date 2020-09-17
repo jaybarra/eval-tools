@@ -12,9 +12,10 @@
 (def fib
   (memoize
     (fn [n]
-      (if (< n 2)
-        1
-        (+ (fib (dec (dec n))) (fib (dec n)))))))
+      (let [big-n (bigint n)]
+        (if (< big-n 2)
+          1
+          (+ (fib (dec (dec n))) (fib (dec n))))))))
 
 ;; Collatz Conjecture
 (def collatz
@@ -36,7 +37,8 @@
     (> n 1) (concat (tower (dec n) source aux dest)
                     (tower 1 source dest aux)
                     (tower (dec n) aux dest source))
-    :else (throw "Values smaller than 1 are not allowed.")))
+    :else (throw (ex-info "Values smaller than 1 are not allowed."
+                          {:cause "Tower height" n "is invalid"}))))
 
 (defn print-tower!
   "Takes list of tower moves and prints the solving sequence."
