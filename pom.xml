@@ -18,7 +18,7 @@
     <url>https://github.com/jaybarra/eval-tools</url>
     <connection>scm:git:git://github.com/jaybarra/eval-tools.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/jaybarra/eval-tools.git</developerConnection>
-    <tag>c1cb7b550e05788122068fcf8fb31db1b1fd4e16</tag>
+    <tag>ba3bdb7af968c1d9edb013f52b3426f8bf8f73ac</tag>
   </scm>
   <build>
     <sourceDirectory>src</sourceDirectory>
