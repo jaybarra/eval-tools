@@ -30,6 +30,7 @@
   (is (= 1 (core/collatz 1)))
   (is (= 1 (core/collatz 2)))
   (is (= 1 (core/collatz 3)))
+
   (is (thrown? AssertionError (core/collatz 0.5)))
   (is (thrown? AssertionError (core/collatz 0)))
   (is (thrown? AssertionError (core/collatz -1))))

@@ -15,7 +15,7 @@
                    :plugins [[lein-cloverage "1.2.0"]
                              [jonase/eastwood "0.3.10"]
                              [lein-kibit "0.1.8"]]}
-             :kaocha {:dependencies [[lambdaisland/kaocha "1.0.663"]]}}
+             :kaocha {:dependencies [[lambdaisland/kaocha "1.0.700"]]}}
   :repl-options {:init-ns eval.core}
   :aliases {"kaocha" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner"]
             "slamhound" ["run" "-m" "slam.hound"]
