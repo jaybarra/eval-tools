@@ -31,26 +31,6 @@
                              :opt [::swarm]))
 
 ;; Code ==============================================================
-#_(defn compute-fitness
-  "Glove Problem [[https://en.wikipedia.org/wiki/Glove_problem]]
-  optimization
-
-  G(M, N) = M + N − 2 if both M, N ≥ 2
-  G(M, 1) = M
-  G(1, N) = N
-  G(1, 1) = 1"
-  [pos]
-  {:pre [(spec/valid? ::pos pos)
-         (>= (count pos) 2)]}
-  (let [[m n] pos
-        m1? (= 1 m)
-        n1? (= 1 n)]
-    (cond
-      (and m1? n1?) 1
-      n1? m
-      m1? n
-      :else (- (+ m n) 2))))
-
 (defn compute-fitness
   "10 is optimimum"
   [pos]
@@ -88,7 +68,7 @@
         opts (get state ::opts)
         swarm-best (get-in state [::swarm ::best-pos])
         n-vel (map (partial compute-velocity! opts)
-                    pos vel best-pos swarm-best)]
+                   pos vel best-pos swarm-best)]
     (assoc particle ::vel n-vel)))
 
 (defn update-particle-pos
@@ -121,7 +101,7 @@
 (defn generate-particle!
   [dims]
   (let [positions (map (fn [[mn mx]]
-                          (rand-int (- mx mn)))
+                         (rand-int (- mx mn)))
                        (seq dims))
         velocities (repeatedly (count dims) #(- (rand) 0.5))]
     {::pos positions
@@ -192,7 +172,7 @@
       (catch java.util.IllegalFormatConversionException e
         (log/error "Error parsing score" e)))))
 
-(defn run
+(defn run-optimization
   [init-state]
   (when-not (spec/valid? ::state init-state)
     (throw (ex-info "Invalid options"
@@ -209,8 +189,11 @@
         (recur (next-state state)
                (inc iteration))))))
 
-#_(clojure.pprint/pprint (run {::opts {::max-iterations 1000
-                                     ::omega 0.8
-                                     ::phi-p 0.8
-                                     ::phi-s 0.5}}))
+;; Example ===========================================================
+
+#_(clojure.pprint/pprint (run-optimization
+                           {::opts {::max-iterations 1000
+                                    ::omega 0.8
+                                    ::phi-p 0.8
+                                    ::phi-s 0.5}}))
 
