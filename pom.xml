@@ -18,7 +18,7 @@
     <url>https://github.com/jaybarra/eval-tools</url>
     <connection>scm:git:git://github.com/jaybarra/eval-tools.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/jaybarra/eval-tools.git</developerConnection>
-    <tag>3692145a1e5644fea3f9cfb2b249fed0b35def73</tag>
+    <tag>c1cb7b550e05788122068fcf8fb31db1b1fd4e16</tag>
   </scm>
   <build>
     <sourceDirectory>src</sourceDirectory>
@@ -97,6 +97,11 @@
       <groupId>org.clojure</groupId>
       <artifactId>math.numeric-tower</artifactId>
       <version>0.0.4</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.6.4</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
