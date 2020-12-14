@@ -15,7 +15,7 @@
   (is (not= nil core/fib 1))
 
   (is (pos? (core/fib 1)))
-  
+
   (are [input output] (= output (core/fib input))
     1 1
     2 2
@@ -42,7 +42,7 @@
           ["S" "D"]
           ["A" "D"]]
          (core/tower 2 "S" "D" "A")))
-  
+
   (is (thrown? clojure.lang.ExceptionInfo
                (core/tower 0 "S" "D" "A"))))
 

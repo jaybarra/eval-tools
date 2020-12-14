@@ -43,6 +43,14 @@
     :else (throw (ex-info "Values smaller than 1 are not allowed."
                           {:cause "Tower height" n "is invalid"}))))
 
+(defn mandelbrot
+  [z i c]
+  {:pre [(pos? i)]}
+  (if (zero? i)
+    true
+    (mandelbrot (+ (* z z) c) (dec i) c)))
+
+
 (defn print-tower!
   "Takes list of tower moves and prints the solving sequence."
   [tower-moves]

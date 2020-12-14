@@ -1,6 +1,5 @@
 (ns eval.cmr.orbit
   (:require
-   [cheshire.core :as json]
    [eval.cmr.core :as cmr]))
 
 

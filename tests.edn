@@ -1,17 +1,22 @@
 #kaocha/v1
-{:kaocha/tests [{:kaocha.testable/type :kaocha.type/clojure.test
-                 :kaocha.testable/id :unit
-                 :kaocha/ns-patterns ["-test$"]
-                 :kaocha/source-paths ["src"]
-                 :kaocha/test-paths ["test"]}]
- :kaocha/color? true
- :kaocha/fail-fast? false
- :kaocha/reporter [kaocha.report/dots]
- :kaocha/plugins [:kaocha.plugin/capture-output
-                  :kaocha.plugin/filter
-                  :kaocha.plugin/profiling
-                  :kaocha.plugin/randomize]
+{:tests [{:id :unit}]
+
+ :plugins [:kaocha.plugin.alpha/info
+           :kaocha.plugin/randomize
+           :capture-output
+           :junit-xml
+           :print-invocations
+           :profiling
+           :notifier]
+
+ :color? true
+ :fail-fast? false
+ :reporter kaocha.report/documentation
+
  :kaocha.plugin.profiling/count 3
  :kaocha.plugin.profiling/profiling? true
+
  :kaocha.plugin.randomize/seed 94433896
- :kaocha.plugin.randomize/randomize? true}
+ :kaocha.plugin.randomize/randomize? true
+
+ :kaocha.plugin.junit-xml/target-file "target/junit.xml"}

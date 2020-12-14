@@ -1,9 +1,9 @@
 (ns eval.cmr.tag
   (:require
-   [cheshire.core :as json]
    [clj-http.client :as client]
    [clojure.spec.alpha :as spec]
    [eval.cmr.core :as cmr]
+   [muuntaja.core :as m]
    [taoensso.timbre :as log]))
 
 ;; Specs =============================================================
@@ -24,8 +24,8 @@
                          coll-ids
                          tag))
       (client/post
-        url
-        {:body (json/encode (map #(into {} {:concept_id %}) coll-ids))
-         :headers {"Content-Type" "application/json"
-                   "Echo-Token" echo-token}}))))
+       url
+       {:body (m/encode "application/json" (map #(into {} {:concept_id %}) coll-ids))
+        :headers {"Content-Type" "application/json"
+                  "Echo-Token" echo-token}}))))
 

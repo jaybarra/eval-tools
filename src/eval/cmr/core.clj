@@ -1,15 +1,17 @@
 (ns eval.cmr.core
   (:require
-   [cheshire.core :as json]
    [clj-http.client :as client]
    [clojure.spec.alpha :as spec]
    [clojure.string :as string]
    [environ.core :refer [env]]
+   [muuntaja.core :as m]
    [taoensso.timbre :as log])
   (:import
    [clojure.lang ExceptionInfo]))
 
-;; Specs =============================================================
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Specs
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (spec/def ::env #{:local :sit :uat :prod})
 (spec/def ::concept-type #{:collection :granule})
 
@@ -33,7 +35,9 @@
 
 (spec/def ::cmr (spec/keys :req [::env
                                  ::url]))
-;; Functions =========================================================
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Functions
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn cmr
   "Return a CMR connection object."
   [cmr-env]
@@ -111,8 +115,7 @@
                      :headers {"Echo-Token" echo-token}}]
      (-> coll-search-url
          (client/get query-opts)
-         :body
-         (json/parse-string true)
+         m/decode-response-body
          (get-in [:feed :entry])))))
 
 (defn get-granules!
@@ -132,8 +135,7 @@
                      :cookie-policy :standard}]
      (-> coll-search-url
          (client/get query-opts)
-         :body
-         (json/parse-string true)
+         m/decode-response-body
          (get-in [:feed :entry])))))
 
 (defn get-granule-v2-facets!
@@ -151,8 +153,7 @@
                coll-id)
     (-> coll-search-url
         (client/get query-opts)
-        :body
-        (json/parse-string true)
+        m/decode-response-body
         (get-in [:feed :facets]))))
 
 (defn facets-contains-type?

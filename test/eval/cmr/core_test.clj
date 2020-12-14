@@ -11,17 +11,17 @@
 (deftest cmr-conn-test
   (are [env out] (= out (cmr/cmr env))
     :prod {::cmr/env :prod
-          ::cmr/url "https://cmr.earthdata.nasa.gov"}
-    
+           ::cmr/url "https://cmr.earthdata.nasa.gov"}
+
     :uat {::cmr/env :uat
           ::cmr/url "https://cmr.uat.earthdata.nasa.gov"}
-    
+
     :sit {::cmr/env :sit
           ::cmr/url "https://cmr.sit.earthdata.nasa.gov"}
-    
+
     :local {::cmr/env :local
             ::cmr/url "http://localhost:3003"}
-    
+
     :foo {::cmr/env :local
           ::cmr/url "http://localhost:3003"}))
 
@@ -33,7 +33,7 @@
     (testing "permutations"
       (are [input]
           (= false (spec/valid? ::cmr/cmr input))
-        
+
         ;; missing
         {}
 
@@ -44,7 +44,7 @@
         ;; invalid url
         {::cmr/env :prod
          ::cmr/url "http://cmr.not.earthdata.nasa.goov"}
-        
+
         ;; invalid namespace
         {:env :prod
          :url "https://cmr.earthdata.nasa.gov"}))))
@@ -80,4 +80,3 @@
 (deftest facets-contains-type-test  
   (is (= true (cmr/facets-contains-type? "Temporal" facet-group)))
   (is (= false (cmr/facets-contains-type? "Spatial" facet-group))))
-
