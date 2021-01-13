@@ -1,16 +1,35 @@
-/target
-/classes
-/checkouts
-profiles.clj
+## OS stuff
+.DS_Store
+
+## Created things
+/target/
+/classes/
+/checkouts/
+/lib/
 pom.xml
 pom.xml.asc
-*.jar
-*.class
-/.lein-*
-/.nrepl-port
-.hgignore
-.hg/
+
+## Linting and dev files
 .eastwood
 .lsp
 .clj-kondo
 .cider-repl-history
+.nrepl-port
+.cpcache/
+
+## leiningen
+.lein-deps-sum
+.lein-repl-history
+.lein-plugins/
+.lein-failures
+
+## Files
+*.jar
+*.class
+*.log
+
+## local configurations
+profiles.clj
+
+## IDE files
+.idea
