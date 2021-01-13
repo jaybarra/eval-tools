@@ -11,3 +11,6 @@ pom.xml.asc
 .hgignore
 .hg/
 .eastwood
+.lsp
+.clj-kondo
+.cider-repl-history
