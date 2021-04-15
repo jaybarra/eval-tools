@@ -1,22 +1,23 @@
 #kaocha/v1
 {:tests [{:id :unit}]
 
- :plugins [:kaocha.plugin.alpha/info
+ :plugins [:kaocha.plugin/cloverage
+           :kaocha.plugin.alpha/info
            :kaocha.plugin/randomize
            :capture-output
            :junit-xml
            :print-invocations
-           :profiling
-           :notifier]
+           :profiling]
 
  :color? true
+
  :fail-fast? false
+
  :reporter kaocha.report/documentation
 
  :kaocha.plugin.profiling/count 3
- :kaocha.plugin.profiling/profiling? true
+ :kaocha.plugin.profiling/profiling? false
 
- :kaocha.plugin.randomize/seed 94433896
  :kaocha.plugin.randomize/randomize? true
 
  :kaocha.plugin.junit-xml/target-file "target/junit.xml"}

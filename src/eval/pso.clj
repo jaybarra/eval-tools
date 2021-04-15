@@ -178,7 +178,7 @@
     (throw (ex-info "Invalid options"
                     (spec/explain-data ::state init-state))))
   (log/info "Running Optimization")
-  (let [swarm (generate-swarm! {::size 3
+  (let [swarm (generate-swarm! {::size (get-in init-state [::opts ::size] 3)
                                 ::dims [[-50 50]
                                         [1 10]]})]
     (loop [state (assoc init-state ::swarm swarm)
@@ -191,9 +191,12 @@
 
 ;; Example ===========================================================
 
-#_(clojure.pprint/pprint (run-optimization
-                           {::opts {::max-iterations 1000
-                                    ::omega 0.8
-                                    ::phi-p 0.8
-                                    ::phi-s 0.5}}))
+(comment
+  (clojure.pprint/pprint
+   (run-optimization
+    {::opts {::size 5
+             ::max-iterations 1000
+             ::omega 0.8
+             ::phi-p 0.8
+             ::phi-s 0.5}})))
 

@@ -27,7 +27,7 @@
          cmr-env ::cmr/env} (state->cmr context)
         ingest-url (format "%s/ingest" cmr-url)
         echo-token (cmr/get-echo-token cmr-env) ]
-    (time (-> (client/post ingest-url
-                           {:headers {"Echo-Token" echo-token}
-                            :body concept})
-              m/decode-response-body))))
+    (time (m/decode-response-body
+           (client/post ingest-url
+                        {:headers {"Echo-Token" echo-token}
+                         :body concept})))))
