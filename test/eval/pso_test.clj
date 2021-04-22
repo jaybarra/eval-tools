@@ -15,11 +15,25 @@
                  (pso/run-optimization {})))
     (is (thrown? ExceptionInfo
                  (pso/run-optimization
-                   {::pso/opts
-                    (merge valid-opts
-                           {::pso/max-iterations -1})})))))
+                  {::pso/opts
+                   (merge valid-opts
+                          {::pso/max-iterations -1})})))))
 
 (deftest compute-velocity!-test
   (testing "velocity is different from current velocity"
     (is (not= 1.0
               (compute-velocity! valid-opts 1.0 0 0 2)))))
+
+(deftest compute-fitness-test
+  (testing "any valid output will be a number"
+    (is (instance? Number (pso/compute-fitness [1 0])))))
+
+(deftest sort-particles-by-pos-test
+  (let [p1 {::pso/pos [0 0]}
+        p2 {::pso/pos [1 1]}]
+    (is (= [p2 p1] (pso/sort-particles-by-pos [p1 p2])))))
+
+(deftest sort-particles-by-best-pos-test
+  (let [p1 {::pso/best-pos [0 0]}
+        p2 {::pso/best-pos [1 1]}]
+    (is (= [p2 p1] (pso/sort-particles-by-best-pos [p1 p2])))))
