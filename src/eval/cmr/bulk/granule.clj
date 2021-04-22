@@ -1,9 +1,7 @@
 (ns eval.cmr.bulk.granule
   (:require
-   [clj-http.client :as client]
    [eval.cmr.core :as cmr]
    [muuntaja.core :as muuntaja]
-   [muuntaja.format.json :as json-format]
    [taoensso.timbre :as log]))
 
 (def m (muuntaja/create))
@@ -13,10 +11,10 @@
                    :update-field "OPeNDAPLink"
                    :updates []})
 
-(defn request->json
-  "Convert edn to json"
-  [request]
-  (muuntaja/encode m "application/json" request))
+(defn edn->json
+  "Convert edn to json string."
+  [edn]
+  (slurp (muuntaja/encode m "application/json" edn)))
 
 (defn scroll-granules
   "Send a scroll search request to CMR for a list of granules."
@@ -50,42 +48,36 @@
                    :scroll-id scroll-id})
                  [:results :items])))))))
 
-(defn my-test-search
-  [size]
-  (->> (scroll-granules (cmr/cmr-state :prod)
-                        (cmr/->Query {:collection_concept_id "C1674794625-PODAAC"})
-                        size)
+(defn granule-bulk-update-request
+  "Generates a bulk update request json file.
+  example: (generate-request-file r 10000 bulk-update.json)"
+  [state request query size]
+  (->> (scroll-granules state query size)
        (map :meta)
        (map :concept-id)
        (map (fn [id] [id  (str "http://www.example.com/granule/" id)]))
-       (assoc base-request :updates)
-       request->json
-       slurp
-       (spit "bgu.json")))
+       (assoc request :updates)))
+
+(defn request->file
+  [request filename]
+  (->> request
+       edn->json
+       (spit filename)))
 
 (comment
-  (def collections '("C1674794625-PODAAC"
-                     "C1674794634-PODAAC"
-                     "C1652977738-PODAAC"
-                     "C1649553027-PODAAC"
-                     "C1649549053-PODAAC"
-                     "C1649539559-PODAAC"
-                     "C1649549176-PODAAC"
-                     "C1649539971-PODAAC"
-                     "C1649549419-PODAAC"
-                     "C1649540312-PODAAC"))
-
-
-
-
-  (assoc base-request :updates)
-  request->json
-  slurp
-  (spit "bgu.json")
-
-
-
-  (->> base-request
-       request->json
-       slurp
-       (spit "big-request.json")))
+  (request->file
+   (granule-bulk-update-request
+    (cmr/cmr-state :prod)
+    base-request
+    (cmr/->Query {:collection_concept_id ["C1674794625-PODAAC"
+                                          "C1674794634-PODAAC"
+                                          "C1652977738-PODAAC"
+                                          "C1649553027-PODAAC"
+                                          "C1649549053-PODAAC"
+                                          "C1649539559-PODAAC"
+                                          "C1649549176-PODAAC"
+                                          "C1649539971-PODAAC"
+                                          "C1649549419-PODAAC"
+                                          "C1649540312-PODAAC"]})
+    100)
+   "bgu.json"))
