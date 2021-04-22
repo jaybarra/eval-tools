@@ -123,8 +123,6 @@
 
 (defn get-collections
   "GET the collections from the specified CMR enviroment"
-  ([state]
-   (get-collections state nil))
   ([state opts]
    (let [{cmr-url ::url
           cmr-env ::env} (state->cmr state)

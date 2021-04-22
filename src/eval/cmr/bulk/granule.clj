@@ -17,7 +17,9 @@
   (slurp (muuntaja/encode m "application/json" edn)))
 
 (defn scroll-granules
-  "Send a scroll search request to CMR for a list of granules."
+  "Send a scroll search request to CMR for a list of granules.
+  TODO: move this to the [[eval.cmr.core]] namespace, this has nothing
+  to do with bulk granule specifically"
   [state request limit]
   (let [{:keys [scroll-id results]} (cmr/scroll-granules
                                      state
@@ -25,14 +27,14 @@
                                      {:continue true})
         result-cap (min limit (:hits results))]
 
-    (log/info (format "Began scrolling sesession [%s]" scroll-id))
+    (log/info (format "Began scrolling session [%s]" scroll-id))
 
     (loop [scrolled (:items results)]
       (if (>= (count scrolled) result-cap)
         (do
           (cmr/clear-scroll-session! state scroll-id)
-          (log/info (format (str"Completed scrolling for [%s]. "
-                                "Found [%d], Requested [%d], Available [%d]")
+          (log/info (format (str "Completed scrolling for [%s]. "
+                                 "Found [%d], Requested [%d], Available [%d]")
                             (pr-str request)
                             (count scrolled)
                             limit
@@ -50,11 +52,11 @@
 
 (defn granule-bulk-update-request
   "Generates a bulk update request json file.
-  example: (generate-request-file r 10000 bulk-update.json)"
+  example: (generate-request-file state base-req query 10000)"
   [state request query size]
   (->> (scroll-granules state query size)
-       (map :meta)
-       (map :concept-id)
+       (map :umm)
+       (map :GranuleUR)
        (map (fn [id] [id  (str "http://www.example.com/granule/" id)]))
        (assoc request :updates)))
 
@@ -65,19 +67,19 @@
        (spit filename)))
 
 (comment
+  (def concept-ids
+    (->> (cmr/get-collections (cmr/cmr-state :prod) {:provider "PODAAC"
+                                                     :page_size 50})
+         :items
+         (map :meta)
+         (map :concept-id)
+         vec))
+
   (request->file
    (granule-bulk-update-request
     (cmr/cmr-state :prod)
     base-request
-    (cmr/->Query {:collection_concept_id ["C1674794625-PODAAC"
-                                          "C1674794634-PODAAC"
-                                          "C1652977738-PODAAC"
-                                          "C1649553027-PODAAC"
-                                          "C1649549053-PODAAC"
-                                          "C1649539559-PODAAC"
-                                          "C1649549176-PODAAC"
-                                          "C1649539971-PODAAC"
-                                          "C1649549419-PODAAC"
-                                          "C1649540312-PODAAC"]})
-    100)
-   "bgu.json"))
+    (cmr/->Query {:collection_concept_id concept-ids
+                  :page_size 1000})
+    20000)
+   "bgu_20k.json"))
