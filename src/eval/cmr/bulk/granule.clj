@@ -50,13 +50,13 @@
                    :scroll-id scroll-id})
                  [:results :items])))))))
 
-(defn granule-bulk-update-request
-  "Generates a bulk update request json file.
+(defn add-update-instructions
+  "Add a list of update instructions
   example: (generate-request-file state base-req query 10000)"
-  [urs bulk-update-request]
+  [urs request updater-fn]
   (->> urs
-       (map (fn [id] [id  (str "http://www.example.com/granule/" id)]))
-       (assoc bulk-update-request :updates)))
+       (map (fn [id] [id  (updater-fn id)]))
+       (assoc request :updates)))
 
 (defn fetch-granule-urs
   [state query amount]
@@ -85,11 +85,12 @@
      (cmr/cmr-state :prod)
      (cmr/->Query
       {:collection_concept_id concept-ids
-       :page_size 1000})
-     20000))
+       :page_size 100})
+     200))
 
-  (def bgu (granule-bulk-update-request
+  (def bgu (add-update-instructions
             granule-urs
-            base-request))
+            base-request
+            (fn [ur] (str "https://example.com/granule/" ur))))
 
   (request->file bgu "bgu_20k.json"))
