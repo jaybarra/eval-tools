@@ -65,7 +65,7 @@
            ::url "https://cmr.earthdata.nasa.gov"}
     ;; default
     {::env :local
-     ::url "http://localhost:3003"}))
+     ::url "http://localhost:9999"}))
 
 (defn cmr-state
   "Return a CMR enabled state"
