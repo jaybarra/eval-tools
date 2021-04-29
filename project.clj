@@ -11,27 +11,26 @@
                  [graphql-clj "0.2.9"]
                  [integrant "0.8.0"]
                  [metosin/muuntaja "0.6.8"]
-                 [metosin/reitit "0.5.12"]
+                 [metosin/reitit "0.5.13"]
                  [org.clojure/clojure "1.10.3"]
                  [org.clojure/core.async "1.3.618"]
                  [org.clojure/math.numeric-tower "0.0.4"]
-                 [ring/ring-core "1.9.2"]
-                 [ring/ring-jetty-adapter "1.9.2"]]
+                 [ring/ring-core "1.9.3"]
+                 [ring/ring-jetty-adapter "1.9.3"]]
   :plugins [[org.clojars.benfb/lein-gorilla "0.7.0"]]
   :profiles {:dev {:repl-options {:init (load-file "dev/user.clj")
                                   :init-ns user}
                    :dependencies [[integrant/repl "0.3.2"]
                                   [org.clojure/test.check "1.1.0"]
-                                  [ring/ring-devel "1.9.2"]
-                                  [slamhound "1.5.5"]]
-                   :plugins [[lein-ancient "0.6.15"]
-                             [lein-cloverage "1.2.0"]
-                             [jonase/eastwood "0.3.10"]
-                             [lein-kibit "0.1.8"]]}
+                                  [ring/ring-devel "1.9.3"]
+                                  [slamhound/slamhound "1.5.5"]]
+                   :plugins [[jonase/eastwood "0.3.10"]
+                             [lein-ancient/lein-ancient "0.6.15"]
+                             [lein-cloverage/lein-cloverage "1.2.0"]
+                             [lein-kibit/lein-kibit "0.1.8"]]}
              :kaocha {:dependencies [[lambdaisland/kaocha "1.0.829"]
                                      [lambdaisland/kaocha-cloverage "1.0.75"]
                                      [lambdaisland/kaocha-junit-xml "0.0.76"]]}}
   :repl-options {:init-ns eval.core}
   :aliases {"kaocha" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner"]
-            "slamhound" ["run" "-m" "slam.hound"]
-            "test" "kaocha"})
+            "slamhound" ["run" "-m" "slam.hound"]})
