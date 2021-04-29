@@ -17,7 +17,7 @@
   "Create a tag association by ID in CMR."
   [state tag & coll-ids]
   (let [cmr-url (::cmr/url (cmr/state->cmr state))
-        echo-token (cmr/get-echo-token (::cmr/env (cmr/state->cmr state)))
+        echo-token (cmr/echo-token (::cmr/env (cmr/state->cmr state)))
         url (format "%s/tags/%s/associations" cmr-url tag)]
     (when coll-ids
       (log/debug (format "Tagging collection [%s] with tag [%s]"

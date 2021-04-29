@@ -27,7 +27,7 @@
 
 (defn add-update-instructions
   "Add a list of update instructions to a bulk granule update request."
-  [urs request updater-fn]
+  [request urs updater-fn]
   (->> urs
        (map (fn [id] [id  (updater-fn id)]))
        (assoc request :updates)))
@@ -97,12 +97,21 @@
   [benchmark]
   (let [{:keys [start-cnt end-cnt average duration task-id]} benchmark]
     (log/info
-     (format "%d => %d : Processed [%d] per second over [%d] seconds in task [%s]"
+     (format "%d => %d : Processed [%d] granules per second over [%d] seconds in task [%s]"
              start-cnt
              end-cnt
              average
              duration
              task-id))))
+
+(defn async-benchmark-processing
+  [state out-ch task-id]
+  (async/go
+    (async/<! out-ch (benchmark-processing state task-id))))
+
+(defn async-log-benchmark
+  [in-ch]
+  (log-benchmark (async/>! in-ch)))
 
 (comment
   (def concept-ids
@@ -119,11 +128,13 @@
      (cmr/cmr-state :prod)
      {:collection_concept_id concept-ids
       :page_size 2000}
-     20000))
+     200000))
+
+  (count (distinct granule-urs))
 
   (def job-def (add-update-instructions
-                granule-urs
                 base-request
+                granule-urs
                 (fn [ur] (str "https://example.com/granule/" ur))))
 
   (def job (create-bulk-granule-update-job

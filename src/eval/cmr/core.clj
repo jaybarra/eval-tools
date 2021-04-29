@@ -221,7 +221,7 @@
         (recur (concat
                 scrolled
                 (get-in
-                 (send-scroll-granules-request state query)
+                 (send-scroll-granules-request state query {:scroll-id scroll-id})
                  [:results :items])))))))
 
 (defn get-granule-v2-facets
@@ -273,9 +273,9 @@
           (filterv contains-spatial?)
           (filterv contains-temporal?)))))
 
-(defn get-collections-with-temporal-and-spatial
+(defn search-collections-with-temporal-and-spatial
   ([state]
-   (get-collections-with-temporal-and-spatial state nil))
+   (search-collections-with-temporal-and-spatial state nil))
   ([state m-opts]
    (let [opts (merge {:has_granules true}
                      m-opts)
@@ -311,7 +311,7 @@
                              page-num
                              max-page))
           (recur (inc page-num)
-                 (if-let [results (seq (get-collections-with-temporal-and-spatial
+                 (if-let [results (seq (search-collections-with-temporal-and-spatial
                                         state
                                         {:page_num page-num
                                          :page_size page-size}))]
