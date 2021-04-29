@@ -17,6 +17,7 @@
                  [org.clojure/math.numeric-tower "0.0.4"]
                  [ring/ring-core "1.9.2"]
                  [ring/ring-jetty-adapter "1.9.2"]]
+  :plugins [[org.clojars.benfb/lein-gorilla "0.7.0"]]
   :profiles {:dev {:repl-options {:init (load-file "dev/user.clj")
                                   :init-ns user}
                    :dependencies [[integrant/repl "0.3.2"]
