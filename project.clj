@@ -13,6 +13,7 @@
                  [metosin/muuntaja "0.6.8"]
                  [metosin/reitit "0.5.12"]
                  [org.clojure/clojure "1.10.3"]
+                 [org.clojure/core.async "1.3.618"]
                  [org.clojure/math.numeric-tower "0.0.4"]
                  [ring/ring-core "1.9.2"]
                  [ring/ring-jetty-adapter "1.9.2"]]

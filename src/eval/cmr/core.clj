@@ -21,12 +21,10 @@
              [:formats "application/vnd.nasa.cmr.umm_results+json"]
              vnd-nasa-cmr-umm-json-format)))
 
-(defrecord Query [query])
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Specs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(spec/def ::env #{:local :sit :uat :prod})
+(spec/def ::env #{:local :sit :uat :wl :prod})
 (spec/def ::concept-type #{:collection :granule})
 
 (def scheme-pattern "https?:\\/\\/")
@@ -63,9 +61,11 @@
           ::url "https://cmr.uat.earthdata.nasa.gov"}
     :prod {::env cmr-env
            ::url "https://cmr.earthdata.nasa.gov"}
+    :wl {::env cmr-env
+         ::url "http://localhost:9999"}
     ;; default
     {::env :local
-     ::url "http://localhost:9999"}))
+     ::url "http://localhost:3003"}))
 
 (defn cmr-state
   "Return a CMR enabled state"
@@ -92,6 +92,23 @@
        (str "cmr-echo-token-")
        keyword
        env))
+
+(defn http-request
+  "Return an application/json encoded http request."
+  ([body]
+   (http-request body {}))
+  ([body opts]
+   {:headers {:content-type "application/json"
+              :accept "application/json"
+              :cookie-policy :standard}
+    :body (muuntaja/encode m "application/json" body)}))
+
+(defn scroll-http-request
+  "Return an application/json encoded http scrolling request."
+  [body scroll-id]
+  (-> body
+      http-request
+      (assoc-in [:headers :CMR-Scroll-Id] scroll-id)))
 
 (defn cmr-hits
   "Query CMR for count of available concepts."
@@ -121,7 +138,9 @@
   [state coll-id]
   (cmr-hits state :granule {:collection_concept_id coll-id}))
 
-(defn get-collections
+
+
+(defn search-collections
   "GET the collections from the specified CMR enviroment"
   ([state opts]
    (let [{cmr-url ::url
@@ -134,67 +153,76 @@
          (client/get query-opts)
          (as-> res (muuntaja/decode-response-body m res))))))
 
-(defn get-granules
+(defn search-granules
   "GET the granules from the specified CMR collections for a given collection."
   [state query-params]
   (let [{cmr-url ::url
          cmr-env ::env} (state->cmr state)
-        coll-search-url (format "%s/search/granules.umm_json" cmr-url)
-        query-opts {:query-params query-params
-                    :headers {"Echo-Token" (echo-token cmr-env)}
-                    :cookie-policy :standard}]
-    (-> coll-search-url
-        (client/get query-opts)
-        (as-> res (muuntaja/decode-response-body m res)))))
+        coll-search-url (format "%s/search/granules.umm_json" cmr-url)]
+    (muuntaja/decode-response-body
+     m
+     (client/get coll-search-url {:query-params query-params}))))
 
-(defn request
-  "Return an application/json encoded http request."
-  [body]
-  {:headers {"Content-Type" "application/json"
-             "Accept" "application/json"}
-   :body (muuntaja/encode m "application/json" body)})
-
-(defn scroll-request
-  "Return an application/json encoded http scrolling request."
-  [body scroll-id]
-  {:headers {"Content-Type" "application/json"
-             "Accept" "application/json"
-             "CMR-Scroll-Id" scroll-id}
-   :body (muuntaja/encode m "application/json" body)})
 
 (defn clear-scroll-session!
+  "Clear the CMR scroll session."
   [state scroll-id]
   (let [{cmr-url ::url
          cmr-env ::env} (state->cmr state)
         clear-scroll-url (format "%s/search/clear-scroll" cmr-url)]
-    (log/info (format "Releasing scroll-session [%s]" scroll-id))
-    (client/post clear-scroll-url (request {:scroll_id scroll-id}))))
+    (client/post clear-scroll-url {:headers {:content-type "application/json"
+                                             :accept "application/json"}
+                                   :body (muuntaja/encode
+                                          m
+                                          "application/json"
+                                          {:scroll_id scroll-id})})
+    (log/info (format "Cleared scroll-session [%s]" scroll-id))))
 
-(defn scroll-granules
-  "GET the granules using the scrolling API."
+(defn send-scroll-granules-request
+  "GET the granules using the scrolling API.
+  You must clear the scrolling session after opening it with [[clear-scroll-session!]]."
   ([state query]
-   (scroll-granules state query {}))
+   (send-scroll-granules-request state query {}))
   ([state query opts]
-   (let [{cmr-url ::url
-          cmr-env ::env} (state->cmr state)
+   (let [{cmr-url ::url cmr-env ::env} (state->cmr state)
          search-url (format "%s/search/granules.umm_json" cmr-url)
          headers (cond-> {"Echo-Token" (echo-token cmr-env)}
                    (:scroll-id opts) (assoc "CMR-Scroll-Id" (:scroll-id opts)))        
          query-opts {:query-params
                      (-> query
-                         :query
                          (dissoc :page_num :offset)
-                         (merge {:scroll true}))
-                     :headers headers
+                         (assoc :scroll true))
+                     :headers (merge headers
+                                     {"Accept" "application/json"})
                      :cookie-policy :standard}
          response (client/get search-url query-opts)
-         results (muuntaja/decode-response-body m response)]
-     
-     (when-not (:continue opts)
-       (clear-scroll-session! state (:scroll-id opts)))
-     
+         data (muuntaja/decode-response-body m response)]
      {:scroll-id (get-in response [:headers "CMR-Scroll-Id"])
-      :results results})))
+      :results data})))
+
+(defn scroll-granules
+  "Send a scroll search request to CMR for a list of granules."
+  [state query opts]
+  (let [{:keys [hits]} (search-granules state (assoc query :page_size 0))
+        max-results (min (get opts :limit hits) hits)
+        {:keys [scroll-id results]} (send-scroll-granules-request
+                                     state
+                                     query)]
+    (loop [scrolled (:items results)]
+      (log/debug (format "Scroll session [%s] retrieved [%d], requested [%d], available [%d]"
+                         scroll-id
+                         (count scrolled)
+                         max-results
+                         hits))
+      (if (>= (count scrolled) max-results)
+        (do
+          (clear-scroll-session! state scroll-id)
+          (take max-results scrolled))
+        (recur (concat
+                scrolled
+                (get-in
+                 (send-scroll-granules-request state query)
+                 [:results :items])))))))
 
 (defn get-granule-v2-facets
   "GET granule v2 facets for a collection, ignoring granules."
@@ -234,7 +262,7 @@
    (let [opts (merge {:page_num 1
                       :has_granules true}
                      m-opts)
-         fetch-collections! (partial get-collections state)
+         fetch-collections! (partial search-collections state)
          fetch-coll-granules! (partial get-granule-v2-facets state)
          contains-spatial? (partial facets-contains-type? "Spatial")
          contains-temporal? (partial facets-contains-type? "Temporal")]
@@ -251,7 +279,7 @@
   ([state m-opts]
    (let [opts (merge {:has_granules true}
                      m-opts)
-         fetch-collections! (partial get-collections state)
+         fetch-collections! (partial search-collections state)
          fetch-coll-granules! (partial get-granule-v2-facets state)
          contains-spatial? (fn [c-with-g]
                              (facets-contains-type?

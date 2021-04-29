@@ -1,5 +1,7 @@
 (ns eval.cmr.bulk.granule
   (:require
+   [clj-http.client :as client]
+   [clojure.string :as string]
    [eval.cmr.core :as cmr]
    [muuntaja.core :as muuntaja]
    [taoensso.timbre :as log]))
@@ -16,66 +18,98 @@
   [edn]
   (slurp (muuntaja/encode m "application/json" edn)))
 
-(defn scroll-granules
-  "Send a scroll search request to CMR for a list of granules.
-  TODO: move this to the [[eval.cmr.core]] namespace, this has nothing
-  to do with bulk granule specifically"
-  [state request limit]
-  (let [{:keys [scroll-id results]} (cmr/scroll-granules
-                                     state
-                                     request
-                                     {:continue true})
-        result-cap (min limit (:hits results))]
-
-    (log/info (format "Began scrolling session [%s]" scroll-id))
-
-    (loop [scrolled (:items results)]
-      (if (>= (count scrolled) result-cap)
-        (do
-          (cmr/clear-scroll-session! state scroll-id)
-          (log/info (format (str "Completed scrolling for [%s]. "
-                                 "Found [%d], Requested [%d], Available [%d]")
-                            (pr-str request)
-                            (count scrolled)
-                            limit
-                            (:hits results)))
-          scrolled)
-        (recur (concat
-                scrolled
-                (get-in
-                 (cmr/scroll-granules
-                  state
-                  request
-                  {:continue true
-                   :scroll-id scroll-id})
-                 [:results :items])))))))
+(defn edn->file
+  "Write an edn map to a file."
+  [edn filename]
+  (->> edn
+       edn->json
+       (spit filename)))
 
 (defn add-update-instructions
-  "Add a list of update instructions
-  example: (generate-request-file state base-req query 10000)"
+  "Add a list of update instructions to a bulk granule update request."
   [urs request updater-fn]
   (->> urs
        (map (fn [id] [id  (updater-fn id)]))
        (assoc request :updates)))
 
 (defn fetch-granule-urs
+  "Return a list of granule URs from CMR."
   [state query amount]
-  (->> (scroll-granules state query amount)
+  (->> (cmr/scroll-granules state query {:limit amount})
        (map :umm)
        (map :GranuleUR)))
 
-(defn request->file
-  [request filename]
-  (->> request
-       edn->json
-       (spit filename)))
+(defn create-bulk-granule-update-job
+  "Submit a bulk granule update request to CMR and return the task-id."
+  [state provider task-def]
+  (let [{cmr-url ::cmr/url
+         cmr-env ::cmr/env} (cmr/state->cmr state)
+        bgu-url (format "%s/ingest/providers/%s/bulk-update/granules"
+                        cmr-url
+                        provider)
+        response (client/post
+                  bgu-url
+                  (update-in (cmr/http-request task-def)
+                             [:headers]
+                             #(merge % {"Echo-Token" (cmr/echo-token cmr-env)})))
+        task (muuntaja/decode-response-body m response)]
+    (log/info (format "Bulk Granule Update Job created with ID [%s]" (:task-id task)))
+    task))
+
+(defn fetch-job-status
+  "Request bulk granule update job status from CMR."
+  [state job-id]
+  (let [{cmr-url ::cmr/url cmr-env ::cmr/env} (cmr/state->cmr state)
+        response (client/get (format "%s/ingest/granule-bulk-update/status/%d"
+                                     cmr-url
+                                     job-id)
+                             {:headers {"Echo-Token" (cmr/echo-token cmr-env)}})]
+    (muuntaja/decode-response-body m response)))
+
+(defn benchmark-processing
+  "Blocking benchmark request for processing."
+  ([task-id]
+   (benchmark-processing task-id 3))
+  ([task-id time-in-sec]
+   (let [start-cnt (get (->> (fetch-job-status (cmr/cmr-state :wl) task-id)
+                             :granule-statuses
+                             (map :status)
+                             frequencies)
+                        "UPDATED")
+         start-time (System/nanoTime)
+         _ (Thread/sleep (* 1000 time-in-sec))
+         end-time (System/nanoTime)
+         end-cnt (get (->> (fetch-job-status (cmr/cmr-state :wl) task-id)
+                           :granule-statuses
+                           (map :status)
+                           frequencies)
+                      "UPDATED")
+         avg (int (/ (- end-cnt start-cnt) time-in-sec))]
+     {:task-id task-id
+      :start-time start-time
+      :end-time end-time
+      :duration time-in-sec
+      :start-cnt start-cnt
+      :end-cnt end-cnt
+      :average avg})))
+
+(defn log-benchmark
+  [benchmark]
+  (let [{:keys [start-cnt end-cnt average duration task-id]} benchmark]
+    (log/info
+     (format "%d => %d : Processed [%d] per second over [%d] seconds in task [%s]"
+             start-cnt
+             end-cnt
+             average
+             duration
+             task-id))))
 
 (comment
   (def concept-ids
-    (->> (cmr/get-collections
+    (->> (cmr/search-collections
           (cmr/cmr-state :prod)
           {:provider "PODAAC"
-           :page_size 50})
+           :page_size 100})
          :items
          (map :meta)
          (map :concept-id)))
@@ -83,14 +117,18 @@
   (def granule-urs
     (fetch-granule-urs
      (cmr/cmr-state :prod)
-     (cmr/->Query
-      {:collection_concept_id concept-ids
-       :page_size 100})
-     200))
+     {:collection_concept_id concept-ids
+      :page_size 2000}
+     20000))
 
-  (def bgu (add-update-instructions
-            granule-urs
-            base-request
-            (fn [ur] (str "https://example.com/granule/" ur))))
+  (def job-def (add-update-instructions
+                granule-urs
+                base-request
+                (fn [ur] (str "https://example.com/granule/" ur))))
 
-  (request->file bgu "bgu_20k.json"))
+  (def job (create-bulk-granule-update-job
+            (cmr/cmr-state :wl)
+            "PODAAC"
+            job-def))
+
+  (log-benchmark (benchmark-processing (:task-id job))))
