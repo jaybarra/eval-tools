@@ -104,15 +104,6 @@
              duration
              task-id))))
 
-(defn async-benchmark-processing
-  [state out-ch task-id]
-  (async/go
-    (async/<! out-ch (benchmark-processing state task-id))))
-
-(defn async-log-benchmark
-  [in-ch]
-  (log-benchmark (async/>! in-ch)))
-
 (comment
   (def concept-ids
     (->> (cmr/search-collections
