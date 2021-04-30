@@ -5,33 +5,21 @@
    [clojure.string :as string]
    [criterium.core :as criterium]
    [environ.core :refer [env]]
+   [eval.cmr.formats :as formats]
    [muuntaja.core :as muuntaja]
-   [muuntaja.format.json :as json-format]
-   [muuntaja.format.core :as fmt-core]
    [taoensso.timbre :as log])
   (:import
    [clojure.lang ExceptionInfo]))
-
-(def vnd-nasa-cmr-umm-json-format
-  {:decoder [json-format/decoder {:decode-key-fn true}]
-   :matches #"^application/vnd\.nasa\.cmr\.umm_results\+json.*"})
-
-(def echo10+xml-format
-  {:decoder (reify
-              fmt-core/Decode
-              (decode [_ xml _charset]
-                xml))
-   :matches #"^application/echo10\+xml.*"})
 
 (def m
   (muuntaja/create
    (-> muuntaja/default-options
        (assoc-in 
         [:formats "application/vnd.nasa.cmr.umm_results+json"]
-        vnd-nasa-cmr-umm-json-format)
+        formats/vnd-nasa-cmr-umm-json-format)
        (assoc-in 
         [:formats "application/echo10+xml"]
-        echo10+xml-format))))
+        formats/echo10+xml-format))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Specs
