@@ -153,12 +153,7 @@
         (recur))))
 
   ;; verify the change is reflected in searches
-  (->> (cmr/search-granules
-        (cmr/cmr-state :wl)
-        {:collection_concept_id (first concept-ids)})
-       slurp)
-
-  #_(benchmark->csv-file benchmarks "job_21.csv")
-  #_(clojure.pprint/pprint benchmarks)
-
-  )
+  (slurp
+   (cmr/search-granules
+    (cmr/cmr-state :wl)
+    {:collection_concept_id (first concept-ids)})))
