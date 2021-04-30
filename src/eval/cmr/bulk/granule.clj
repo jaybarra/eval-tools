@@ -1,6 +1,9 @@
 (ns eval.cmr.bulk.granule
   (:require
    [clj-http.client :as client]
+   [clojure.core.async :as async]
+   [clojure.data.csv :as csv]
+   [clojure.java.io :as io]
    [clojure.string :as string]
    [eval.cmr.core :as cmr]
    [muuntaja.core :as muuntaja]
@@ -68,22 +71,22 @@
 
 (defn benchmark-processing
   "Blocking benchmark request for processing."
-  ([task-id]
-   (benchmark-processing task-id 3))
-  ([task-id time-in-sec]
-   (let [start-cnt (get (->> (fetch-job-status (cmr/cmr-state :wl) task-id)
+  ([state task-id]
+   (benchmark-processing state task-id 3))
+  ([state task-id time-in-sec]
+   (let [start-cnt (get (->> (fetch-job-status state task-id)
                              :granule-statuses
                              (map :status)
                              frequencies)
-                        "UPDATED")
+                        "UPDATED" 0)
          start-time (System/nanoTime)
          _ (Thread/sleep (* 1000 time-in-sec))
          end-time (System/nanoTime)
-         end-cnt (get (->> (fetch-job-status (cmr/cmr-state :wl) task-id)
+         end-cnt (get (->> (fetch-job-status state task-id)
                            :granule-statuses
                            (map :status)
                            frequencies)
-                      "UPDATED")
+                      "UPDATED" 0)
          avg (int (/ (- end-cnt start-cnt) time-in-sec))]
      {:task-id task-id
       :start-time start-time
@@ -104,6 +107,14 @@
              duration
              task-id))))
 
+(defn benchmark->csv-file
+  [benchmarks file]
+  (with-open [writer (io/writer file)]
+    (let [col-names (map name (keys (first benchmarks)))
+          data [col-names]
+          data (concat data (for [bench benchmarks] (vals bench)))]
+      (csv/write-csv writer data))))
+
 (comment
   (def concept-ids
     (->> (cmr/search-collections
@@ -119,18 +130,35 @@
      (cmr/cmr-state :prod)
      {:collection_concept_id concept-ids
       :page_size 2000}
-     200000))
+     250000))
 
   (count (distinct granule-urs))
 
   (def job-def (add-update-instructions
                 base-request
                 granule-urs
-                (fn [ur] (str "https://example.com/granule/" ur))))
+                (fn [ur] (str "https://example.com/justupdated/" ur))))
 
   (def job (create-bulk-granule-update-job
             (cmr/cmr-state :wl)
             "PODAAC"
             job-def))
 
-  (log-benchmark (benchmark-processing (:task-id job))))
+  (loop []
+    (let [benchmark (benchmark-processing (cmr/cmr-state :wl) 141)]
+      (Thread/sleep 10000)
+      (log-benchmark benchmark)
+      (when (not= (:start-cnt benchmark)
+                  (:end-cnt benchmark))
+        (recur))))
+
+  ;; verify the change is reflected in searches
+  (->> (cmr/search-granules
+        (cmr/cmr-state :wl)
+        {:collection_concept_id (first concept-ids)})
+       slurp)
+
+  #_(benchmark->csv-file benchmarks "job_21.csv")
+  #_(clojure.pprint/pprint benchmarks)
+
+  )

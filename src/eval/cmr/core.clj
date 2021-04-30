@@ -7,6 +7,7 @@
    [environ.core :refer [env]]
    [muuntaja.core :as muuntaja]
    [muuntaja.format.json :as json-format]
+   [muuntaja.format.core :as fmt-core]
    [taoensso.timbre :as log])
   (:import
    [clojure.lang ExceptionInfo]))
@@ -15,11 +16,22 @@
   {:decoder [json-format/decoder {:decode-key-fn true}]
    :matches #"^application/vnd\.nasa\.cmr\.umm_results\+json.*"})
 
+(def echo10+xml-format
+  {:decoder (reify
+              fmt-core/Decode
+              (decode [_ xml _charset]
+                xml))
+   :matches #"^application/echo10\+xml.*"})
+
 (def m
-  (muuntaja/create        
-   (assoc-in muuntaja/default-options
-             [:formats "application/vnd.nasa.cmr.umm_results+json"]
-             vnd-nasa-cmr-umm-json-format)))
+  (muuntaja/create
+   (-> muuntaja/default-options
+       (assoc-in 
+        [:formats "application/vnd.nasa.cmr.umm_results+json"]
+        vnd-nasa-cmr-umm-json-format)
+       (assoc-in 
+        [:formats "application/echo10+xml"]
+        echo10+xml-format))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Specs
@@ -158,7 +170,7 @@
   [state query-params]
   (let [{cmr-url ::url
          cmr-env ::env} (state->cmr state)
-        coll-search-url (format "%s/search/granules.umm_json" cmr-url)]
+        coll-search-url (format "%s/search/granules.echo10" cmr-url)]
     (muuntaja/decode-response-body
      m
      (client/get coll-search-url {:query-params query-params}))))

@@ -14,6 +14,7 @@
                  [metosin/reitit "0.5.13"]
                  [org.clojure/clojure "1.10.3"]
                  [org.clojure/core.async "1.3.618"]
+                 [org.clojure/data.csv "1.0.0"]
                  [org.clojure/math.numeric-tower "0.0.4"]
                  [ring/ring-core "1.9.3"]
                  [ring/ring-jetty-adapter "1.9.3"]]
