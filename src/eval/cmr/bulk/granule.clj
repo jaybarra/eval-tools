@@ -37,14 +37,16 @@
 
 (defn fetch-granule-urs
   "Return a list of granule URs from CMR."
-  [state query amount]
-  (->> (cmr/scroll-granules state query {:limit amount})
+  [state query & [amount]]
+  (->> (cmr/scroll-granules state query (if amount
+                                          {:limit amount}
+                                          {}))
        (map :umm)
        (map :GranuleUR)))
 
-(defn create-bulk-granule-update-job
-  "Submit a bulk granule update request to CMR and return the task-id."
-  [state provider task-def]
+(defn submit-job
+  "Submit a bulk granule update request to CMR and return the job-id."
+  [state provider job-def]
   (let [{cmr-url ::cmr/url
          cmr-env ::cmr/env} (cmr/state->cmr state)
         bgu-url (format "%s/ingest/providers/%s/bulk-update/granules"
@@ -52,12 +54,12 @@
                         provider)
         response (client/post
                   bgu-url
-                  (update-in (cmr/http-request task-def)
+                  (update-in (cmr/http-request job-def)
                              [:headers]
                              #(merge % {"Echo-Token" (cmr/echo-token cmr-env)})))
-        task (muuntaja/decode-response-body m response)]
-    (log/info (format "Bulk Granule Update Job created with ID [%s]" (:task-id task)))
-    task))
+        job (muuntaja/decode-response-body m response)]
+    (log/info (format "Bulk Granule Update Job created with ID [%s]" (:task-id job)))
+    job))
 
 (defn fetch-job-status
   "Request bulk granule update job status from CMR."
@@ -79,9 +81,9 @@
                              (map :status)
                              frequencies)
                         "UPDATED" 0)
-         start-time (System/nanoTime)
+         start-time (System/currentTimeMillis)
          _ (Thread/sleep (* 1000 time-in-sec))
-         end-time (System/nanoTime)
+         end-time (System/currentTimeMillis)
          end-cnt (get (->> (fetch-job-status state task-id)
                            :granule-statuses
                            (map :status)
@@ -116,11 +118,11 @@
       (csv/write-csv writer data))))
 
 (comment
-  (def concept-ids
+  (def collection-ids
     (->> (cmr/search-collections
           (cmr/cmr-state :prod)
           {:provider "PODAAC"
-           :page_size 100})
+           :page_size 10})
          :items
          (map :meta)
          (map :concept-id)))
@@ -128,32 +130,34 @@
   (def granule-urs
     (fetch-granule-urs
      (cmr/cmr-state :prod)
-     {:collection_concept_id concept-ids
-      :page_size 2000}
-     250000))
+     {:collection_concept_id collection-ids
+      :page_size 100}
+     100))
 
-  (count (distinct granule-urs))
+  (def job-def
+    (add-update-instructions
+     base-request
+     granule-urs
+     (fn [ur] (str "https://example.com/updated/" ur))))
 
-  (def job-def (add-update-instructions
-                base-request
-                granule-urs
-                (fn [ur] (str "https://example.com/justupdated/" ur))))
+  (def job
+    (submit-job
+     (cmr/cmr-state :wl)
+     "PODAAC"
+     job-def))
 
-  (def job (create-bulk-granule-update-job
-            (cmr/cmr-state :wl)
-            "PODAAC"
-            job-def))
-
-  (loop []
-    (let [benchmark (benchmark-processing (cmr/cmr-state :wl) 141)]
-      (Thread/sleep 10000)
-      (log-benchmark benchmark)
-      (when (not= (:start-cnt benchmark)
-                  (:end-cnt benchmark))
-        (recur))))
+  (def benchmarks
+    (loop [data []]
+      (Thread/sleep 1000)
+      (let [benchmark (benchmark-processing (cmr/cmr-state :wl) (:task-id job))]
+        (log-benchmark benchmark)
+        (if (= (:start-cnt benchmark) (:end-cnt benchmark))
+          data
+          (recur (conj data benchmark))))))
 
   ;; verify the change is reflected in searches
-  (slurp
+  (log/info
    (cmr/search-granules
     (cmr/cmr-state :wl)
-    {:collection_concept_id (first concept-ids)})))
+    {:granule_ur (first granule-urs)
+     :collection_concept_id collection-ids})))

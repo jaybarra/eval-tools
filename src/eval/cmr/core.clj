@@ -11,6 +11,20 @@
   (:import
    [clojure.lang ExceptionInfo]))
 
+<<<<<<< HEAD
+=======
+(def vnd-nasa-cmr-umm-json-format
+  {:decoder [json-format/decoder {:decode-key-fn true}]
+   :matches #"^application/vnd\.nasa\.cmr\.umm_results\+json.*"})
+
+(def echo10+xml-format
+  {:decoder (reify
+              fmt-core/Decode
+              (decode [_ xml _charset]
+                (slurp xml)))
+   :matches #"^application/echo10\+xml.*"})
+
+>>>>>>> smoothing the api
 (def m
   (muuntaja/create
    (-> muuntaja/default-options
@@ -203,7 +217,7 @@
 (defn scroll-granules
   "Send a scroll search request to CMR for a list of granules."
   [state query opts]
-  (let [{:keys [hits]} (search-granules state (assoc query :page_size 0))
+  (let [hits (cmr-hits state :granule query)
         max-results (min (get opts :limit hits) hits)
         {:keys [scroll-id results]} (send-scroll-granules-request
                                      state
