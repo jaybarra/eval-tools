@@ -30,13 +30,14 @@
 
 (defn add-update-instructions
   "Add a list of update instructions to a bulk granule update request."
-  [request urs updater-fn]
+  [request urs xf]
   (->> urs
-       (map (fn [id] [id  (updater-fn id)]))
+       (map (fn [id] [id (xf id)]))
        (assoc request :updates)))
 
 (defn fetch-granule-urs
-  "Return a list of granule URs from CMR."
+  "Return the list of granule URs from CMR based on a query.
+  And optional amount value may be specified."
   [state query & [amount]]
   (->> (cmr/scroll-granules state query (if amount
                                           {:limit amount}
@@ -44,8 +45,8 @@
        (map :umm)
        (map :GranuleUR)))
 
-(defn submit-job
-  "Submit a bulk granule update request to CMR and return the job-id."
+(defn submit-job!
+  "POST a bulk granule update job to CMR and return the response."
   [state provider job-def]
   (let [{cmr-url ::cmr/url
          cmr-env ::cmr/env} (cmr/state->cmr state)
