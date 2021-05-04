@@ -4,22 +4,46 @@
    [clojure.core.async :as async]
    [clojure.data.csv :as csv]
    [clojure.java.io :as io]
+   [clojure.spec.alpha :as spec]
    [clojure.string :as string]
    [eval.cmr.core :as cmr]
    [muuntaja.core :as muuntaja]
    [taoensso.timbre :as log]))
 
-(def m (muuntaja/create))
+(spec/def ::instruction (spec/cat :granule-ur string? :url string?))
+(spec/def ::updates (spec/* ::instruction))
+(spec/def ::operation #{"UPDATE_FIELD"})
+(spec/def ::update-field #{"OPeNDAPLink" "S3Link"})
+(spec/def ::name string?)
+(spec/def ::provider string?)
+
+(spec/def ::definition (spec/keys :req-un [::operation
+                                           ::update-field
+                                           ::updates]
+                                  :opt-un [::name]))
+
+(spec/def ::bulk-granule-job (spec/keys :req-un [::definition
+                                                 ::provider]
+                                        :opt-un [::granules-query]))
+
 
 (def base-request {:name "large update request"
                    :operation "UPDATE_FIELD"
                    :update-field "OPeNDAPLink"
                    :updates []})
 
+(spec/explain-str ::definition base-request)
+
+(def bulk-granule-job
+  {:provider nil
+   :definition base-request
+   :granules-query {}
+   :xf (fn [ur] ur)})
+
 (defn edn->json
   "Convert edn to json string."
   [edn]
-  (slurp (muuntaja/encode m "application/json" edn)))
+  (slurp (muuntaja/encode (cmr/m) "application/json" edn)))
 
 (defn edn->file
   "Write an edn map to a file."
@@ -58,7 +82,7 @@
                   (update-in (cmr/http-request job-def)
                              [:headers]
                              #(merge % {"Echo-Token" (cmr/echo-token cmr-env)})))
-        job (muuntaja/decode-response-body m response)]
+        job (muuntaja/decode-response-body (cmr/m) response)]
     (log/info (format "Bulk Granule Update Job created with ID [%s]" (:task-id job)))
     job))
 
@@ -70,10 +94,11 @@
                                      cmr-url
                                      job-id)
                              {:headers {"Echo-Token" (cmr/echo-token cmr-env)}})]
-    (muuntaja/decode-response-body m response)))
+    (muuntaja/decode-response-body (cmr/m) response)))
 
 (defn benchmark-processing
-  "Blocking benchmark request for processing."
+  "Request status with a delay to compute per-second updates happening
+  in the job."
   ([state task-id]
    (benchmark-processing state task-id 3))
   ([state task-id time-in-sec]
@@ -122,7 +147,7 @@
   (def collection-ids
     (->> (cmr/search-collections
           (cmr/cmr-state :prod)
-          {:provider "PODAAC"
+          {:provider "CDDIS"
            :page_size 10})
          :items
          (map :meta)
@@ -142,9 +167,9 @@
      (fn [ur] (str "https://example.com/updated/" ur))))
 
   (def job
-    (submit-job
+    (submit-job!
      (cmr/cmr-state :wl)
-     "PODAAC"
+     "LAADS"
      job-def))
 
   (def benchmarks

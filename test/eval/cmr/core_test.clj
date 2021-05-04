@@ -2,7 +2,8 @@
   (:require
    [clojure.test :refer :all]
    [clojure.spec.alpha :as spec]
-   [eval.cmr.core :as cmr :refer [state->cmr]]))
+   [eval.cmr.core :as cmr :refer [state->cmr]]
+   [muuntaja.core :as muuntaja]))
 
 (def state {:connections
             {::cmr/cmr {::cmr/env :local
@@ -80,3 +81,4 @@
 (deftest facets-contains-type-test  
   (is (= true (cmr/facets-contains-type? "Temporal" facet-group)))
   (is (= false (cmr/facets-contains-type? "Spatial" facet-group))))
+

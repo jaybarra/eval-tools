@@ -11,29 +11,27 @@
   (:import
    [clojure.lang ExceptionInfo]))
 
-<<<<<<< HEAD
-=======
-(def vnd-nasa-cmr-umm-json-format
-  {:decoder [json-format/decoder {:decode-key-fn true}]
-   :matches #"^application/vnd\.nasa\.cmr\.umm_results\+json.*"})
 
-(def echo10+xml-format
+(def extended-json-formats
+  {:decoder [json-format/decoder {:decode-key-fn true}]
+   :matches #"^application/((.*)\+)?json.*"})
+
+(def extended-xml-formats
   {:decoder (reify
               fmt-core/Decode
               (decode [_ xml _charset]
                 (slurp xml)))
-   :matches #"^application/echo10\+xml.*"})
+   :matches #"^application/((.*)\+)?xml.*"})
 
->>>>>>> smoothing the api
 (def m
   (muuntaja/create
    (-> muuntaja/default-options
        (assoc-in 
-        [:formats "application/vnd.nasa.cmr.umm_results+json"]
-        formats/vnd-nasa-cmr-umm-json-format)
+        [:formats "application/extended+json"]
+        extended-json-formats)
        (assoc-in 
-        [:formats "application/echo10+xml"]
-        formats/echo10+xml-format))))
+        [:formats "application/extended+xml"]
+        extended-xml-formats))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Specs
@@ -139,20 +137,14 @@
          opts {:query-params query-params
                :headers {"Echo-Token" (echo-token cmr-env)}
                :cookie-policy :standard}]
-     (try 
-       (-> (client/get target-url opts)
-           (get-in [:headers "CMR-Hits"] 0)
-           (Integer/parseInt))
-       (catch ExceptionInfo e
-         (log/error e)
-         0)))))
+     (-> (client/get target-url opts)
+         (get-in [:headers "CMR-Hits"])
+         (Integer/parseInt)))))
 
 (defn cmr-granule-hits
   "Query CMR for count of available granules in a collection."
   [state coll-id]
   (cmr-hits state :granule {:collection_concept_id coll-id}))
-
-
 
 (defn search-collections
   "GET the collections from the specified CMR enviroment"
@@ -172,11 +164,10 @@
   [state query-params]
   (let [{cmr-url ::url
          cmr-env ::env} (state->cmr state)
-        coll-search-url (format "%s/search/granules.echo10" cmr-url)]
+        coll-search-url (format "%s/search/granules" cmr-url)]
     (muuntaja/decode-response-body
      m
      (client/get coll-search-url {:query-params query-params}))))
-
 
 (defn clear-scroll-session!
   "Clear the CMR scroll session."
