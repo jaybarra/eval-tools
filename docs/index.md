@@ -11,7 +11,7 @@ The central CMR interaction namespace.
 (def state (cmr/cmr-state :prod))
 
 ;; search prod for how many hits are available for a query
-(cmr/cmr-hits state {:provider "MY_PROVIDER}) ;; => 12345
+(cmr/cmr-hits state {:provider "MY_PROVIDER"}) ;; => 12345
 ```
 
 ### eval.cmr.bulk.granule
