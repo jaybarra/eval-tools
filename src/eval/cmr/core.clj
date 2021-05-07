@@ -1,29 +1,40 @@
 (ns eval.cmr.core
+  "Default functionality for interacting with CMR.
+
+  See Also:
+  * [[eval.cmr.bulk.collection]]
+  * [[eval.cmr.bulk.granule]] "
   (:require
    [clj-http.client :as client]
    [clojure.spec.alpha :as spec]
    [clojure.string :as string]
    [criterium.core :as criterium]
    [environ.core :refer [env]]
-   [eval.cmr.formats :as formats]
    [muuntaja.core :as muuntaja]
+   [muuntaja.format.json :as json-format]
+   [muuntaja.format.core :as fmt-core]
    [taoensso.timbre :as log])
   (:import
    [clojure.lang ExceptionInfo]))
 
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Muuntaja codec
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def extended-json-formats
+  "Let the decoder know how to decode UMM JSON"
   {:decoder [json-format/decoder {:decode-key-fn true}]
-   :matches #"^application/((.*)\+)?json.*"})
+   :matches #"^application/(.*)\+json.*"})
 
 (def extended-xml-formats
+  "Let the decoder know how to decode XML formats, echo10, iso:smap..."
   {:decoder (reify
               fmt-core/Decode
               (decode [_ xml _charset]
                 (slurp xml)))
-   :matches #"^application/((.*)\+)?xml.*"})
+   :matches #"^application/(.*)\+xml.*"})
 
 (def m
+  "Muuntaja instance for CMR content"
   (muuntaja/create
    (-> muuntaja/default-options
        (assoc-in 
@@ -53,12 +64,9 @@
 (spec/def :v2-facets/facets (spec/keys :req-un [:v2-facets/title]
                                        :opt-un [:v2-facets/children]))
 
+(spec/def ::url (spec/and string? #(re-matches cmr-rx %)))
+(spec/def ::cmr (spec/keys :req [::env ::url]))
 
-(spec/def ::url (spec/and string?
-                          #(re-matches cmr-rx %)))
-
-(spec/def ::cmr (spec/keys :req [::env
-                                 ::url]))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Functions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -80,7 +88,7 @@
      ::url "http://localhost:3003"}))
 
 (defn cmr-state
-  "Return a CMR enabled state"
+  "Adds CMR connection and returns a state."
   ([cmr-env]
    (cmr-state {} cmr-env))
   ([state cmr-env]
@@ -183,11 +191,11 @@
                                           {:scroll_id scroll-id})})
     (log/info (format "Cleared scroll-session [%s]" scroll-id))))
 
-(defn send-scroll-granules-request
+(defn scroll-next!
   "GET the granules using the scrolling API.
   You must clear the scrolling session after opening it with [[clear-scroll-session!]]."
   ([state query]
-   (send-scroll-granules-request state query {}))
+   (scroll-next! state query {}))
   ([state query opts]
    (let [{cmr-url ::url cmr-env ::env} (state->cmr state)
          search-url (format "%s/search/granules.umm_json" cmr-url)
@@ -196,7 +204,7 @@
          query-opts {:query-params
                      (-> query
                          (dissoc :page_num :offset)
-                         (assoc :scroll true))
+                         (assoc :scroll true))b 
                      :headers (merge headers
                                      {"Accept" "application/json"})
                      :cookie-policy :standard}
@@ -210,11 +218,12 @@
   [state query opts]
   (let [hits (cmr-hits state :granule query)
         max-results (min (get opts :limit hits) hits)
-        {:keys [scroll-id results]} (send-scroll-granules-request
+        {:keys [scroll-id results]} (scroll-next!
                                      state
                                      query)]
+    (log/info "Initiating granule scroll session [%s] " query)
     (loop [scrolled (:items results)]
-      (log/debug (format "Scroll session [%s] retrieved [%d], requested [%d], available [%d]"
+      (log/debug (format "Granule scroll session [%s] retrieved [%d] of [%d] requested with [%d] available."
                          scroll-id
                          (count scrolled)
                          max-results
@@ -228,6 +237,42 @@
                 (get-in
                  (send-scroll-granules-request state query {:scroll-id scroll-id})
                  [:results :items])))))))
+
+(defn scroll-granule-urs-to-file!
+  "Send a scroll search request to CMR for a list of granules and appends to a file."
+  [state query out-file opts]
+  (let [hits (cmr-hits state :granule query)
+        max-results (min (get opts :limit hits) hits)
+        {:keys [scroll-id results]} (scroll-next! state query)]
+    (log/info "Initiating granule scroll session [%s] " query)
+
+    ;; SIDE EFFECT bad!
+    ;; IO bad
+    (spit out-file (->> (:items results)
+                        (map :umm)
+                        (map :GranuleUR)
+                        (string/join ",\n")))
+
+    (loop [scrolled-count (count (:items results))]
+      (log/debug (format "Granule scroll session [%s] wrote [%d] of [%d] requested with [%d] available to [%s]"
+                         scroll-id
+                         scrolled-count
+                         max-results
+                         hits
+                         out-file))
+      (if (>= scrolled-count max-results)
+        (clear-scroll-session! state scroll-id)
+        (let [granules (get-in
+                        (scroll-next! state query {:scroll-id scroll-id})
+                        [:results :items])]
+          ;; SIDE EFFECT + IO in a loop
+          (spit out-file
+                (->> granules
+                     (map :umm)
+                     (map :GranuleUR)
+                     (string/join ",\n"))
+                :append true)
+          (recur (+ scrolled-count (count granules))))))))
 
 (defn get-granule-v2-facets
   "GET granule v2 facets for a collection, ignoring granules."
@@ -312,7 +357,7 @@
       (if (< max-page page-num)
         colls
         (do
-          (log/debug (format "Searching page %d of %d"
+          (log/debug (format "Searching page [%d/%d]"
                              page-num
                              max-page))
           (recur (inc page-num)

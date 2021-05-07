@@ -81,4 +81,3 @@
 (deftest facets-contains-type-test  
   (is (= true (cmr/facets-contains-type? "Temporal" facet-group)))
   (is (= false (cmr/facets-contains-type? "Spatial" facet-group))))
-
