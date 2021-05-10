@@ -8,14 +8,10 @@
   * Submit jobs for processing
   * Check the status of jobs"
   (:require
-   [clj-http.client :as client]
-   [clojure.core.async :as async]
    [clojure.java.io :as io]
    [clojure.spec.alpha :as spec]
    [clojure.string :as string]
    [eval.cmr.core :as cmr]
-   [eval.utils.conversions :as util]
-   [muuntaja.core :as muuntaja]
    [taoensso.timbre :as log])
   (:import
    (java.time Instant)))
@@ -111,13 +107,13 @@
   "POST a bulk granule update job to CMR and return the response."
   [cmr-conn provider job-def]
   (let [url (format "/ingest/providers/%s/bulk-update/granules" provider)
-        response (cmr/api-action!
-                  cmr-conn
-                  {:method :post
-                   :url url
-                   :headers {:content-type "application/json"}
-                   :body (cmr/encode->json job-def)})
-        job (muuntaja/decode-response-body cmr/m response)]
+        job (cmr/decode-cmr-response
+             (cmr/api-action!
+              cmr-conn
+              {:method :post
+               :url url
+               :headers {:content-type "application/json"}
+               :body (cmr/encode->json job-def)}))]
     (log/info (format "Bulk Granule Update Job created with ID [%s]" (:task-id job)))
     job))
 
