@@ -88,9 +88,9 @@
         urs (map (comp :GranuleUR :umm) granules)]
 
     (spit out-file (string/join "\n" urs))
-
     (try
       (loop [scrolled (count urs)]
+        (log/debug (str scrolled " granule urs written to " out-file))
         (if (>= scrolled limit)
           (.exists (io/file out-file))
           (let [urs (->> (scroll-page {:format :umm_json
@@ -178,57 +178,3 @@
              (quot (- processed-start processed-end) benchmark-duration)
              benchmark-duration
              task-id) benchmark)))
-
-(comment
-  (def base-request {:name "large update request"
-                     :operation "UPDATE_FIELD"
-                     :update-field "OPeNDAPLink"
-                     :updates []})
-
-  (def collection-ids
-    (->> (cmr/search
-          (cmr/cmr-conn :prod)
-          :collection
-          {:provider "CDDIS"}
-          {:format :umm_json})
-         cmr/umm-json-response->items
-         (map (comp :concept-id :meta))))
-
-  (def granule-urs
-    (scroll-granule-urs
-     (cmr/cmr-conn :prod)
-     {:collection_concept_id collection-ids
-      :page_size 2000}
-     {:limit 10000}))
-
-  (def job-def
-    (add-update-instructions
-     base-request
-     granule-urs
-     (fn [ur] (str "https://example.com/updated/" ur))))
-
-  (def job
-    (submit-job!
-     (cmr/cmr-conn :wl)
-     "CDDIS"
-     job-def))
-
-  #_(def benchmarks
-      (loop [data []]
-        (Thread/sleep 1000)
-        (let [benchmark (benchmark-processing (cmr/cmr-conn :sit) 121)]
-          (log/info benchmark)
-          (if (= (:start-cnt benchmark) (:end-cnt benchmark))
-            data
-            (recur (conj data benchmark))))))
-
-  ;; verify the change is reflected in searches
-  (log/info
-   (cmr/decode-cmr-response
-    (cmr/search
-     (cmr/cmr-conn :prod)
-     :granule
-     {:granule_ur (first granule-urs)
-      :collection_concept_id collection-ids
-      :page_size 1}
-     {:format :umm_json}))))
