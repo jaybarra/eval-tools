@@ -3,6 +3,10 @@
 A Clojure library designed to assist with evalutating and testing REST
 APIs and tools.
 
+[Eval Tools Documentation](https://jaybarra.github.io/eval-tools/)
+
+[Code](https://github.com/jaybarra/eval-tools)
+
 ## Usage
 
 Currently best run from within a REPL. Emacs + Cider is recommended.
