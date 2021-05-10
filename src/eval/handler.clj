@@ -18,16 +18,16 @@
 (defn create-app
   []
   (ring/ring-handler
-    (ring/router
-      routes
-      {:data {:coercion reitit.coercion.spec/coercion
-              :middleware [params/wrap-params
-                           muuntaja/format-negotiate-middleware
-                           muuntaja/format-response-middleware
-                           exception/exception-middleware
-                           muuntaja/format-request-middleware
-                           coercion/coerce-request-middleware
-                           coercion/coerce-response-middleware]
-              :muuntaja m/instance}
-       :exception pretty/exception})
-    (ring/create-default-handler)))
+   (ring/router
+    routes
+    {:data {:coercion reitit.coercion.spec/coercion
+            :middleware [params/wrap-params
+                         muuntaja/format-negotiate-middleware
+                         muuntaja/format-response-middleware
+                         exception/exception-middleware
+                         muuntaja/format-request-middleware
+                         coercion/coerce-request-middleware
+                         coercion/coerce-response-middleware]
+            :muuntaja m/instance}
+     :exception pretty/exception})
+   (ring/create-default-handler)))
