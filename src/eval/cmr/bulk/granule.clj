@@ -74,7 +74,7 @@
   "Return a filename containing the list of granule URs from CMR based on a query.
   And optional amount value may be specified.
 
-  This is suitable for granule amounts tha cannot fit in memory.
+  This is suitable for granule amounts that cannot fit in memory.
 
   TODO: this is blocking and should be have an async version
   See also: [[scroll-granule-urs]]"
