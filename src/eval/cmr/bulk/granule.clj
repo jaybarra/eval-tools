@@ -10,6 +10,7 @@
   (:require
    [clj-http.client :as client]
    [clojure.core.async :as async]
+   [clojure.java.io :as io]
    [clojure.spec.alpha :as spec]
    [clojure.string :as string]
    [eval.cmr.core :as cmr]
@@ -95,7 +96,7 @@
     (try
       (loop [scrolled (count urs)]
         (if (>= scrolled limit)
-          (.exists (clojure.java.io/file out-file))
+          (.exists (io/file out-file))
           (let [urs (->> (scroll-page {:format :umm_json
                                        :CMR-Scroll-Id scroll-id})
                          :response
