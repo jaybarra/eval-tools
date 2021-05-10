@@ -44,7 +44,7 @@
 (defn scroll-granule-urs
   "Return the list of granule URs from CMR based on a query.
   And optional amount value may be specified.
-  TODO: this is blocking and should be have an async version"
+  TODO: this is blocking and should have an async version"
   [cmr-conn query & [opts]]
   (let [available (cmr/cmr-hits cmr-conn :granule query)
         limit (min available (get opts :limit available))
@@ -68,13 +68,13 @@
       (finally
         (cmr/clear-scroll-session! cmr-conn scroll-id)))))
 
-(defn scroll-granule-urs->file
+(defn scroll-granule-urs->file!
   "Return a filename containing the list of granule URs from CMR based on a query.
   And optional amount value may be specified.
 
   This is suitable for granule amounts that cannot fit in memory.
 
-  TODO: this is blocking and should be have an async version
+  TODO: this is blocking and should have an async version
   See also: [[scroll-granule-urs]]"
   [cmr-conn out-file query & [opts]]
   (let [available (cmr/cmr-hits cmr-conn :granule query)
@@ -175,7 +175,7 @@
         processed-end (get end-counts "PENDING" 0)]
     (log/info
      (format "BENCHMARK: [%d] granules per second over [%d] seconds in task [%s]"
-             (/ (- processed-start processed-end) benchmark-duration)
+             (quot (- processed-start processed-end) benchmark-duration)
              benchmark-duration
              task-id) benchmark)))
 
