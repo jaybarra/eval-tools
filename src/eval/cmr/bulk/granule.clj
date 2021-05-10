@@ -8,7 +8,6 @@
   * Submit jobs for processing
   * Check the status of jobs"
   (:require
-   [clojure.core.async :as async :refer [go >! <! >!! <!! chan close!]]
    [clojure.data.csv :as csv]
    [clojure.java.io :as io]
    [clojure.spec.alpha :as spec]
@@ -17,7 +16,8 @@
    [muuntaja.core :as muuntaja]
    [taoensso.timbre :as log])
   (:import
-   (java.time Instant)))
+   (java.time Instant)
+   (java.util Scanner)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Specs
@@ -112,30 +112,29 @@
 (defn bulk-update-file!
   "Write a bulk granule update job as a json file using a file containing
   a newline-separated list of granules and a transform function for"
-  [job-def granule-file out-file]
+  [job-def instruction-file out-file]
 
-  #_(when-not (spec/valid? ::bulk-granule-job job-def)
-      (throw (ex-info "Invalid bulkd-granule-job definition"
-                      (spec/explain-data ::bulk-granule-job job-def))))
-
-  ;; write incomplete update json
-  ;; TODO this is not precise enough, verify we are only removing "]}"
+  ;; write incomplete update json structure by removing trailing `]}`
+  ;; TODO this can break if job keywords are out of order, :updates must be last
   (let [file-data (seq (slurp (muuntaja/encode cmr/m "application/json" job-def)))]
     (spit out-file (str (string/join (drop-last (drop-last file-data))) "\n")))
 
-  (let [ch (async/chan)]
-    (go
-      (with-open [rdr (io/reader granule-file)]
-        (doseq [line (line-seq rdr)]
-          (>! ch line)))
-      (async/close! ch))
-    (loop []
-      (when-let [line (<!! ch)]
-        ;; TODO this is ugly and not easily understood, rewrite to be cleaner
-        (spit out-file (str "[" (string/join "," (map #(str "\"" % "\"") (string/split line #","))) "],\n") :append true)
-        (recur))))
-  ;; TODO remove trailing comma from final instruction when present
-  ;; cap the instructions list
+  ;; write the instructions
+  (with-open [xin (io/input-stream instruction-file)]
+    (let [scan (Scanner. xin)]
+      (loop [line (.nextLine scan)]
+        ;; this is ugly, it's just csv, no need to be this dirty
+        (let [line-str (as-> line line-str
+                         (string/split line-str #",")
+                         (map #(str "\"" % "\"") line-str)
+                         (string/join "," line-str)
+                         (str "[" line-str "]"))]
+          (if (.hasNext scan)
+            (do
+              (spit out-file (str line-str ",\n") :append true)
+              (recur (.nextLine scan)))
+            (spit out-file line-str :append true))))))
+  ;; cap the file with the missing json closures
   (spit out-file "\n]}" :append true))
 
 (defn submit-job!
