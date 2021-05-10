@@ -1,90 +1,119 @@
 (ns eval.cmr.core
+  "Default functionality for interacting with CMR.
+
+  See Also:
+  * [[eval.cmr.bulk.granule]]"
   (:require
-   [clj-http.client :as client]
+   [clj-http.client :as http]
+   [clojure.core.async :as async :refer [>! <! chan go]]
    [clojure.spec.alpha :as spec]
    [clojure.string :as string]
    [criterium.core :as criterium]
    [environ.core :refer [env]]
-   [eval.cmr.formats :as formats]
+   [eval.system :as system]
+   [eval.utils.core :refer [defn-timed]]
    [muuntaja.core :as muuntaja]
+   [muuntaja.format.json :as json-format]
+   [muuntaja.format.core :as fmt-core]
    [taoensso.timbre :as log])
   (:import
    [clojure.lang ExceptionInfo]))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Muuntaja codec
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(def extended-json-formats
+  "Let the decoder know how to decode UMM JSON"
+  {:decoder [json-format/decoder {:decode-key-fn true}]
+   :matches #"^application/(.*)\+json.*"})
+
+(def extended-xml-formats
+  "Let the decoder know how to decode XML formats, echo10, iso:smap..."
+  {:decoder (reify
+              fmt-core/Decode
+              (decode [_ xml _charset]
+                (slurp xml)))
+   :matches #"^application/(.*)\+xml.*"})
+
 (def m
+  "Muuntaja instance for handling CMR content types. This contains
+  decoders for the following format types. Version information may be
+  additionally appended.
+
+  e.g \"Content-Type: application/vnd.nasa.cmr.umm+json;version=1.16.2\"
+  
+  XML formats:
+  * application/dif10+xml
+  * application/dif+xml
+  * application/echo10+xml
+  * application/iso19115+xml
+  * application/iso:smap+xml
+  
+  JSON formats:
+  * application/vnd.nasa.cmr.umm+json"
   (muuntaja/create
    (-> muuntaja/default-options
        (assoc-in 
-        [:formats "application/vnd.nasa.cmr.umm_results+json"]
-        formats/vnd-nasa-cmr-umm-json-format)
+        [:formats "application/extended+json"]
+        extended-json-formats)
        (assoc-in 
-        [:formats "application/echo10+xml"]
-        formats/echo10+xml-format))))
+        [:formats "application/extended+xml"]
+        extended-xml-formats))))
 
+(def encode->json (partial muuntaja/encode m "application/json"))
+
+(def decode-cmr-response "Decode the body of CMR responses"
+  (partial muuntaja/decode-response-body m))
+
+(def umm-json-response->items "Unpack :umm_json format concepts from a response."
+  (comp :items decode-cmr-response))
+
+(def json-response->entry "Unpack :json format concepts from a response."
+  (comp :entry :feed decode-cmr-response))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Specs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(spec/def ::env #{:local :sit :uat :wl :prod})
-(spec/def ::concept-type #{:collection :granule})
+(def cmr-formats "Set of supported CMR data format keywords."
+  #{:atom
+    :dif 
+    :dif10 
+    :echo10
+    :iso 
+    :iso19115
+    :json 
+    :xml
+    :native
+    :umm_json})
+(spec/def ::cmr-formats cmr-formats)
+(spec/def ::concept-type #{:collection :granule :service :tool :concept})
+(spec/def ::url string?)
+(spec/def ::cmr (spec/keys :req [::env ::url]))
 
-(def scheme-pattern "https?:\\/\\/")
-(def cmr-url-pattern "cmr\\.((uat|sit)\\.)?earthdata\\.nasa\\.gov")
-(def cmr-local-pattern "localhost:\\d{4}")
-(def cmr-rx (re-pattern (format "%s(%s|%s)"
-                                scheme-pattern
-                                cmr-local-pattern
-                                cmr-url-pattern)))
-
-(spec/def :v2-facets/title string?)
-(spec/def :v2-facets/facet (spec/keys :req-un [:v2-facets/title]))
-(spec/def :v2-facets/children (spec/* :v2-facets/facet))
-(spec/def :v2-facets/facets (spec/keys :req-un [:v2-facets/title]
-                                       :opt-un [:v2-facets/children]))
-
-
-(spec/def ::url (spec/and string?
-                          #(re-matches cmr-rx %)))
-
-(spec/def ::cmr (spec/keys :req [::env
-                                 ::url]))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Functions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn cmr
-  "Return a CMR connection object."
-  [cmr-env]
-  {:post [(spec/valid? ::cmr %)]}
-  (case cmr-env
-    :sit {::env cmr-env
-          ::url "https://cmr.sit.earthdata.nasa.gov"}
-    :uat {::env cmr-env
-          ::url "https://cmr.uat.earthdata.nasa.gov"}
-    :prod {::env cmr-env
-           ::url "https://cmr.earthdata.nasa.gov"}
-    :wl {::env cmr-env
-         ::url "http://localhost:9999"}
-    ;; default
-    {::env :local
-     ::url "http://localhost:3003"}))
-
-(defn cmr-state
-  "Return a CMR enabled state"
-  ([cmr-env]
-   (cmr-state {} cmr-env))
-  ([state cmr-env]
-   (let [cmr-opts (cmr cmr-env)
-         cons (merge (:connections state)
-                     {::cmr cmr-opts})]
-     (merge state {:connections cons }))))
-
-(defn state->cmr
-  "Extract CMR connection options from state."
-  [state]
-  {:post [(spec/valid? ::cmr %)]}
-  (get-in state [:connections ::cmr]))
+(defn cmr-conn
+  "Create a CMR connection object based on the given environment.
+  Configure environments in the configuration under :cmr-environments."
+  [cmr-env & [opts]]
+  (let [url (or (get-in system/system-config [:cmr-environments cmr-env])
+                (format "%s://%s:%s"
+                        (get opts :protocol "http")
+                        (get opts :host "localhost")
+                        (get opts :port 9999)))]
+    {::env cmr-env
+     ::url url}))
 
 (defn echo-token
-  "Read CMR enviroment echo token from environment variables."
+  "Read CMR enviroment echo token from environment variables.
+  By default it reads from CMR_ECHO_TOKEN_*
+  where the * is the matching keyword name of the provided cmr-env
+
+  e.g.
+  `(echo-token :prod) will look for an environment variable CMR_ECHO_TOKEN_PROD
+  `(echo-token :uat)  will look for an environment variable CMR_ECHO_TOKEN_UAT
+
+  TODO: get echo-tokens from configs or dynamically in the library"
   [cmr-env]
   (->> cmr-env
        name
@@ -93,246 +122,152 @@
        keyword
        env))
 
-(defn http-request
-  "Return an application/json encoded http request."
-  ([body]
-   (http-request body {}))
-  ([body opts]
-   {:headers {:content-type "application/json"
-              :accept "application/json"
-              :cookie-policy :standard}
-    :body (muuntaja/encode m "application/json" body)}))
+(def format->mime-type
+  "CMR support format to MIME type map."
+  {:atom "application/atom+xml"
+   :dif "application/dif+xml"
+   :dif10 "application/dif10+xml"
+   :echo10 "application/echo10+xml"
+   :html "text/html"
+   :iso "application/iso19115+xml"
+   :iso19115 "application/iso19115+xml"
+   :json "application/json"
+   :xml "application/xml"
+   :native "application/metadata+xml"
+   :umm_json "application/vnd.nasa.cmr.umm+json"})
 
-(defn scroll-http-request
-  "Return an application/json encoded http scrolling request."
-  [body scroll-id]
-  (-> body
-      http-request
-      (assoc-in [:headers :CMR-Scroll-Id] scroll-id)))
+(defn- format->cmr-extension
+  "Takes a CMR supported format and returns the appropriate extension
+  for use on the search endpoint
 
-(defn cmr-hits
-  "Query CMR for count of available concepts."
-  ([state concept-type]
-   (cmr-hits state concept-type nil))
-  ([state concept-type m-opts]
-   {:pre [(spec/valid? ::concept-type concept-type)]}
-   (let [{cmr-url ::url
-          cmr-env ::env} (state->cmr state)
-         target-url (format "%s/search/%ss"
-                            cmr-url
-                            (name concept-type))
-         query-params (merge {:page_size 0} m-opts)
-         opts {:query-params query-params
-               :headers {"Echo-Token" (echo-token cmr-env)}
-               :cookie-policy :standard}]
-     (try 
-       (-> (client/get target-url opts)
-           (get-in [:headers "CMR-Hits"] 0)
-           (Integer/parseInt))
-       (catch ExceptionInfo e
-         (log/error e)
-         0)))))
+  e.g. {:format :echo10} will yield \"/search/collections.echo10\"
+  after being passed through [[search]]"
+  [fmt]
+  (case fmt
+    :atom ".atom"
+    :dif ".dif"
+    :dif10 ".dif10"
+    :echo10 ".echo10"
+    :iso ".iso"
+    :iso19115 ".iso19115"
+    :json ".json"
+    :native ".native"
+    :umm_json ".umm_json"
+    ;; default to empty, CMR will return XML(native) by default
+    ""))
 
-(defn cmr-granule-hits
-  "Query CMR for count of available granules in a collection."
-  [state coll-id]
-  (cmr-hits state :granule {:collection_concept_id coll-id}))
+(defn-timed api-action!
+  "Invoke CMR endpoints with a request map and return the response.
+  Throws with exceptional response status (>= status 400)
 
+  The [[cmr-conn]] url will be prefixed to the provided url to determine
+  where the request should be sent.
 
+  Sends a query to CMR over HTTP and returns the response object.
+  
+  If an echo-token is available for the provided [[cmr-conn]] it will
+  be added to the \"Echo-Token\" header.
 
-(defn search-collections
+  TODO: make an async version of this"
+  [cmr-conn request & [opts]]
+  (let [{cmr-url ::url cmr-env ::env} cmr-conn
+        out-request (cond-> request
+                      ;; prefix with the CMR instance
+                      true (assoc :url (str cmr-url (:url request)))
+                      ;; Insert echo-token if available
+                      (echo-token cmr-env) (assoc-in [:headers "Echo-Token"]
+                                                     (echo-token request)))]
+    (log/debug "Sending request to CMR" cmr-env (dissoc request :body))
+    (http/request out-request)))
+
+(defn search-request
   "GET the collections from the specified CMR enviroment"
-  ([state opts]
-   (let [{cmr-url ::url
-          cmr-env ::env} (state->cmr state)
-         coll-search-url (format "%s/search/collections.umm_json" cmr-url)
-         query-opts {:query-params opts
-                     :cookie-policy :standard
-                     :headers {"Echo-Token" (echo-token cmr-env)}}]
-     (-> coll-search-url
-         (client/get query-opts)
-         (as-> res (muuntaja/decode-response-body m res))))))
-
-(defn search-granules
-  "GET the granules from the specified CMR collections for a given collection."
-  [state query-params]
-  (let [{cmr-url ::url
-         cmr-env ::env} (state->cmr state)
-        coll-search-url (format "%s/search/granules.echo10" cmr-url)]
-    (muuntaja/decode-response-body
-     m
-     (client/get coll-search-url {:query-params query-params}))))
-
+  ([concept-type query & [opts]]
+   (let [search-url (format
+                     "/search/%ss%s"
+                     (name concept-type)
+                     (format->cmr-extension (:format opts)))]
+     {:method :get
+      :url search-url
+      :query-params query})))
 
 (defn clear-scroll-session!
   "Clear the CMR scroll session."
-  [state scroll-id]
-  (let [{cmr-url ::url
-         cmr-env ::env} (state->cmr state)
-        clear-scroll-url (format "%s/search/clear-scroll" cmr-url)]
-    (client/post clear-scroll-url {:headers {:content-type "application/json"
-                                             :accept "application/json"}
-                                   :body (muuntaja/encode
-                                          m
-                                          "application/json"
-                                          {:scroll_id scroll-id})})
-    (log/info (format "Cleared scroll-session [%s]" scroll-id))))
+  [cmr-conn scroll-id]
+  (let [request {:method :post
+                 :url "/search/clear-scroll"
+                 :headers {:content-type "application/json"}
+                 :body (encode->json {:scroll_id scroll-id})}]
+    (log/debug "Clearing scroll session [" scroll-id "]")
+    (api-action! cmr-conn request)))
 
-(defn send-scroll-granules-request
-  "GET the granules using the scrolling API.
-  You must clear the scrolling session after opening it with [[clear-scroll-session!]]."
-  ([state query]
-   (send-scroll-granules-request state query {}))
-  ([state query opts]
-   (let [{cmr-url ::url cmr-env ::env} (state->cmr state)
-         search-url (format "%s/search/granules.umm_json" cmr-url)
-         headers (cond-> {"Echo-Token" (echo-token cmr-env)}
-                   (:scroll-id opts) (assoc "CMR-Scroll-Id" (:scroll-id opts)))        
-         query-opts {:query-params
-                     (-> query
+(defn search
+  "Return a response from CMR."
+  [cmr-conn concept-type query & [opts]]
+  (api-action! cmr-conn
+               (search-request concept-type query opts)
+               opts))
+
+(defn scroll!
+  "Begin or continue a scrolling session and returns a map with 
+  :CMR-Scroll-Id and :response.
+
+  ## CMR-Scroll-Id
+
+  The first scroll! query will return the CMR-Scroll-Id in the header
+  of the response. Add this to the options map of subsequent calls to
+  continue getting results.
+
+  e.g.
+  %> (scroll! cmr :granules query)
+  {:CMR-Scroll-Id \"612341\"
+   :response <page 1 of results>}
+
+  %> (scroll! cmr :granules query {:CMR-Scroll-Id \"612341\"})
+  {:CMR-Scroll-Id \"612341\"
+   :response <page 2 of results>}
+
+  %> (get-in (clear-scroll-session! cmr \"612341\") :status)
+  204
+
+  The ideal use case is to always run in a try-finally
+  e.g.
+
+  (try
+    (scroll! cmr query {:CMR-Scroll-id scroll-id)
+    (finally (clear-scroll-session! cmr scroll-id))
+  
+  ## Query Parameters
+  Standard [[search]] parameters are accepted with the following exceptions.
+  
+  :page_num and :offset are not valid params when using the scrolling endpoint.
+  :page_size is a valid query param and must be below 2000
+
+  Repeated calls will yield additional results.
+
+  Be sure to call [[clear-scroll-session!]] when finished. "
+  [cmr-conn concept-type query & [opts]]
+  (let [scroll-query (-> query
                          (dissoc :page_num :offset)
                          (assoc :scroll true))
-                     :headers (merge headers
-                                     {"Accept" "application/json"})
-                     :cookie-policy :standard}
-         response (client/get search-url query-opts)
-         data (muuntaja/decode-response-body m response)]
-     {:scroll-id (get-in response [:headers "CMR-Scroll-Id"])
-      :results data})))
+        existing-scroll-id (:CMR-Scroll-Id opts)
+        request (search-request concept-type scroll-query opts)
+        scroll-request (cond-> request
+                         existing-scroll-id (assoc-in
+                                             [:headers :CMR-Scroll-Id]
+                                             existing-scroll-id))
+        response (api-action! cmr-conn scroll-request opts)
+        scroll-id (get-in response [:headers :CMR-Scroll-Id])]
+    (if existing-scroll-id
+      (log/debug "Continuing scroll [" scroll-id "]")
+      (log/debug "Started new scroll session [" scroll-id "]"))
+    {:CMR-Scroll-Id scroll-id
+     :response response}))
 
-(defn scroll-granules
-  "Send a scroll search request to CMR for a list of granules."
-  [state query opts]
-  (let [{:keys [hits]} (search-granules state (assoc query :page_size 0))
-        max-results (min (get opts :limit hits) hits)
-        {:keys [scroll-id results]} (send-scroll-granules-request
-                                     state
-                                     query)]
-    (loop [scrolled (:items results)]
-      (log/debug (format "Scroll session [%s] retrieved [%d], requested [%d], available [%d]"
-                         scroll-id
-                         (count scrolled)
-                         max-results
-                         hits))
-      (if (>= (count scrolled) max-results)
-        (do
-          (clear-scroll-session! state scroll-id)
-          (take max-results scrolled))
-        (recur (concat
-                scrolled
-                (get-in
-                 (send-scroll-granules-request state query {:scroll-id scroll-id})
-                 [:results :items])))))))
-
-(defn get-granule-v2-facets
-  "GET granule v2 facets for a collection, ignoring granules."
-  [state coll-id]
-  (let [{cmr-url ::url
-         cmr-env ::env} (state->cmr state)
-        coll-search-url (format "%s/search/granules.json" cmr-url)
-        query-opts {:query-params {:collection_concept_id coll-id
-                                   :page_size 0
-                                   :include_facets "v2"}
-                    :headers {"Echo-Token" (echo-token cmr-env)}
-                    :cookie-policy :standard}]
-    (log/debug "Fetching granules with v2 facets for collection"
-               coll-id)
-    (-> coll-search-url
-        (client/get query-opts)
-        (as-> res (muuntaja/decode-response-body m res))
-        (get-in [:feed :facets]))))
-
-(defn facets-contains-type?
-  "Return true if a faceted query result contains a facet with the
-  given name."
-  [type facets]
-  {:pre [(spec/valid? :v2-facets/facets facets)]}
-  (when-let [nodes (seq (:children facets))]
-    (->> nodes
-         (map :title)
-         (some #{type})
-         some?)))
-
-(defn get-facets-with-temporal-and-spatial
-  "Query CMR for collections and associated granules, print any that 
-  contain both Temporal and Spatial"
-  ([state]
-   (get-facets-with-temporal-and-spatial state nil))
-  ([state m-opts]
-   (let [opts (merge {:page_num 1
-                      :has_granules true}
-                     m-opts)
-         fetch-collections! (partial search-collections state)
-         fetch-coll-granules! (partial get-granule-v2-facets state)
-         contains-spatial? (partial facets-contains-type? "Spatial")
-         contains-temporal? (partial facets-contains-type? "Temporal")]
-     (log/debug "Fetching facets" opts)
-     (->> (fetch-collections! opts)
-          (map :id)
-          (pmap fetch-coll-granules!)
-          (filterv contains-spatial?)
-          (filterv contains-temporal?)))))
-
-(defn search-collections-with-temporal-and-spatial
-  ([state]
-   (search-collections-with-temporal-and-spatial state nil))
-  ([state m-opts]
-   (let [opts (merge {:has_granules true}
-                     m-opts)
-         fetch-collections! (partial search-collections state)
-         fetch-coll-granules! (partial get-granule-v2-facets state)
-         contains-spatial? (fn [c-with-g]
-                             (facets-contains-type?
-                              "Spatial"
-                              (:granules c-with-g)))
-         contains-temporal? (fn [c-with-g]
-                              (facets-contains-type?
-                               "Temporal"
-                               (:granules c-with-g)))]
-     (log/debug "Fetching collections" opts)
-     (->> (fetch-collections! opts)
-          (pmap #(merge % {:granules (fetch-coll-granules! (:id %))}))
-          (filterv contains-spatial?)
-          (filterv contains-temporal?)))))
-
-(defn find-all-collections-with-spatial-and-temporal
-  "Crawls through CMR to find any collection with facets that have
-  temporal and spatial facets."
-  [state]
-  (let [n-coll (cmr-hits state :collection {:has_granules true})
-        page-size 100
-        max-page (int (Math/ceil (/ n-coll page-size)))]
-    (loop [page-num 1
-           colls []]
-      (if (< max-page page-num)
-        colls
-        (do
-          (log/debug (format "Searching page %d of %d"
-                             page-num
-                             max-page))
-          (recur (inc page-num)
-                 (if-let [results (seq (search-collections-with-temporal-and-spatial
-                                        state
-                                        {:page_num page-num
-                                         :page_size page-size}))]
-                   (into colls (map #(select-keys % [:id]) results))
-                   colls)))))))
-
-(defn ingest-collection
-  "Send a collection to CMR to be ingested."
-  ([state provider-id collection]
-   (ingest-collection state provider-id collection nil))
-  ([state provider-id collection opts]
-   (log/info (format "Ingesting collection [%s] on provider [%s]"
-                     (:native-id collection)
-                     provider-id))
-   (let [{cmr-url ::url
-          cmr-env ::env} (state->cmr state)
-         url (format "%s/search/providers/%s/collections/%s"
-                     cmr-url
-                     provider-id
-                     (:native-id collection))]
-     (client/put url {:body (muuntaja/encode m "application/json" collection)
-                      :headers {"Echo-Token" (echo-token cmr-env)
-                                "Content-Type" "application/umm+json"}
-                      :cookie-policy :standard}))))
+(defn cmr-hits
+  "Query CMR for count of available concepts."
+  [cmr-conn concept-type query & [opts]]
+  (let [query (assoc query :page_size 0)]
+    (-> (search cmr-conn concept-type query)
+        (get-in [:headers :CMR-Hits])
+        Integer/parseInt)))

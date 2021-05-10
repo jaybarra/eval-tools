@@ -1,8 +1,10 @@
 (ns eval.utils.conversions)
 
-;; Mass conversions ==================================================
+;; ===================================================================
+;; Mass conversions
+;; ===================================================================
 
-(def mass-conversion 2.2046226218488)
+(def mass-conversion "Kg to Pound conversion factor" 2.2046226218488)
 
 (defn kg->lb
   "Convert mass in kilograms to pounds."
@@ -14,8 +16,9 @@
   [mass]
   (/ mass mass-conversion))
 
-
-;; Length conversions ================================================
+;; ===================================================================
+;; Length conversions
+;; ===================================================================
 
 (defn cm->in
   [length]
