@@ -8,10 +8,13 @@
   * Submit jobs for processing
   * Check the status of jobs"
   (:require
+   [clojure.core.async :as async :refer [go >! <! >!! <!! chan close!]]
+   [clojure.data.csv :as csv]
    [clojure.java.io :as io]
    [clojure.spec.alpha :as spec]
    [clojure.string :as string]
    [eval.cmr.core :as cmr]
+   [muuntaja.core :as muuntaja]
    [taoensso.timbre :as log])
   (:import
    (java.time Instant)))
@@ -19,7 +22,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Specs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(spec/def ::instruction (spec/cat :granule-ur string? :url string?))
+(spec/def ::instruction (spec/cat :granule-ur string? :value string?))
 (spec/def ::updates (spec/* ::instruction))
 (spec/def ::operation #{"UPDATE_FIELD" "APPEND_TO_FIELD"})
 (spec/def ::update-field #{"OPeNDAPLink" "S3Link"})
@@ -76,7 +79,7 @@
 
   TODO: this is blocking and should have an async version
   See also: [[scroll-granule-urs]]"
-  [cmr-conn out-file query & [opts]]
+  [cmr-conn out-file query xf & [opts]]
   (let [available (cmr/cmr-hits cmr-conn :granule query)
         limit (min available (get opts :limit available))
 
@@ -85,23 +88,55 @@
         first-page (scroll-page {:format :umm_json})
         scroll-id (:CMR-Scroll-Id first-page)
         granules (cmr/umm-json-response->items (:response first-page))
-        urs (map (comp :GranuleUR :umm) granules)]
+        instructions (->> granules
+                          (map (comp :GranuleUR :umm))
+                          (map xf))]
 
-    (spit out-file (string/join "\n" urs))
+    (spit out-file (string/join "\n" instructions))
     (try
-      (loop [scrolled (count urs)]
+      (loop [scrolled (count instructions)]
         (log/debug (str scrolled " granule urs written to " out-file))
         (if (>= scrolled limit)
           (.exists (io/file out-file))
-          (let [urs (->> (scroll-page {:format :umm_json
-                                       :CMR-Scroll-Id scroll-id})
-                         :response
-                         cmr/umm-json-response->items
-                         (map (comp :GranuleUR :umm)))]
-            (spit out-file (string/join "\n" urs) :append true)
-            (recur (+ scrolled (count urs))))))
+          (let [instructions (->> (scroll-page {:format :umm_json
+                                                :CMR-Scroll-Id scroll-id})
+                                  :response
+                                  cmr/umm-json-response->items
+                                  (map (comp :GranuleUR :umm))
+                                  (map xf))]
+            (spit out-file (string/join "\n" instructions) :append true)
+            (recur (+ scrolled (count instructions))))))
       (finally
         (cmr/clear-scroll-session! cmr-conn scroll-id)))))
+
+(defn bulk-update-file!
+  "Write a bulk granule update job as a json file using a file containing
+  a newline-separated list of granules and a transform function for"
+  [job-def granule-file out-file]
+
+  #_(when-not (spec/valid? ::bulk-granule-job job-def)
+      (throw (ex-info "Invalid bulkd-granule-job definition"
+                      (spec/explain-data ::bulk-granule-job job-def))))
+
+  ;; write incomplete update json
+  ;; TODO this is not precise enough, verify we are only removing "]}"
+  (let [file-data (seq (slurp (muuntaja/encode cmr/m "application/json" job-def)))]
+    (spit out-file (str (string/join (drop-last (drop-last file-data))) "\n")))
+
+  (let [ch (async/chan)]
+    (go
+      (with-open [rdr (io/reader granule-file)]
+        (doseq [line (line-seq rdr)]
+          (>! ch line)))
+      (async/close! ch))
+    (loop []
+      (when-let [line (<!! ch)]
+        ;; TODO this is ugly and not easily understood, rewrite to be cleaner
+        (spit out-file (str "[" (string/join "," (map #(str "\"" % "\"") (string/split line #","))) "],\n") :append true)
+        (recur))))
+  ;; TODO remove trailing comma from final instruction when present
+  ;; cap the instructions list
+  (spit out-file "\n]}" :append true))
 
 (defn submit-job!
   "POST a bulk granule update job to CMR and return the response."
