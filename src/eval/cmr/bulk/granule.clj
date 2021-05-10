@@ -70,6 +70,41 @@
       (finally
         (cmr/clear-scroll-session! cmr-conn scroll-id)))))
 
+(defn granule-urs->file
+  "Return a filename containing the list of granule URs from CMR based on a query.
+  And optional amount value may be specified.
+
+  This is suitable for granule amounts tha cannot fit in memory.
+
+  TODO: this is blocking and should be have an async version
+  See also: [[fetch-granule-urs]]"
+  [cmr-conn out-file query & [opts]]
+  (let [available (cmr/cmr-hits cmr-conn :granule query)
+        limit (min available (get opts :limit available))
+
+        scroll-page (partial cmr/scroll! cmr-conn :granule query)
+
+        first-page (scroll-page {:format :umm_json})
+        scroll-id (:CMR-Scroll-Id first-page)
+        granules (cmr/umm-json-response->items (:response first-page))
+        urs (map (comp :GranuleUR :umm) granules)]
+
+    (spit out-file (string/join "\n" urs))
+
+    (try
+      (loop [scrolled (count urs)]
+        (if (>= scrolled limit)
+          (.exists (clojure.java.io/file out-file)
+          (let [urs (->> (scroll-page {:format :umm_json
+                                       :CMR-Scroll-Id scroll-id})
+                         :response
+                         cmr/umm-json-response->items
+                         (map (comp :GranuleUR :umm)))]
+            (spit out-file (string/join "\n" urs) :append true)
+            (recur (+ scrolled (count urs))))))
+      (finally
+        (cmr/clear-scroll-session! cmr-conn scroll-id)))))
+
 (defn submit-job!
   "POST a bulk granule update job to CMR and return the response."
   [cmr-conn provider job-def]
