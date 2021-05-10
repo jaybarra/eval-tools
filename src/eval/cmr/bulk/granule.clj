@@ -105,6 +105,7 @@
                                   (map (comp :GranuleUR :umm))
                                   (map xf))]
             (spit out-file (string/join "\n" instructions) :append true)
+            (spit out-file "\n" :append true)
             (recur (+ scrolled (count instructions))))))
       (finally
         (cmr/clear-scroll-session! cmr-conn scroll-id)))))
