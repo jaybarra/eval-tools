@@ -206,10 +206,11 @@
   "Write a formatted benchmark to the log."
   [benchmark]
   (let [{:keys [start-counts end-counts benchmark-duration task-id]} benchmark
-        processed-start (get start-counts "PENDING" 0)
-        processed-end (get end-counts "PENDING" 0)]
+        pending-start (get start-counts "PENDING" 0)
+        pending-end (get end-counts "PENDING" 0)]
     (log/info
      (format "BENCHMARK: [%d] granules per second over [%d] seconds in task [%s]"
-             (quot (- processed-start processed-end) benchmark-duration)
+             (quot (- pending-start pending-end) benchmark-duration)
              benchmark-duration
-             task-id) benchmark)))
+             task-id)
+     benchmark)))
