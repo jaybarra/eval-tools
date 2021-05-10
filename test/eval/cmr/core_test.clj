@@ -11,21 +11,6 @@
    [ring.adapter.jetty :as jetty]
    [ring.util.response :refer [response status]]))
 
-#_(def cmr-handler
-    (ring/ring-handler
-     (ring/router
-      ["/ingest"
-       ["providers"
-        ["/:provider"
-         ["/bulk-update"
-          ["/granules" ::granule-bulk-update-create]]]]
-       ["/granule-bulk-update"
-        ["/status"
-         ["" ::granule-bulk-update-update]
-         ["/:id" ::granule-bulk-update-job-get]]]]
-      {:data {:middleware [muuntaja-mw/format-response-middleware]
-              :muuntaja muuntaja/instance}})))
-
 (def cmr-conn (cmr/cmr-conn :local))
 
 (deftest cmr-conn-test
@@ -42,22 +27,4 @@
     :wl {::cmr/env :wl
          ::cmr/url "http://localhost:9999"}))
 
-(deftest echo-token-test
-  #_(testing "get value when value exists"
-      (is (string? (cmr/echo-token :prod))))
-  (testing "returns nil when no token is available"
-    (is (nil? (cmr/echo-token :elsewhere)))))
 
-
-(deftest search-test
-  (testing "returns a search request command"
-    (are [concept-type opts url]
-        (let [request (cmr/search concept-type nil opts)]
-          (is (= :get (:method request)))
-          (is (= url (:url request))))
-      :granule {:format :echo10} "/search/granules.echo10"
-      :granule {} "/search/granules"
-      :collection {:format :umm_json} "/search/collections.umm_json"
-      :collection {:format :iso} "/search/collections.iso"
-      :service {} "/search/services"
-      :tool {} "/search/tools")))

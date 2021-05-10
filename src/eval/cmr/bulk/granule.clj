@@ -14,9 +14,10 @@
    [clojure.string :as string]
    [eval.cmr.core :as cmr]
    [eval.utils.conversions :as util]
-   [java-time :as jtime]
    [muuntaja.core :as muuntaja]
-   [taoensso.timbre :as log]))
+   [taoensso.timbre :as log])
+  (:import
+   (java.time Instant)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Specs
@@ -94,7 +95,7 @@
     (try
       (loop [scrolled (count urs)]
         (if (>= scrolled limit)
-          (.exists (clojure.java.io/file out-file)
+          (.exists (clojure.java.io/file out-file))
           (let [urs (->> (scroll-page {:format :umm_json
                                        :CMR-Scroll-Id scroll-id})
                          :response
@@ -143,16 +144,16 @@
          ;; Note where start and end are calculated from
          ;; The query takes a while so we clock it from when it was
          ;; sent, not when the response comes back
-         start-time (System/currentTimeMillis)
+         start-time (Instant/now)
 
          _ (Thread/sleep (* 1000 time-in-sec))
 
-         end-time (System/currentTimeMillis)
+         end-time (Instant/now)
          end-counts (get-counts)
-         duration (/ (- end-time start-time) 1000.0)]
+         duration (quot (- end-time start-time) 1000)]
      {:task-id task-id
-      :start-time (jtime/instant start-time)
-      :end-time (jtime/instant end-time)
+      :start-time start-time
+      :end-time end-time
       :benchmark-duration duration
       :start-counts start-counts
       :end-counts end-counts
@@ -188,7 +189,7 @@
 
   (def collection-ids
     (->> (cmr/search
-          (cmr/cmr-conn :wl)
+          (cmr/cmr-conn :prod)
           :collection
           {:provider "CDDIS"}
           {:format :umm_json})
@@ -196,8 +197,8 @@
          (map (comp :concept-id :meta))))
 
   (def granule-urs
-    (fetch-granule-urs
-     (cmr/cmr-conn :wl)
+    (scroll-granule-urs
+     (cmr/cmr-conn :prod)
      {:collection_concept_id collection-ids
       :page_size 2000}
      {:limit 10000}))

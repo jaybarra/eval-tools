@@ -191,14 +191,6 @@
       :url search-url
       :query-params query})))
 
-(defn cmr-hits
-  "Query CMR for count of available concepts."
-  [cmr-conn concept-type query & [opts]]
-  (let [query (assoc query :page_size 0)]
-    (-> (search cmr-conn concept-type query)
-        (get-in [:headers :CMR-Hits])
-        Integer/parseInt)))
-
 (defn clear-scroll-session!
   "Clear the CMR scroll session."
   [cmr-conn scroll-id]
@@ -271,3 +263,11 @@
       (log/debug "Started new scroll session [" scroll-id "]"))
     {:CMR-Scroll-Id scroll-id
      :response response}))
+
+(defn cmr-hits
+  "Query CMR for count of available concepts."
+  [cmr-conn concept-type query & [opts]]
+  (let [query (assoc query :page_size 0)]
+    (-> (search cmr-conn concept-type query)
+        (get-in [:headers :CMR-Hits])
+        Integer/parseInt)))

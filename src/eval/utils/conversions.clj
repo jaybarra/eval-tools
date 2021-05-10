@@ -1,15 +1,8 @@
-(ns eval.utils.conversions
-  (:require
-   [java-time :as jtime]))
+(ns eval.utils.conversions)
 
-;; Time conversions ==================================================
-
-(defn timeMillis->timestamp
-  "Convert a time in millis to a timestamp."
-  [ctm]
-  (jtime/instant ctm))
-
-;; Mass conversions ==================================================
+;; ===================================================================
+;; Mass conversions
+;; ===================================================================
 
 (def mass-conversion "Kg to Pound conversion factor" 2.2046226218488)
 
@@ -23,8 +16,9 @@
   [mass]
   (/ mass mass-conversion))
 
-
-;; Length conversions ================================================
+;; ===================================================================
+;; Length conversions
+;; ===================================================================
 
 (defn cm->in
   [length]
