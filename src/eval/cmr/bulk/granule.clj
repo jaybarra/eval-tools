@@ -151,14 +151,15 @@
 
          end-time (Instant/now)
          end-counts (get-counts)
-         duration (quot (- end-time start-time) 1000)]
+         duration (quot (- (.toEpochMilli end-time)
+                           (.toEpochMilli start-time))
+                        1000)]
      {:task-id task-id
       :start-time start-time
       :end-time end-time
       :benchmark-duration duration
       :start-counts start-counts
       :end-counts end-counts
-
       :processed (- (get start-counts "PENDING" 0)
                     (get end-counts "PENDING" 0))})))
 
