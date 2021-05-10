@@ -8,10 +8,10 @@ The central CMR interaction namespace.
 
 ```clojure
 ;; create a CMR enabled state object for the production environment
-(def state (cmr/cmr-state :prod))
+(def conn (cmr/cmr-conn :prod))
 
 ;; search prod for how many hits are available for a query
-(cmr/cmr-hits state {:provider "MY_PROVIDER"}) ;; => 12345
+(cmr/cmr-hits conn {:provider "MY_PROVIDER"}) ;; => 12345
 ```
 
 ### eval.cmr.bulk.granule
