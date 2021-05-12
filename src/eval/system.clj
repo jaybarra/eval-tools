@@ -29,6 +29,8 @@
 (defmethod ig/init-key :handler/app
   [_ {message :welcome-message}]
   (println (or message "Good Luck!!"))
+  (when-let [banner (io/resource "banner.txt")]
+    (log/info (slurp banner)))
   (app/create-app))
 
 ;; default handler for integrant

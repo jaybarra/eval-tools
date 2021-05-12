@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Configuration
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-{:handler/app {:welcome-message #include "banner.txt"}
+{:handler/app {:welcome-message "Good luck!!"}
 
  :adapter/jetty {:handler #ref [:handler/app]
                  :port #long #or [#env PORT 8880]
