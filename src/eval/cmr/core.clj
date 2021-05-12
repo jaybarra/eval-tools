@@ -1,23 +1,23 @@
 (ns eval.cmr.core
-  "Default functionality for interacting with CMR.
+  "Default functionality for interacting with a Common Metadata Repository
+  instance.
+
+  This namespace provides basic interaction through the [[api-action!]]
+  function.
 
   See Also:
   * [[eval.cmr.bulk.granule]]"
   (:require
    [clj-http.client :as http]
-   [clojure.core.async :as async :refer [>! <! chan go]]
    [clojure.spec.alpha :as spec]
    [clojure.string :as string]
-   [criterium.core :as criterium]
    [environ.core :refer [env]]
    [eval.system :as system]
    [eval.utils.core :refer [defn-timed]]
    [muuntaja.core :as muuntaja]
    [muuntaja.format.json :as json-format]
    [muuntaja.format.core :as fmt-core]
-   [taoensso.timbre :as log])
-  (:import
-   [clojure.lang ExceptionInfo]))
+   [taoensso.timbre :as log]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Muuntaja codec
@@ -104,6 +104,9 @@
     {::env cmr-env
      ::url url}))
 
+(def ^:private keyword->lowercase-str
+  (comp string/lower-case name))
+
 (defn echo-token
   "Read CMR enviroment echo token from environment variables.
   By default it reads from CMR_ECHO_TOKEN_*
@@ -116,8 +119,7 @@
   TODO: get echo-tokens from configs or dynamically in the library"
   [cmr-env]
   (->> cmr-env
-       name
-       string/lower-case
+       keyword->lowercase-str
        (str "cmr-echo-token-")
        keyword
        env))
@@ -181,7 +183,10 @@
     (http/request out-request)))
 
 (defn search-request
-  "GET the collections from the specified CMR enviroment"
+  "GET the collections from the specified CMR enviroment.
+
+  Send a GET request to the search endpoint for the specific concept-type
+  as a query-param."
   ([concept-type query & [opts]]
    (let [search-url (format
                      "/search/%ss%s"
@@ -264,8 +269,12 @@
     {:CMR-Scroll-Id scroll-id
      :response response}))
 
-(defn cmr-hits
-  "Query CMR for count of available concepts."
+(defn query-hits
+  "Query CMR for count of available concepts that are available from
+  a given query.
+
+  Takes a query and sets a :page_size of 0 and returns
+  the CMR-Hits header string as an integer value."
   [cmr-conn concept-type query & [opts]]
   (let [query (assoc query :page_size 0)]
     (-> (search cmr-conn concept-type query)
