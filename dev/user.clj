@@ -3,7 +3,7 @@
    [integrant.repl :as ig-repl]
    [eval.system :as system]))
 
-(ig-repl/set-prep! (constantly system/system-config))
+(ig-repl/set-prep! system/config)
 
 (def go ig-repl/go)
 (def halt ig-repl/halt)

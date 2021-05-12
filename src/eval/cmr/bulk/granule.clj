@@ -161,12 +161,12 @@
     {:method :get
      :url (format "/ingest/granule-bulk-update/status/%s" job-id)})))
 
-(defn benchmark-processing
+(defn benchmark
   "Request status with a delay to compute per-second updates happening
-  in the job.
+  in the bulk granule update job.
   TODO: make an async, non-blocking version"
   ([cmr-conn task-id]
-   (benchmark-processing cmr-conn task-id 3))
+   (benchmark cmr-conn task-id 3))
   ([cmr-conn task-id time-in-sec]
    (let [get-counts #(->> (fetch-job-status cmr-conn task-id)
                           :granule-statuses
@@ -203,7 +203,10 @@
                      :url "/ingest/granule-bulk-update/status"})))
 
 (defn log-benchmark
-  "Write a formatted benchmark to the log."
+  "Write a formatted benchmark to the log.
+
+  See [[benchmark]]
+  "
   [benchmark]
   (let [{:keys [start-counts end-counts benchmark-duration task-id]} benchmark
         pending-start (get start-counts "PENDING" 0)

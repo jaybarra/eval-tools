@@ -56,7 +56,7 @@
             ~@timed-arity-body
             (finally
               (let [elapsed# (- (System/currentTimeMillis) start#)]
-                (when (true? (get system/system-config :benchmarking?))
+                (when (true? (get (system/config) :benchmarking?))
                   (log/info
                    (format
                     "Timed function [%s/%s] took [%d] ms."

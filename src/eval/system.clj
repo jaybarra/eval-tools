@@ -9,9 +9,6 @@
    [taoensso.timbre :as log])
   (:gen-class))
 
-;; Bootstrap the configs
-(def system-config (read-config (io/resource "config.edn")))
-
 (defn config
   "Read the config"
   []
@@ -38,4 +35,4 @@
 
 (defn -main
   []
-  (ig/init system-config))
+  (ig/init (config)))

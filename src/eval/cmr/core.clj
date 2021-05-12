@@ -94,13 +94,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn cmr-conn
   "Create a CMR connection object based on the given environment.
-  Configure environments in the configuration under :cmr-environments."
+  Configure environments in the configuration under :cmr :cmr-instances"
   [cmr-env & [opts]]
-  (let [url (or (get-in system/system-config [:cmr-environments cmr-env])
-                (format "%s://%s:%s"
-                        (get opts :protocol "http")
-                        (get opts :host "localhost")
-                        (get opts :port 9999)))]
+  (let [cmr-instance (get-in (system/config) [:cmr :cmr-instances cmr-env])
+        url (if (map? cmr-instance)
+              (:url cmr-instance)
+              cmr-instance)]
     {::env cmr-env
      ::url url}))
 

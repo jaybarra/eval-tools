@@ -1,10 +1,10 @@
 (defproject eval-tools "0.1.0-SNAPSHOT"
   :description "Evaluation and Testing Tools"
-  :url "https://github.com/jaybarra/eval-tools"
+  :url "https://jaybarra.github.io/eval-tools"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
             :url "https://www.eclipse.org/legal/epl-2.0/"}
   :dependencies [[aero/aero "1.1.6"]
-                 [clj-http "3.12.1"]
+                 [clj-http/clj-http "3.12.1"]
                  [com.taoensso/carmine "3.1.0"]
                  [com.taoensso/timbre "5.1.2"]
                  [criterium/criterium "0.4.6"]
@@ -26,7 +26,7 @@
                                   [org.clojure/test.check "1.1.0"]
                                   [ring/ring-devel "1.9.3"]
                                   [slamhound/slamhound "1.5.5"]]
-                   :plugins [[jonase/eastwood "0.3.10"]
+                   :plugins [[jonase/eastwood "0.4.2"]
                              [lein-ancient/lein-ancient "0.6.15"]
                              [lein-cloverage/lein-cloverage "1.2.0"]
                              [lein-kibit/lein-kibit "0.1.8"]]}
