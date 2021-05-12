@@ -23,7 +23,7 @@ Prefer ```lein kaocha``` to ```lein test```
 
 ## License
 
-Copyright © 2020 Jay Barra
+Copyright © 2021 Jay Barra
 
 This program and the accompanying materials are made available under the
 terms of the Eclipse Public License 2.0 which is available at

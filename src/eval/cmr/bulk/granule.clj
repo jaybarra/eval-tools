@@ -8,22 +8,21 @@
   * Submit jobs for processing
   * Check the status of jobs"
   (:require
-   [clj-http.client :as client]
-   [clojure.core.async :as async]
+   [clojure.data.csv :as csv]
    [clojure.java.io :as io]
    [clojure.spec.alpha :as spec]
    [clojure.string :as string]
    [eval.cmr.core :as cmr]
-   [eval.utils.conversions :as util]
    [muuntaja.core :as muuntaja]
    [taoensso.timbre :as log])
   (:import
-   (java.time Instant)))
+   (java.time Instant)
+   (java.util Scanner)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Specs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(spec/def ::instruction (spec/cat :granule-ur string? :url string?))
+(spec/def ::instruction (spec/cat :granule-ur string? :value string?))
 (spec/def ::updates (spec/* ::instruction))
 (spec/def ::operation #{"UPDATE_FIELD" "APPEND_TO_FIELD"})
 (spec/def ::update-field #{"OPeNDAPLink" "S3Link"})
@@ -48,7 +47,7 @@
 (defn scroll-granule-urs
   "Return the list of granule URs from CMR based on a query.
   And optional amount value may be specified.
-  TODO: this is blocking and should be have an async version"
+  TODO: this is blocking and should have an async version"
   [cmr-conn query & [opts]]
   (let [available (cmr/query-hits cmr-conn :granule query)
         limit (min available (get opts :limit available))
@@ -72,15 +71,15 @@
       (finally
         (cmr/clear-scroll-session! cmr-conn scroll-id)))))
 
-(defn scroll-granule-urs->file
+(defn scroll-granule-urs->file!
   "Return a filename containing the list of granule URs from CMR based on a query.
   And optional amount value may be specified.
 
   This is suitable for granule amounts that cannot fit in memory.
 
-  TODO: this is blocking and should be have an async version
+  TODO: this is blocking and should have an async version
   See also: [[scroll-granule-urs]]"
-  [cmr-conn out-file query & [opts]]
+  [cmr-conn out-file query xf & [opts]]
   (let [available (cmr/query-hits cmr-conn :granule query)
         limit (min available (get opts :limit available))
 
@@ -89,35 +88,66 @@
         first-page (scroll-page {:format :umm_json})
         scroll-id (:CMR-Scroll-Id first-page)
         granules (cmr/umm-json-response->items (:response first-page))
-        urs (map (comp :GranuleUR :umm) granules)]
+        instructions (->> granules
+                          (map (comp :GranuleUR :umm))
+                          (map xf))]
 
-    (spit out-file (string/join "\n" urs))
-
+    (spit out-file (string/join "\n" instructions))
     (try
-      (loop [scrolled (count urs)]
+      (loop [scrolled (count instructions)]
+        (log/debug (str scrolled " granule urs written to " out-file))
         (if (>= scrolled limit)
           (.exists (io/file out-file))
-          (let [urs (->> (scroll-page {:format :umm_json
-                                       :CMR-Scroll-Id scroll-id})
-                         :response
-                         cmr/umm-json-response->items
-                         (map (comp :GranuleUR :umm)))]
-            (spit out-file (string/join "\n" urs) :append true)
-            (recur (+ scrolled (count urs))))))
+          (let [instructions (->> (scroll-page {:format :umm_json
+                                                :CMR-Scroll-Id scroll-id})
+                                  :response
+                                  cmr/umm-json-response->items
+                                  (map (comp :GranuleUR :umm))
+                                  (map xf))]
+            (spit out-file (string/join "\n" instructions) :append true)
+            (recur (+ scrolled (count instructions))))))
       (finally
         (cmr/clear-scroll-session! cmr-conn scroll-id)))))
+
+(defn bulk-update-file!
+  "Write a bulk granule update job as a json file using a file containing
+  a newline-separated list of granules and a transform function for"
+  [job-def instruction-file out-file]
+
+  ;; write incomplete update json structure by removing trailing `]}`
+  ;; TODO this can break if job keywords are out of order, :updates must be last
+  (let [file-data (seq (slurp (muuntaja/encode cmr/m "application/json" job-def)))]
+    (spit out-file (str (string/join (drop-last (drop-last file-data))) "\n")))
+
+  ;; write the instructions
+  (with-open [xin (io/input-stream instruction-file)]
+    (let [scan (Scanner. xin)]
+      (loop [line (.nextLine scan)]
+        ;; this is ugly, it's just csv, no need to be this dirty
+        (let [line-str (as-> line line-str
+                         (string/split line-str #",")
+                         (map #(str "\"" % "\"") line-str)
+                         (string/join "," line-str)
+                         (str "[" line-str "]"))]
+          (if (.hasNext scan)
+            (do
+              (spit out-file (str line-str ",\n") :append true)
+              (recur (.nextLine scan)))
+            (spit out-file line-str :append true))))))
+  ;; cap the file with the missing json closures
+  (spit out-file "\n]}" :append true))
 
 (defn submit-job!
   "POST a bulk granule update job to CMR and return the response."
   [cmr-conn provider job-def]
   (let [url (format "/ingest/providers/%s/bulk-update/granules" provider)
-        response (cmr/api-action!
-                  cmr-conn
-                  {:method :post
-                   :url url
-                   :headers {:content-type "application/json"}
-                   :body (cmr/encode->json job-def)})
-        job (muuntaja/decode-response-body cmr/m response)]
+        job (cmr/decode-cmr-response
+             (cmr/api-action!
+              cmr-conn
+              {:method :post
+               :url url
+               :headers {:content-type "application/json"}
+               :body (cmr/encode->json job-def)}))]
     (log/info (format "Bulk Granule Update Job created with ID [%s]" (:task-id job)))
     job))
 
@@ -175,64 +205,11 @@
   "Write a formatted benchmark to the log."
   [benchmark]
   (let [{:keys [start-counts end-counts benchmark-duration task-id]} benchmark
-        processed-start (get start-counts "PENDING" 0)
-        processed-end (get end-counts "PENDING" 0)]
+        pending-start (get start-counts "PENDING" 0)
+        pending-end (get end-counts "PENDING" 0)]
     (log/info
      (format "BENCHMARK: [%d] granules per second over [%d] seconds in task [%s]"
-             (/ (- processed-start processed-end) benchmark-duration)
+             (quot (- pending-start pending-end) benchmark-duration)
              benchmark-duration
-             task-id) benchmark)))
-
-(comment
-  (def base-request {:name "large update request"
-                     :operation "UPDATE_FIELD"
-                     :update-field "OPeNDAPLink"
-                     :updates []})
-
-  (def collection-ids
-    (->> (cmr/search
-          (cmr/cmr-conn :prod)
-          :collection
-          {:provider "CDDIS"}
-          {:format :umm_json})
-         cmr/umm-json-response->items
-         (map (comp :concept-id :meta))))
-
-  (def granule-urs
-    (scroll-granule-urs
-     (cmr/cmr-conn :prod)
-     {:collection_concept_id collection-ids
-      :page_size 2000}
-     {:limit 10000}))
-
-  (def job-def
-    (add-update-instructions
-     base-request
-     granule-urs
-     (fn [ur] (str "https://example.com/updated/" ur))))
-
-  (def job
-    (submit-job!
-     (cmr/cmr-conn :wl)
-     "CDDIS"
-     job-def))
-
-  #_(def benchmarks
-      (loop [data []]
-        (Thread/sleep 1000)
-        (let [benchmark (benchmark-processing (cmr/cmr-conn :sit) 121)]
-          (log/info benchmark)
-          (if (= (:start-cnt benchmark) (:end-cnt benchmark))
-            data
-            (recur (conj data benchmark))))))
-
-  ;; verify the change is reflected in searches
-  (log/info
-   (cmr/decode-cmr-response
-    (cmr/search
-     (cmr/cmr-conn :prod)
-     :granule
-     {:granule_ur (first granule-urs)
-      :collection_concept_id collection-ids
-      :page_size 1}
-     {:format :umm_json}))))
+             task-id)
+     benchmark)))

@@ -168,17 +168,24 @@
   Sends a query to CMR over HTTP and returns the response object.
   
   If an echo-token is available for the provided [[cmr-conn]] it will
-  be added to the \"Echo-Token\" header.
+  be added to the \"Echo-Token\" header. This may be ignored by setting
+  :anonymous? to true in the options.
+
+  ## Options
+  :anonymous? boolean - when true, no echo-token will be added to the header
+  :echo-token string - when set, will be used in place of [[echo-token]] result, will be ignored if :anonymous? is true
 
   TODO: make an async version of this"
   [cmr-conn request & [opts]]
   (let [{cmr-url ::url cmr-env ::env} cmr-conn
+        token (and (not (:anonymous? opts))
+                   (or (:echo-token opts)
+                       (echo-token cmr-env)))
         out-request (cond-> request
                       ;; prefix with the CMR instance
                       true (assoc :url (str cmr-url (:url request)))
                       ;; Insert echo-token if available
-                      (echo-token cmr-env) (assoc-in [:headers "Echo-Token"]
-                                                     (echo-token request)))]
+                      token (assoc-in [:headers "Echo-Token"] token))]
     (log/debug "Sending request to CMR" cmr-env (dissoc request :body))
     (http/request out-request)))
 
