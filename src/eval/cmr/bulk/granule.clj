@@ -49,7 +49,7 @@
   And optional amount value may be specified.
   TODO: this is blocking and should have an async version"
   [cmr-conn query & [opts]]
-  (let [available (cmr/cmr-hits cmr-conn :granule query)
+  (let [available (cmr/query-hits cmr-conn :granule query)
         limit (min available (get opts :limit available))
 
         scroll-page (partial cmr/scroll! cmr-conn :granule query)
@@ -80,7 +80,7 @@
   TODO: this is blocking and should have an async version
   See also: [[scroll-granule-urs]]"
   [cmr-conn out-file query xf & [opts]]
-  (let [available (cmr/cmr-hits cmr-conn :granule query)
+  (let [available (cmr/query-hits cmr-conn :granule query)
         limit (min available (get opts :limit available))
 
         scroll-page (partial cmr/scroll! cmr-conn :granule query)
