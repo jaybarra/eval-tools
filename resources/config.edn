@@ -1,16 +1,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Configuration
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-{:handler/app {:message "CMR Eval Tools"}
+{:handler/app {:welcome-message #include "banner.txt"}
 
- :adapter/jetty {:handler #ig/ref :handler/app
-                 :port 2888
+ :adapter/jetty {:handler #ref [:handler/app]
+                 :port #long #or [#env PORT 8880]
                  :join? false}
 
- :cmr-environments
- {:prod "https://cmr.earthdata.nasa.gov"
-  :uat "https://cmr.uat.earthdata.nasa.gov"
-  :sit "https://cmr.sit.earthdata.nasa.gov"}
+ ;; Enable logging of benchmarks for timed functions [[defn-timed]]
+ :benchmarking? true
 
- ;; Enable benchmarks
- :benchmarking? true}
+ ;; Load others resources
+ :cmr #include "config.cmr.edn"}

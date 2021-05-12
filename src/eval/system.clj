@@ -1,15 +1,21 @@
-;;; system.clj --- system configuration
-;;; Commentary:
-;;; Code:
 (ns eval.system
+  "Main entrypoint to the Eval Tools system."
   (:require
+   [aero.core :as aero :refer [read-config]]
    [clojure.java.io :as io]
    [integrant.core :as ig]
    [eval.handler :as app]
    [ring.adapter.jetty :as jetty]
-   [taoensso.timbre :as log]))
+   [taoensso.timbre :as log])
+  (:gen-class))
 
-(def system-config (-> "config.edn" io/resource slurp ig/read-string))
+;; Bootstrap the configs
+(def system-config (read-config (io/resource "config.edn")))
+
+(defn config
+  "Read the config"
+  []
+  (aero/read-config (io/resource "config.edn")))
 
 (defmethod ig/init-key :adapter/jetty
   [_ {:keys [handler port] :as opts}]
@@ -21,11 +27,13 @@
   (.stop server))
 
 (defmethod ig/init-key :handler/app
-  [_ {message :message}]
-  (log/info (or message "No message provided. Good Luck"))
+  [_ {message :welcome-message}]
+  (println (or message "Good Luck!!"))
   (app/create-app))
+
+;; default handler for integrant
+(defmethod ig/init-key :default [_ _cfg])
 
 (defn -main
   []
   (ig/init system-config))
-;;; system.clj ends here

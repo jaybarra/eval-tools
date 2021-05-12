@@ -7,12 +7,13 @@
 (deftest spec-validate-test
   (testing "throwing"
     (let [pos-spec (s/def ::pos-num pos?)]
-      (is (thrown-with-msg? clojure.lang.ExceptionInfo
-                            #"Validation failed"
-                            (utils/spec-validate pos-spec -1))))))
+      (is (thrown-with-msg?
+           clojure.lang.ExceptionInfo
+           #"Validation failed"
+           (utils/spec-validate pos-spec -1))))))
 
 (deftest within?-test
-  (testing "returns correct evaluations"
+  (testing "within checks values within a delta distance correctly"
     (are [delta a b expected] (= expected (utils/within? delta a b))
       ;; base check
       1 4 5 true
