@@ -72,8 +72,8 @@
         (cmr/clear-scroll-session! cmr-conn scroll-id)))))
 
 (defn scroll-granule-urs->file!
-  "Return a filename containing the list of granule URs from CMR based on a query.
-  And optional amount value may be specified.
+  "Return a filename containing the list of granule URs from CMR based
+  on a query. An optional amount value may be specified.
 
   This is suitable for granule amounts that cannot fit in memory.
 
@@ -205,8 +205,7 @@
 (defn log-benchmark
   "Write a formatted benchmark to the log.
 
-  See [[benchmark]]
-  "
+  See [[benchmark]]"
   [benchmark]
   (let [{:keys [start-counts end-counts benchmark-duration task-id]} benchmark
         pending-start (get start-counts "PENDING" 0)

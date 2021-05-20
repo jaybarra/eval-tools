@@ -1,5 +1,7 @@
 #kaocha/v1
-{:tests [{:id :unit}]
+{:tests [{:id :unit}
+         {:id :cmr
+          :test-paths ["test/eval/cmr"]}]
 
  :plugins [:kaocha.plugin/cloverage
            :kaocha.plugin.alpha/info
@@ -20,4 +22,6 @@
 
  :kaocha.plugin.randomize/randomize? true
 
- :kaocha.plugin.junit-xml/target-file "target/junit.xml"}
+ :kaocha.plugin.junit-xml/target-file "target/junit.xml"
+
+ :cloverage/opts {:summary? false}}

@@ -1,33 +1,34 @@
 (ns eval.handler
+  "Core web handler"
   (:require
+   [clojure.java.io :as io]
+   [eval.api.health :as health]
    [muuntaja.core :as m]
    [reitit.coercion.spec]
    [reitit.dev.pretty :as pretty]
-   [reitit.ring.coercion :as coercion]
+   [reitit.ring :as ring]
+   [reitit.ring.coercion :as rrc]
    [reitit.ring.middleware.exception :as exception]
    [reitit.ring.middleware.muuntaja :as muuntaja]
-   [reitit.ring :as ring]
-   [ring.middleware.params :as params]
-   [ring.util.response :refer [response status]]))
-
-(def ok-handler (constantly (status 200)))
-
-(def routes
-  [["/" {:get {:handler ok-handler}}]])
+   [reitit.ring.middleware.parameters :as parameters]))
 
 (defn create-app
+  "Return a configured handler instance."
   []
   (ring/ring-handler
    (ring/router
-    routes
+    [["/api"
+      [health/routes]]]
     {:data {:coercion reitit.coercion.spec/coercion
-            :middleware [params/wrap-params
+            :muuntaja m/instance
+            :middleware [parameters/parameters-middleware
                          muuntaja/format-negotiate-middleware
                          muuntaja/format-response-middleware
                          exception/exception-middleware
                          muuntaja/format-request-middleware
-                         coercion/coerce-request-middleware
-                         coercion/coerce-response-middleware]
-            :muuntaja m/instance}
+                         rrc/coerce-request-middleware
+                         rrc/coerce-response-middleware]}
      :exception pretty/exception})
-   (ring/create-default-handler)))
+   (ring/routes
+    (ring/create-resource-handler {:path "/"})
+    (ring/create-default-handler))))

@@ -33,7 +33,7 @@
               fmt-core/Decode
               (decode [_ xml _charset]
                 (slurp xml)))
-   :matches #"^application/(.*)\+xml.*"})
+   :matches #"^application/((.*)\+)?xml.*"})
 
 (def m
   "Muuntaja instance for handling CMR content types. This contains
@@ -96,7 +96,7 @@
   "Create a CMR connection object based on the given environment.
   Configure environments in the configuration under :cmr :cmr-instances"
   [cmr-env & [opts]]
-  (let [cmr-instance (get-in (system/config) [:cmr :cmr-instances cmr-env])
+  (let [cmr-instance (system/config :cmr :instances cmr-env)
         url (if (map? cmr-instance)
               (:url cmr-instance)
               cmr-instance)]
@@ -172,7 +172,7 @@
 
   ## Options
   :anonymous? boolean - when true, no echo-token will be added to the header
-  :echo-token string - when set, will be used in place of [[echo-token]] result, will be ignored if :anonymous? is true
+  :echo-token string  - when set, will be used unless :anonymous? is true
 
   TODO: make an async version of this"
   [cmr-conn request & [opts]]
