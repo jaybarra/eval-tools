@@ -3,9 +3,10 @@
   (:require
    [aero.core :as aero :refer [read-config]]
    [clojure.java.io :as io]
-   [integrant.core :as ig]
+   [environ.core :refer [env]]
    [eval.db.event-store :as event-store]
    [eval.handler :as app]
+   [integrant.core :as ig]
    [ring.adapter.jetty :as jetty]
    [taoensso.timbre :as log])
   (:gen-class))
@@ -24,10 +25,13 @@
   specific keys may be passed in to get specific value. Nil will be returned
   if no matching value exists.
 
+  Config location looks for :eval-config-location
+
   e.g. (config) => entire config
   (config :cmr :instances) => cmr instances map"
   [& keys]
-  (let [cfg (aero/read-config (io/resource "config.edn"))]
+  (let [cfg-file (env :eval-config-location "config.edn")
+        cfg (aero/read-config (io/resource cfg-file))]
     (get-in cfg keys)))
 
 (defmethod ig/init-key :db/event-store
@@ -57,5 +61,8 @@
 
 (defn -main
   "Main entrypoint when running from uberjar"
-  []
+  [& args]
+  (when (seq args)
+    (doseq [arg args]
+      (println arg)))
   (ig/init (config)))

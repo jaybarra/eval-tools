@@ -27,6 +27,7 @@ pom.xml.asc
 *.jar
 *.class
 *.log
+node_modules
 
 ## local configurations
 profiles.clj

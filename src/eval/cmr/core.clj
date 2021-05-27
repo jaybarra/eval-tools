@@ -2,7 +2,7 @@
   "Default functionality for interacting with a Common Metadata Repository
   instance.
 
-  This namespace provides basic interaction through the [[api-action!]]
+  This namespace provides basic interaction through the [[invoke!]]
   function.
 
   See Also:
@@ -12,6 +12,7 @@
    [clojure.spec.alpha :as spec]
    [clojure.string :as string]
    [environ.core :refer [env]]
+   [eval.db.event-store :as es]
    [eval.system :as system]
    [eval.utils.core :refer [defn-timed]]
    [muuntaja.core :as muuntaja]
@@ -86,22 +87,38 @@
     :umm_json})
 (spec/def ::cmr-formats cmr-formats)
 (spec/def ::concept-type #{:collection :granule :service :tool :concept})
+(spec/def ::id (spec/or :id-kw keyword? :id-str string?))
 (spec/def ::url string?)
-(spec/def ::cmr (spec/keys :req [::env ::url]))
+(spec/def ::cmr (spec/keys :req [::id ::url]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Functions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn cmr-conn
-  "Create a CMR connection object based on the given environment.
+(defn- -load-client
+  "Read CMR instance from config and return the config"
+  [cmr]
+  (if-let [cmr-instance (system/config :cmr :instances cmr)]
+    (let [url (if (map? cmr-instance)
+                (:url cmr-instance)
+                cmr-instance)]
+      {::id cmr ::url url})
+    (throw (ex-info "No entry found in configuration for specified CMR instance"
+                    {:cmr cmr}))))
+(defn client
+  "Create a CMR client
+  
+  When given a keyword it will look up the from the system configuration
+  When given a map it will attempt to contruct the client
+
   Configure environments in the configuration under :cmr :cmr-instances"
-  [cmr-env & [opts]]
-  (let [cmr-instance (system/config :cmr :instances cmr-env)
-        url (if (map? cmr-instance)
-              (:url cmr-instance)
-              cmr-instance)]
-    {::env cmr-env
-     ::url url}))
+  [cmr]
+  (let [client (if (map? cmr)
+                 cmr
+                 (-load-client cmr))]
+    (if (spec/valid? ::cmr client)
+      client
+      (throw (ex-info "Invalid CMR configuration"
+                      (spec/explain-data ::cmr client))))))
 
 (def ^:private keyword->lowercase-str
   (comp string/lower-case name))
@@ -116,8 +133,9 @@
   `(echo-token :uat)  will look for an environment variable CMR_ECHO_TOKEN_UAT
 
   TODO: get echo-tokens from configs or dynamically in the library"
-  [cmr-env]
-  (->> cmr-env
+  [client]
+  (->> client
+       ::id
        keyword->lowercase-str
        (str "cmr-echo-token-")
        keyword
@@ -157,16 +175,16 @@
     ;; default to empty, CMR will return XML(native) by default
     ""))
 
-(defn-timed api-action!
+(defn-timed invoke
   "Invoke CMR endpoints with a request map and return the response.
   Throws with exceptional response status (>= status 400)
 
-  The [[cmr-conn]] url will be prefixed to the provided url to determine
+  The [[client]] url will be prefixed to the provided url to determine
   where the request should be sent.
 
   Sends a query to CMR over HTTP and returns the response object.
   
-  If an echo-token is available for the provided [[cmr-conn]] it will
+  If an echo-token is available for the provided [[client]] it will
   be added to the \"Echo-Token\" header. This may be ignored by setting
   :anonymous? to true in the options.
 
@@ -175,17 +193,17 @@
   :echo-token string  - when set, will be used unless :anonymous? is true
 
   TODO: make an async version of this"
-  [cmr-conn request & [opts]]
-  (let [{cmr-url ::url cmr-env ::env} cmr-conn
+  [client request & [opts]]
+  (let [{cmr-url ::url cmr-name ::name} client
         token (and (not (:anonymous? opts))
                    (or (:echo-token opts)
-                       (echo-token cmr-env)))
+                       (echo-token client)))
         out-request (cond-> request
                       ;; prefix with the CMR instance
                       true (assoc :url (str cmr-url (:url request)))
                       ;; Insert echo-token if available
                       token (assoc-in [:headers "Echo-Token"] token))]
-    (log/debug "Sending request to CMR" cmr-env (dissoc request :body))
+    (log/debug "Sending request to CMR" client (dissoc request :body))
     (http/request out-request)))
 
 (defn search-request
@@ -204,20 +222,20 @@
 
 (defn clear-scroll-session!
   "Clear the CMR scroll session."
-  [cmr-conn scroll-id]
+  [client scroll-id]
   (let [request {:method :post
                  :url "/search/clear-scroll"
                  :headers {:content-type "application/json"}
                  :body (encode->json {:scroll_id scroll-id})}]
     (log/debug "Clearing scroll session [" scroll-id "]")
-    (api-action! cmr-conn request)))
+    (invoke client request)))
 
 (defn search
   "Return a response from CMR."
-  [cmr-conn concept-type query & [opts]]
-  (api-action! cmr-conn
-               (search-request concept-type query opts)
-               opts))
+  [client concept-type query & [opts]]
+  (invoke client
+          (search-request concept-type query opts)
+          opts))
 
 (defn scroll!
   "Begin or continue a scrolling session and returns a map with 
@@ -257,7 +275,7 @@
   Repeated calls will yield additional results.
 
   Be sure to call [[clear-scroll-session!]] when finished. "
-  [cmr-conn concept-type query & [opts]]
+  [client concept-type query & [opts]]
   (let [scroll-query (-> query
                          (dissoc :page_num :offset)
                          (assoc :scroll true))
@@ -267,7 +285,7 @@
                          existing-scroll-id (assoc-in
                                              [:headers :CMR-Scroll-Id]
                                              existing-scroll-id))
-        response (api-action! cmr-conn scroll-request opts)
+        response (invoke scroll-request opts)
         scroll-id (get-in response [:headers :CMR-Scroll-Id])]
     (if existing-scroll-id
       (log/debug "Continuing scroll [" scroll-id "]")
@@ -281,8 +299,8 @@
 
   Takes a query and sets a :page_size of 0 and returns
   the CMR-Hits header string as an integer value."
-  [cmr-conn concept-type query & [opts]]
+  [client concept-type query & [opts]]
   (let [query (assoc query :page_size 0)]
-    (-> (search cmr-conn concept-type query)
+    (-> (search client concept-type query)
         (get-in [:headers :CMR-Hits])
         Integer/parseInt)))

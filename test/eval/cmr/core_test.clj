@@ -3,15 +3,11 @@
    [clojure.test :refer :all]
    [eval.cmr.core :as cmr]))
 
-(deftest cmr-conn-test
-  (are [env out] (= out (cmr/cmr-conn env))
-    :prod {::cmr/env :prod
-           ::cmr/url "https://cmr.earthdata.nasa.gov"}
-
-    :uat {::cmr/env :uat
-          ::cmr/url "https://cmr.uat.earthdata.nasa.gov"}
-
-    :sit {::cmr/env :sit
-          ::cmr/url "https://cmr.sit.earthdata.nasa.gov"}))
+(deftest client-test
+  (testing "not found in config"
+    (is (thrown-with-msg?
+         clojure.lang.ExceptionInfo
+         #"No entry found in configuration for specified CMR instance"
+         (cmr/client :foo)))))
 
 

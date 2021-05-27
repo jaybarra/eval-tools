@@ -6,7 +6,12 @@
  :cmr {:instances
        {:prod {:url "https://cmr.earthdata.nasa.gov"}
         :uat {:url "https://cmr.uat.earthdata.nasa.gov"}
-        :sit {:url "https://cmr.sit.earthdata.nasa.gov"}}}
+        :sit {:url "https://cmr.sit.earthdata.nasa.gov"}
+        :local {:url "http://localhost"
+                :token "mock-echo-system-token"
+                :port-map {"access-control" 3011
+                           "search" 3003
+                           "ingest" 3002}}}}
 
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  ;; Integrant configuration
@@ -14,6 +19,7 @@
  :db/event-store {}
 
  :app/core {:db #ig/ref :db/event-store}
+ :app/cmr {:db #ig/ref :db/event-store}
 
  :handler/webapp {:welcome-message "Good luck!!"
                   :db #ig/ref :db/event-store}

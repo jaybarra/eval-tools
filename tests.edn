@@ -3,11 +3,9 @@
          {:id :cmr
           :test-paths ["test/eval/cmr"]}]
 
- :plugins [:kaocha.plugin/cloverage
-           :kaocha.plugin.alpha/info
+ :plugins [:kaocha.plugin.alpha/info
            :kaocha.plugin/randomize
            :capture-output
-           :junit-xml
            :print-invocations
            :profiling]
 
@@ -20,8 +18,4 @@
  :kaocha.plugin.profiling/count 3
  :kaocha.plugin.profiling/profiling? false
 
- :kaocha.plugin.randomize/randomize? true
-
- :kaocha.plugin.junit-xml/target-file "target/junit.xml"
-
- :cloverage/opts {:summary? false}}
+ :kaocha.plugin.randomize/randomize? true}

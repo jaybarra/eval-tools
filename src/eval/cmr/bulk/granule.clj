@@ -8,6 +8,7 @@
   * Submit jobs for processing
   * Check the status of jobs"
   (:require
+   [clojure.core.async :as a]
    [clojure.data.csv :as csv]
    [clojure.java.io :as io]
    [clojure.spec.alpha :as spec]
@@ -47,12 +48,13 @@
 (defn scroll-granule-urs
   "Return the list of granule URs from CMR based on a query.
   And optional amount value may be specified.
+
   TODO: this is blocking and should have an async version"
-  [cmr-conn query & [opts]]
-  (let [available (cmr/query-hits cmr-conn :granule query)
+  [client query & [{ch :ch :as opts}]]
+  (let [available (cmr/query-hits client :granule query)
         limit (min available (get opts :limit available))
 
-        scroll-page (partial cmr/scroll! cmr-conn :granule query)
+        scroll-page (partial cmr/scroll! client :granule query)
 
         first-page (scroll-page {:format :umm_json})
         scroll-id (:CMR-Scroll-Id first-page )
@@ -69,7 +71,7 @@
                       (map (comp :GranuleUR :umm))
                       (concat urs)))))
       (finally
-        (cmr/clear-scroll-session! cmr-conn scroll-id)))))
+        (cmr/clear-scroll-session! client scroll-id)))))
 
 (defn scroll-granule-urs->file!
   "Return a filename containing the list of granule URs from CMR based
@@ -78,12 +80,13 @@
   This is suitable for granule amounts that cannot fit in memory.
 
   TODO: this is blocking and should have an async version
+
   See also: [[scroll-granule-urs]]"
-  [cmr-conn out-file query xf & [opts]]
-  (let [available (cmr/query-hits cmr-conn :granule query)
+  [client out-file query xf & [opts]]
+  (let [available (cmr/query-hits client :granule query)
         limit (min available (get opts :limit available))
 
-        scroll-page (partial cmr/scroll! cmr-conn :granule query)
+        scroll-page (partial cmr/scroll! client :granule query)
 
         first-page (scroll-page {:format :umm_json})
         scroll-id (:CMR-Scroll-Id first-page)
@@ -108,7 +111,7 @@
             (spit out-file "\n" :append true)
             (recur (+ scrolled (count instructions))))))
       (finally
-        (cmr/clear-scroll-session! cmr-conn scroll-id)))))
+        (cmr/clear-scroll-session! client scroll-id)))))
 
 (defn bulk-update-file!
   "Write a bulk granule update job as a json file using a file containing
@@ -140,24 +143,23 @@
 
 (defn submit-job!
   "POST a bulk granule update job to CMR and return the response."
-  [cmr-conn provider job-def]
+  [client provider job-def]
   (let [url (format "/ingest/providers/%s/bulk-update/granules" provider)
         job (cmr/decode-cmr-response
-             (cmr/api-action!
-              cmr-conn
-              {:method :post
-               :url url
-               :headers {:content-type "application/json"}
-               :body (cmr/encode->json job-def)}))]
+             (cmr/invoke client
+                         {:method :post
+                          :url url
+                          :headers {:content-type "application/json"}
+                          :body (cmr/encode->json job-def)}))]
     (log/info (format "Bulk Granule Update Job created with ID [%s]" (:task-id job)))
     job))
 
 (defn fetch-job-status
   "Request bulk granule update job status from CMR."
-  [cmr-conn job-id]
+  [client job-id]
   (cmr/decode-cmr-response
-   (cmr/api-action!
-    cmr-conn
+   (cmr/invoke
+    client
     {:method :get
      :url (format "/ingest/granule-bulk-update/status/%s" job-id)})))
 
@@ -165,10 +167,10 @@
   "Request status with a delay to compute per-second updates happening
   in the bulk granule update job.
   TODO: make an async, non-blocking version"
-  ([cmr-conn task-id]
-   (benchmark cmr-conn task-id 3))
-  ([cmr-conn task-id time-in-sec]
-   (let [get-counts #(->> (fetch-job-status cmr-conn task-id)
+  ([client task-id]
+   (benchmark client task-id 3))
+  ([client task-id time-in-sec]
+   (let [get-counts #(->> (fetch-job-status client task-id)
                           :granule-statuses
                           (map :status)
                           frequencies)
@@ -196,11 +198,11 @@
 
 (defn trigger-status-update!
   "Trigger an update of bulk granule job statuses."
-  [cmr-conn]
+  [client]
   (cmr/decode-cmr-response
-   (cmr/api-action! cmr-conn
-                    {:method :post
-                     :url "/ingest/granule-bulk-update/status"})))
+   (cmr/invoke client
+               {:method :post
+                :url "/ingest/granule-bulk-update/status"})))
 
 (defn log-benchmark
   "Write a formatted benchmark to the log.

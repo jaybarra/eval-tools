@@ -27,16 +27,43 @@
    (or act-as "")
    (or on-behalf-of "")))
 
-(defn get-token!
+(defn soap-get-token!
   "Send a SOAP message to the Authentication endpoint to request a new echo-token.
 
   This will invalidate existing token for the user."
-  [cmr-conn credentials opts]
-  (cmr/api-action!
-   cmr-conn
+  [cmr-client credentials & [opts]]
+  (cmr/invoke
+   cmr-client
    {:method :post
     :url "/legacy-services/AuthenticationServiceportImpl"
     :headers {:content-type "text/xml"}
     :body (echo-token-soap-message (:username credentials)
                                    (:password credentials)
                                    (get opts :client-id "eval-tools"))}))
+
+(defn token-xml-request-body
+  [credentials]
+  (format
+   "<token>
+      <username>%s</username>
+      <password>%s</password>
+      <client_id>%s</client_id>
+      <user_ip_address>%s</user_ip_address>
+    </token>"
+   (:username credentials)
+   (:password credentials)
+   (get credentials :client-id "test-client")
+   (get credentials :ip-address "127.0.0.1")))
+
+
+(defn get-token!
+  "Echo token
+
+  This will invalidate existing token for the user."
+  [cmr-client credentials & [opts]]
+  (cmr/invoke
+   cmr-client
+   {:method :post
+    :url "/legacy-services/rest/tokens"
+    :headers {:content-type "application/xml"}
+    :body (token-xml-request-body credentials)}))
