@@ -1,5 +1,13 @@
 <p align="center">
-    <img alt="Build Status" src="https://img.shields.io/github/workflow/status/jaybarra/eval-tools/ci-test">
+  <a href="https://github.com/jaybarra/eval-tools/actions/workflows/ci-test.yml">
+    <img alt="Build Status"
+         src="https://img.shields.io/github/workflow/status/jaybarra/eval-tools/ci-test">
+  </a>
+
+  <a href="https://codecov.io/gh/jaybarra/eval-tools">
+    <img alt="Code Coverage Report"
+         src="https://codecov.io/gh/jaybarra/eval-tools/branch/core/graph/badge.svg?token=IUCQG02UCE"/>
+  </a>
 </p>
 
 # Eval Tools
