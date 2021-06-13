@@ -3,31 +3,7 @@
 A Clojure library designed to assist with evalutating and testing REST
 APIs and tools.
 
-[Eval Tools Documentation](https://jaybarra.github.io/eval-tools/)
-
-[Code](https://github.com/jaybarra/eval-tools)
-
-## Usage
-
-In your local environment set the following Echo token
-
-* `CMR_ECHO_TOKEN_<env>`
-
-e.g `CMR_ECHO_TOKEN_UAT`
-
-### Uberjar
-
-```sh
-java -jar eval-tools.jar -m eval.system
-```
-
-### REPL
-
-The `user` namespace provides the following commands
-* (go)
-* (halt)
-* (reset)
-* (reset-all)
+* [Documentation](https://jaybarra.github.io/eval-tools/)
 
 ## License
 

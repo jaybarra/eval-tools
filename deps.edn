@@ -21,7 +21,7 @@
 
   ;; Check for out of date dependencies
   :outdated
-  {:extra-deps {com.github.liquidz/antq {:mvn/version "0.15.1"}}
+  {:extra-deps {com.github.liquidz/antq {:mvn/version "0.15.2"}}
    :main-opts ["-m" "antq.core"]}
 
   ;; Run tests
@@ -29,4 +29,8 @@
   {:extra-paths ["test"]
    :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.861"}
                 lambdaisland/kaocha-cloverage {:mvn/version "1.0.75"}}
-   :main-opts ["-m" "kaocha.runner"]}}}
+   :main-opts ["-m" "kaocha.runner"]}
+
+  ;; Uberjar
+  :uberjar {:extra-deps {uberdeps/uberdeps {:mvn/version "1.0.4"}}
+            :main-opts  ["-m" "uberdeps.uberjar" "--target" "target/eval-tools-0.1.0.jar"]}}}
