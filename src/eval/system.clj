@@ -37,7 +37,7 @@
 (defmethod ig/init-key :db/event-store
   [_ opts]
   (log/info "Event Store initialized")
-  (event-store/->LocalStore (atom {})))
+  (event-store/->EchoStore))
 
 (defmethod ig/init-key :app/core
   [_ {:keys [db :as opts]}]

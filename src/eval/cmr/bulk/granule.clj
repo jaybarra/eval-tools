@@ -145,7 +145,7 @@
   "POST a bulk granule update job to CMR and return the response."
   [client provider job-def]
   (let [url (format "/ingest/providers/%s/bulk-update/granules" provider)
-        job (cmr/decode-cmr-response
+        job (cmr/decode-cmr-response-body
              (cmr/invoke client
                          {:method :post
                           :url url
@@ -157,7 +157,7 @@
 (defn fetch-job-status
   "Request bulk granule update job status from CMR."
   [client job-id]
-  (cmr/decode-cmr-response
+  (cmr/decode-cmr-response-body
    (cmr/invoke
     client
     {:method :get
@@ -199,7 +199,7 @@
 (defn trigger-status-update!
   "Trigger an update of bulk granule job statuses."
   [client]
-  (cmr/decode-cmr-response
+  (cmr/decode-cmr-response-body
    (cmr/invoke client
                {:method :post
                 :url "/ingest/granule-bulk-update/status"})))

@@ -1,4 +1,6 @@
-(ns eval.db.event-store)
+(ns eval.db.event-store
+  (:require
+   [taoensso.timbre :as log]))
 
 (defprotocol EventStore
   "A protocol for implementing an event stream for event-sourcing."
@@ -25,3 +27,20 @@
                        (conj (:transactions prior-stream) events))]
       (swap! (:data-atom this) assoc aggregate-id next-stream)
       next-stream)))
+
+(defrecord EchoStore []
+
+  EventStore
+
+  (retrieve-event-stream [_ _] nil)
+
+  (append-events! [_ _ _ events]
+    (log/info events)))
+
+(defrecord NoopStore []
+
+  EventStore
+
+  (retrieve-event-stream [_ _] nil)
+
+  (append-events! [_ _ _ events] nil))
