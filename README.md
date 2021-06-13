@@ -1,4 +1,10 @@
+<p align="center">
+![Build Status](https://github.com/github/docs/actions/workflows/ci-test.yml/badge.svg?branch=core)
+</p>
+
+
 # Eval Tools
+
 
 A Clojure library designed to assist with evalutating and testing REST
 APIs and tools.
