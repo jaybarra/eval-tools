@@ -1,9 +1,13 @@
 (ns user
+  "Developer namespace for controlling the app."
   (:require
+   [clojure.pprint :refer [pprint pp]]
+   [clojure.repl :refer [doc source]]
+   [clojure.stacktrace :as st]
    [integrant.repl :as ig-repl]
-   [eval.system :as system]))
+   [eval.system :refer [config]]))
 
-(ig-repl/set-prep! system/config)
+(ig-repl/set-prep! config)
 
 (def go ig-repl/go)
 (def halt ig-repl/halt)

@@ -3,16 +3,52 @@
   (:require
    [aero.core :as aero :refer [read-config]]
    [clojure.java.io :as io]
-   [integrant.core :as ig]
+   [environ.core :refer [env]]
+   [eval.db.event-store :as event-store]
    [eval.handler :as app]
+   [integrant.core :as ig]
    [ring.adapter.jetty :as jetty]
    [taoensso.timbre :as log])
   (:gen-class))
 
+;; Let Aero know how to read integrant references
+(defmethod aero/reader 'ig/ref
+  [{:keys [profile] :as opts} _tag value]
+  (ig/ref value))
+
+;; default handler for integrant
+(defmethod ig/init-key :default [_ _cfg])
+
 (defn config
-  "Read the config"
-  []
-  (aero/read-config (io/resource "config.edn")))
+  "Read the config file and return a value or map.
+  If no keys are specified, the entire map will be returned, otherwise
+  specific keys may be passed in to get specific value. Nil will be returned
+  if no matching value exists.
+
+  Config location looks for :eval-config-location
+
+  e.g. (config) => entire config
+  (config :cmr :instances) => cmr instances map"
+  [& keys]
+  (let [cfg-file (env :eval-config-location "config.edn")
+        cfg (aero/read-config (io/resource cfg-file))]
+    (get-in cfg keys)))
+
+(defmethod ig/init-key :db/event-store
+  [_ opts]
+  (log/info "Event Store initialized")
+  (event-store/->EchoStore))
+
+(defmethod ig/init-key :app/core
+  [_ {:keys [db :as opts]}]
+  (log/info "Core application initialized"))
+
+(defmethod ig/init-key :handler/webapp
+  [_ {message :welcome-message}]
+  (log/info (or message "Good Luck!!"))
+  (when-let [banner (io/resource "banner.txt")]
+    (log/info (slurp banner)))
+  (app/create-app))
 
 (defmethod ig/init-key :adapter/jetty
   [_ {:keys [handler port] :as opts}]
@@ -23,16 +59,10 @@
   [_ server]
   (.stop server))
 
-(defmethod ig/init-key :handler/app
-  [_ {message :welcome-message}]
-  (println (or message "Good Luck!!"))
-  (when-let [banner (io/resource "banner.txt")]
-    (log/info (slurp banner)))
-  (app/create-app))
-
-;; default handler for integrant
-(defmethod ig/init-key :default [_ _cfg])
-
 (defn -main
-  []
+  "Main entrypoint when running from uberjar"
+  [& args]
+  (when (seq args)
+    (doseq [arg args]
+      (println arg)))
   (ig/init (config)))

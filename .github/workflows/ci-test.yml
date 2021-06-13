@@ -2,27 +2,37 @@ name: Clojure CI
 
 on:
   push:
-    branches: [ master ]
   pull_request:
-    branches: [ master ]
 
 jobs:
-  build:
-
+  unit-tests:
+    strategy:
+      matrix:
+        java: ['8', '11', '15']
+        
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
-    - name: Cache maven repo
+
+    - name: Install Java
+      uses: actions/setup-java@v2
+      with:
+        distribution: adopt
+        java-version: ${{ matrix.java }}
+
+    - name: Install clojure tools
+      uses: DeLaGuardo/setup-clojure@3.4
+      with:
+        cli: 1.10.1.693
+
+    - name: Cache dependencies
       uses: actions/cache@v2
       with:
         path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('project.clj') }}
+        key: ${{ runner.os }}-maven-${{ hashFiles('deps.edn') }}
         restore-keys: |
-          ${{ runner.os }}-maven-
-    - name: Install dependencies
-      run: lein deps
+          ${{ runner.os }}-
+
     - name: Run tests
-      run: lein kaocha
-    - name: Run Coverage
-      run: lein cloverage
+      run: clojure -M:test
