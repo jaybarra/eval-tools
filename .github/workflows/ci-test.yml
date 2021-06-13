@@ -6,10 +6,18 @@ on:
 
 jobs:
   unit-tests:
+    strategy:
+      matrix:
+        java: ["8", "11", "15"]
+        
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
+    - name: Install Java
+      uses: actions/setup-java@v2
+      with:
+        java-version: ${{ matrix.java }}
     - name: Install clojure tools
       uses: DeLaGuardo/setup-clojure@3.4
       with:
