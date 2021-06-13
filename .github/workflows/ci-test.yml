@@ -2,9 +2,7 @@ name: Clojure CI
 
 on:
   push:
-    branches: [ master ]
   pull_request:
-    branches: [ master ]
 
 jobs:
   build:
@@ -17,12 +15,8 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('project.clj') }}
+        key: ${{ runner.os }}-maven-${{ hashFiles('deps.edn') }}
         restore-keys: |
           ${{ runner.os }}-maven-
-    - name: Install dependencies
-      run: lein deps
     - name: Run tests
-      run: lein kaocha
-    - name: Run Coverage
-      run: lein cloverage
+      run: clj -M:test
