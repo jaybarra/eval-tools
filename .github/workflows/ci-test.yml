@@ -34,5 +34,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-
 
-    - name: Run tests
-      run: clojure -M:test
+    - name: Run Tests
+      run: clojure -M:test-ci
+
+    - uses: codecov/codecov-action@v1

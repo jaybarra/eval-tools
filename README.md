@@ -1,7 +1,6 @@
 <p align="center">
-![Build Status](https://github.com/github/docs/actions/workflows/ci-test.yml/badge.svg?branch=core)
+    <img alt="Build Status" src="https://img.shields.io/github/workflow/status/jaybarra/eval-tools/ci-test">
 </p>
-
 
 # Eval Tools
 

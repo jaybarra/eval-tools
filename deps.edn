@@ -31,6 +31,12 @@
                 lambdaisland/kaocha-cloverage {:mvn/version "1.0.75"}}
    :main-opts ["-m" "kaocha.runner"]}
 
+  :test-ci
+  {:extra-paths ["test"]
+   :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.861"}
+                lambdaisland/kaocha-cloverage {:mvn/version "1.0.75"}}
+   :main-opts ["-m" "kaocha.runner" "--profile" "ci"]}
+
   ;; Uberjar
   :uberjar {:extra-deps {uberdeps/uberdeps {:mvn/version "1.0.4"}}
             :main-opts  ["-m" "uberdeps.uberjar" "--target" "target/eval-tools-0.1.0.jar"]}}}

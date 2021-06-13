@@ -3,20 +3,26 @@
          {:id :cmr
           :test-paths ["test/eval/cmr"]}]
 
- :plugins  [:kaocha.plugin.alpha/info
-            :kaocha.plugin/cloverage
-            :kaocha.plugin/randomize
-            :capture-output
-            :print-invocations
-            :profiling]
+ :plugins [:kaocha.plugin.alpha/info
+           :kaocha.plugin/cloverage
+           :kaocha.plugin/randomize
+           :capture-output
+           :print-invocations
+           :profiling]
 
- :color? true
+ :color? #profile {:default true :ci false}
 
  :fail-fast? false
 
- :reporter kaocha.report/dots
+ :reporter #profile {:default kaocha.report/dots
+                     :ci kaocha.report/documentation}
 
+ :kaocha.plugin.profiling/profiling? #profile {:default true :ci false}
  :kaocha.plugin.profiling/count 3
- :kaocha.plugin.profiling/profiling? false
 
- :kaocha.plugin.randomize/randomize? true}
+ :kaocha.plugin.randomize/randomize? true
+
+ :cloverage/opts
+ {:summary? false
+  :html? #profile {:default true :ci false}
+  :codecov? #profile {:default false :ci true}}}
