@@ -1,6 +1,0 @@
-^{:watch-dirs ["src/eval/webapp"]
-  :css-dirs ["resources/public/css"]
-  :auto-testing true
-  ;; :auto-bundle :webpack
-  }
-{:main eval.webapp.core}
