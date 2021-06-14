@@ -5,16 +5,9 @@
    [jsonista.core :as json]))
 
 (deftest client-test
-  (testing "not found in config"
-    (is (thrown-with-msg?
-         clojure.lang.ExceptionInfo
-         #"No entry"
-         (cmr/create-client :foo))))
-
-  (testing "using a map"
-    (is (some?
-         (cmr/create-client {::cmr/id :foo
-                             ::cmr/url "http://localhost"}))))
+  (is (some?
+       (cmr/create-client {:id :foo
+                           :url "http://localhost"})))
 
   (testing "using an invalid map throws an exception"
     (is (thrown-with-msg?

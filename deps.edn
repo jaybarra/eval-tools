@@ -4,6 +4,8 @@
         com.taoensso/timbre {:mvn/version "5.1.2"}
         environ/environ {:mvn/version "1.2.0"}
         integrant/integrant {:mvn/version "0.8.0"}
+        juxt/crux-core {:mvn/version "21.06-1.17.1-beta"}
+        juxt/crux-rocksdb {:mvn/version "21.06-1.17.1-beta"}
         metosin/muuntaja {:mvn/version "0.6.8"}
         metosin/reitit {:mvn/version "0.5.13"}
         org.clojure/clojure {:mvn/version "1.10.3"}
@@ -24,6 +26,12 @@
   {:extra-deps {com.github.liquidz/antq {:mvn/version "0.15.2"}}
    :main-opts ["-m" "antq.core"]}
 
+  ;; launch in nREPL
+  ;; clj -M:dev:nREPL -m nrepl.cmdline --interactive
+  :nREPL
+  {:extra-paths ["dev"]
+   :extra-deps {nrepl/nrepl {:mvn/version "0.8.3"}}}
+
   ;; Run tests
   :test
   {:extra-paths ["test"]
@@ -31,6 +39,7 @@
                 lambdaisland/kaocha-cloverage {:mvn/version "1.0.75"}}
    :main-opts ["-m" "kaocha.runner"]}
 
+  ;; Run tests in CI environment
   :test-ci
   {:extra-paths ["test"]
    :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.861"}

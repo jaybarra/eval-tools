@@ -4,7 +4,9 @@
    [aero.core :as aero :refer [read-config]]
    [clojure.java.io :as io]
    [environ.core :refer [env]]
+   [eval.cmr.core :as cmr]
    [eval.db.event-store :as event-store]
+   [eval.db.document-store :as doc-store]
    [eval.handler :as app]
    [integrant.core :as ig]
    [ring.adapter.jetty :as jetty]
@@ -25,23 +27,29 @@
   specific keys may be passed in to get specific value. Nil will be returned
   if no matching value exists.
 
-  Config location looks for :eval-config-location
-
-  e.g. (config) => entire config
-  (config :cmr :instances) => cmr instances map"
+  Config location looks for :eval-config-location"
   [& keys]
   (let [cfg-file (env :eval-config-location "config.edn")
         cfg (aero/read-config (io/resource cfg-file))]
     (get-in cfg keys)))
 
-(defmethod ig/init-key :db/event-store
+(defmethod ig/init-key :db/document-store
   [_ opts]
-  (log/info "Event Store initialized")
-  (event-store/->EchoStore))
+  (log/info "Document Store initialized")
+  (doc-store/create-document-store opts))
 
-(defmethod ig/init-key :app/core
-  [_ {:keys [db :as opts]}]
-  (log/info "Core application initialized"))
+(defmethod ig/halt-key! :db/document-store
+  [_ store]
+  (log/info "Shutting down Document Store")
+  (doc-store/stop-document-store store))
+
+(defmethod ig/init-key :app/cmr
+  [_ {:keys [db instances :as opts]}]
+  (log/info "CMR application initialized")
+  (let [clients (apply merge (for [[k v] instances]
+                               {k (cmr/create-client (merge {:id k} v))}))]
+    {:db db
+     :connections clients}))
 
 (defmethod ig/init-key :handler/webapp
   [_ {message :welcome-message}]

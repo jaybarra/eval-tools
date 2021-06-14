@@ -1,5 +1,6 @@
-(ns eval.services.cmr.scroll-service
+(ns eval.services.cmr.scroll
   (:require
+   [clojure.core.async :as a]
    [clojure.java.io :as io]
    [clojure.string :as str]
    [eval.cmr.core :as cmr]

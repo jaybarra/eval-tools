@@ -1,6 +1,8 @@
 ## OS stuff
 .DS_Store
 
+data/
+
 ## Created things
 /target/
 /classes/

@@ -12,11 +12,20 @@
 
 # Eval Tools
 
-
 A Clojure library designed to assist with evalutating and testing REST
 APIs and tools.
 
 * [Documentation](https://jaybarra.github.io/eval-tools/)
+
+## Quickstart 
+
+### nREPL
+
+To launch eval-tools in nREPL
+
+```sh
+clj -M:dev:nREPL -m nrepl.cmdline --interactive
+```
 
 ## License
 

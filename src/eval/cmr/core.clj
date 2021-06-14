@@ -13,7 +13,6 @@
    [clojure.string :as str]
    [environ.core :refer [env]]
    [eval.db.event-store :as es]
-   [eval.system :as system]
    [eval.utils.core :refer [defn-timed]]
    [muuntaja.core :as muuntaja]
    [muuntaja.format.json :as json-format]
@@ -90,22 +89,10 @@
 (spec/def ::concept-type #{:collection :granule :service :tool :concept})
 (spec/def ::id (spec/or :id-kw keyword? :id-str string?))
 (spec/def ::url string?)
-(spec/def ::cmr (spec/keys :req [::id ::url]))
-
+(spec/def ::cmr (spec/keys :req-un [::id ::url]))
 
 (def ^:private keyword->lowercase-str
   (comp str/lower-case name))
-
-(defn- read-client-config
-  "Read CMR instance from config and return the system configuration config"
-  [cmr]
-  (if-let [cmr-instance (get-in (system/config) [:cmr :instances cmr])]
-    (let [url (if (map? cmr-instance)
-                (:url cmr-instance)
-                cmr-instance)]
-      {::id cmr ::url url})
-    (throw (ex-info "No entry found in configuration for specified CMR instance"
-                    {:cmr cmr}))))
 
 (defprotocol CmrClient
   (-invoke [client query] "Send a query to CMR")
@@ -127,16 +114,9 @@
 
 (defn create-client
   "Constructs a CMR client.
-
-  When given a keyword it will read the config from the system configuration.
-  When given a map it will construct the client with the map.
-
   An invalid configuration will result in an exception being thrown."
-  [cmr]
-  (let [{::keys [id url] :as cmr-cfg}
-        (if (keyword? cmr)
-          (read-client-config cmr)
-          cmr)]
+  [cmr-cfg]
+  (let [{:keys [id url] :as cfg} cmr-cfg]
     (when-not (spec/valid? ::cmr cmr-cfg)
       (throw (ex-info "Invalid CMR configuration"
                       (spec/explain-data ::cmr cmr-cfg))))
@@ -146,7 +126,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Functions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 
 (def format->mime-type
   "CMR support format to MIME type map."
