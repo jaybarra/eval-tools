@@ -1,4 +1,4 @@
-(ns eval.services.cmr.bulk.granule-service
+(ns eval.services.cmr.bulk.granule
   (:require
    [clojure.java.io :as io]
    [clojure.string :as str]
@@ -40,10 +40,11 @@
   "Request status with a delay to compute per-second updates happening
   in the bulk granule update job.
   TODO: make an async, non-blocking version"
-  ([client task-id]
-   (benchmark client task-id 3))
-  ([client task-id time-in-sec]
-   (let [get-counts #(->> (bulk-granule/fetch-job-status client task-id)
+  ([context cmr-inst task-id]
+   (benchmark context cmr-inst task-id 3))
+  ([context cmr-inst task-id time-in-sec]
+   (let [client (cmr/context->client context cmr-inst)
+         get-counts #(->> (bulk-granule/fetch-job-status client task-id)
                           :granule-statuses
                           (map :status)
                           frequencies)

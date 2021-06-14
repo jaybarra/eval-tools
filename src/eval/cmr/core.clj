@@ -288,3 +288,15 @@
     (-> (search client concept-type query)
         (get-in [:headers :CMR-Hits])
         Integer/parseInt)))
+
+(defn context->client
+  "Extract a CMR client from system context"
+  [{:keys []
+    {:keys [connections]} :app/cmr} cmr-inst]
+  (get connections cmr-inst))
+
+(defn context->db
+  "Extract the CMR db from system context"
+  [{:keys []
+    {:keys [db]} :app/cmr}]
+  db)
