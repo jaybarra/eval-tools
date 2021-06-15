@@ -4,15 +4,27 @@
    [clojure.pprint :refer [pprint pp]]
    [clojure.repl :refer [doc source]]
    [clojure.stacktrace :as st]
+   [clojure.tools.namespace.repl :refer [refresh]]
    [integrant.repl :as ig-repl]
    [eval.system :refer [config]]))
 
 (ig-repl/set-prep! config)
 
-(def go ig-repl/go)
+(defn go
+  []
+  (refresh)
+  (ig-repl/go))
+
 (def halt ig-repl/halt)
-(def reset ig-repl/reset)
-(def reset-all ig-repl/reset-all)
+
+(defn reset []
+  (refresh)
+  (ig-repl/reset))
+
+(defn reset-all
+  []
+  (refresh)
+  (ig-repl/reset-all))
 
 (defn context [] integrant.repl.state/system)
 
