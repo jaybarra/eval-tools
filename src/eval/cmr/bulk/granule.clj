@@ -60,9 +60,16 @@
 
 (defn fetch-job-status
   "Request bulk granule update job status from CMR."
-  [client job-id]
-  (cmr/decode-cmr-response-body
-   (cmr/invoke
-    client
-    {:method :get
-     :url (format "/ingest/granule-bulk-update/status/%s" job-id)})))
+  [client job-id & [opts]]
+  (let [{:keys [show_granules
+                show_progress
+                show_request]} opts
+        query-params {:show_granules (or show_granules false)
+                      :show_progress (or show_progress false)
+                      :show_request (or show_request false)}]
+    (cmr/decode-cmr-response-body
+     (cmr/invoke
+      client
+      {:method :get
+       :url (format "/ingest/granule-bulk-update/status/%s" job-id)
+       :query-params query-params}))))

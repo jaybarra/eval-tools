@@ -44,7 +44,10 @@
    (benchmark context cmr-inst task-id 3))
   ([context cmr-inst task-id time-in-sec]
    (let [client (cmr/context->client context cmr-inst)
-         get-counts #(->> (bulk-granule/fetch-job-status client task-id)
+         get-counts #(->> (bulk-granule/fetch-job-status
+                           client
+                           task-id
+                           {:show_granules true})
                           :granule-statuses
                           (map :status)
                           frequencies)
