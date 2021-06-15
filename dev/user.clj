@@ -12,11 +12,11 @@
 (ig-repl/set-prep! config)
 
 (defn set-logging-level!
-  "Set the log level for the system"
+  "Set the log level for the system. "
   [level]
   (log/set-level! level))
 
-(set-logging-level! (get-in (config) [:app/logging :level] :debug))
+(set-logging-level! (get-in (config) [:log/system :level] :debug))
 
 (defn go
   []

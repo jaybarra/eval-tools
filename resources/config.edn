@@ -1,5 +1,7 @@
 {:db/document-store {:type :crux}
 
+ :log/system {:level :debug}
+
  :app/cmr {:instances {:prod {:url "https://cmr.earthdata.nasa.gov"}
                        :uat {:url "https://cmr.uat.earthdata.nasa.gov"}
                        :sit {:url "https://cmr.sit.earthdata.nasa.gov"}
