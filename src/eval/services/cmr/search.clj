@@ -7,7 +7,8 @@
    [taoensso.timbre :as log]))
 
 (defn search
-  "Search send a query to a CMR instance and return the response."
+  "Search concepts for concepts"
   [context cmr-inst concept-type query & [opts]]
   (let [client (cmr/context->client context cmr-inst)]
-    (cmr/search client concept-type opts)))
+    (cmr/decode-cmr-response-body
+     (cmr/search client concept-type query opts))))

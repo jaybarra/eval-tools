@@ -14,8 +14,11 @@
 (def reset ig-repl/reset)
 (def reset-all ig-repl/reset-all)
 
+(defn context [] integrant.repl.state/system)
+
 (comment
   (go)
   (halt)
   (reset)
-  (reset-all))
+  (reset-all)
+  (context))

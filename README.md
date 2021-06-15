@@ -27,6 +27,33 @@ To launch eval-tools in nREPL
 clj -M:dev:nREPL -m nrepl.cmdline --interactive
 ```
 
+### Cider
+
+Create or override your `.dir-locals.el` file and run cider from Emacs
+
+```cl
+((clojure-mode . ((cider-preferred-build-tool . clojure-cli)
+                  (cider-clojure-cli-aliases . ":dev:test"))))
+```
+
+#### Supported Options in User
+
+- (go)
+- (halt)
+- (reset)
+- (reset-all)
+- (context)
+
+Example workflow
+
+```clojure
+user=> (reset)
+user=> (require '[eval.cmr.core :as cmr])
+user=> (def my-client (cmr/create-client {:id :foo :url "http://instance"}))
+user=> (cmr/decode-cmr-response-body
+        (cmr/search my-client :collection {:provider "FOO"} {:format :umm-json}))
+```
+
 ## License
 
 Copyright © 2021 Jay Barra
