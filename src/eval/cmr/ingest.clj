@@ -1,9 +1,16 @@
 (ns eval.cmr.ingest
+  "Ingest commands for use with [[cmr/invoke]].
+
+  ## Example
+
+  (let [cmd (ingest/create-concept :collection 'FOO_PROV' {})]
+    (cmr/invoke client cmd)) "
   (:require
    [eval.cmr.core :as cmr]))
 
 (defn validate-metadata
-  [client concept-type provider-id granule & [opts]]
+  "Returns a command to validate a given concept."
+  [concept-type provider-id granule & [opts]]
   {:method :post
    :url (format "/providers/%s/validate/%s/%s"
                 provider-id
@@ -11,7 +18,8 @@
                 (:native-id granule))})
 
 (defn create-concept
-  [client concept-type provider-id concept & [native-id]]
+  "Retrurns a command to create a given concept."
+  [concept-type provider-id concept & [native-id]]
   {:method :put
    :url (format "/providers/%s/%s%s"
                 provider-id
@@ -24,7 +32,7 @@
   create-concept)
 
 (defn delete-concept
-  [client concept-type provider-id concept-native-id]
+  [concept-type provider-id concept-native-id]
   {:method :delete
    :url (format "/providers/%s/%s/%s"
                 provider-id
@@ -32,12 +40,23 @@
                 concept-native-id)})
 
 (defn create-association
-  [client collection-id collection-revision variable-id]
+  [collection-id collection-revision variable-id]
   {:method :put
    :url (format "/collections/%s/%s/variables/%s"
                 collection-id
                 collection-revision
                 variable-id)})
+
+(defn reindex-all-collections
+  [& {force :force_version}]
+  {:method :post
+   :url "/ingest/jobs/reindex-all-collections"
+   :query-params {:force_version force}})
+
+(defn reindex-permitted-groups
+  []
+  {:method :post
+   :url "/ingest/jobs/reindex-permitted-groups"})
 
 ;; /providers/<provider-id>/services/<native-id>
 ;; PUT - Create or update a service.

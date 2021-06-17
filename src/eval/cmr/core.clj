@@ -63,8 +63,12 @@
 (def encode->json "Encode EDN to JSON"
   (partial muuntaja/encode m "application/json"))
 
-(def decode-cmr-response-body "Decode the body of CMR responses"
-  (partial muuntaja/decode-response-body m))
+(defn decode-cmr-response-body
+  "Decode the body of CMR responses"
+  [response]
+  (if (get-in response [:headers "Content-Type"])
+    (muuntaja/decode-response-body m response)
+    (:body response)))
 
 (def umm-json-response->items "Unpack :umm_json format concepts from a response."
   (comp :items decode-cmr-response-body))
@@ -141,7 +145,7 @@
    :native "application/metadata+xml"
    :umm_json "application/vnd.nasa.cmr.umm+json"})
 
-(defn- format->cmr-extension
+(defn format->cmr-extension
   "Takes a CMR supported format and returns the appropriate extension
   for use on the search endpoint
 
@@ -190,110 +194,11 @@
     (log/debug "Sending request to CMR" (:id client) (dissoc request :body))
     (-invoke client out-request)))
 
-(defn search-request
-  "GET the collections from the specified CMR enviroment.
-
-  Send a GET request to the search endpoint for the specific concept-type
-  as a query-param."
-  ([concept-type query & [opts]]
-   (let [search-url (format
-                     "/search/%ss%s"
-                     (name concept-type)
-                     (format->cmr-extension (:format opts)))]
-     {:method :get
-      :url search-url
-      :query-params query})))
-
-(defn clear-scroll-session!
-  "Clear the CMR scroll session."
-  [client scroll-id]
-  (let [request {:method :post
-                 :url "/search/clear-scroll"
-                 :headers {:content-type "application/json"}
-                 :body (encode->json {:scroll_id scroll-id})}]
-    (log/debug "Clearing scroll session [" scroll-id "]")
-    (invoke client request)))
-
-(defn search
-  "Return a response from CMR."
-  [client concept-type query & [opts]]
-  (invoke client
-          (search-request concept-type query opts)
-          opts))
-
-(defn scroll!
-  "Begin or continue a scrolling session and returns a map with 
-  :CMR-Scroll-Id and :response.
-
-  ## CMR-Scroll-Id
-
-  The first scroll! query will return the CMR-Scroll-Id in the header
-  of the response. Add this to the options map of subsequent calls to
-  continue getting results.
-
-  e.g.
-  %> (scroll! cmr :granules query)
-  {:CMR-Scroll-Id \"612341\"
-   :response <page 1 of results>}
-
-  %> (scroll! cmr :granules query {:CMR-Scroll-Id \"612341\"})
-  {:CMR-Scroll-Id \"612341\"
-   :response <page 2 of results>}
-
-  %> (get-in (clear-scroll-session! cmr \"612341\") :status)
-  204
-
-  The ideal use case is to always run in a try-finally
-  e.g.
-
-  (try
-    (scroll! cmr query {:CMR-Scroll-id scroll-id)
-    (finally (clear-scroll-session! cmr scroll-id))
-  
-  ## Query Parameters
-  Standard [[search]] parameters are accepted with the following exceptions.
-  
-  :page_num and :offset are not valid params when using the scrolling endpoint.
-  :page_size is a valid query param and must be below 2000
-
-  Repeated calls will yield additional results.
-
-  Be sure to call [[clear-scroll-session!]] when finished. "
-  [client concept-type query & [opts]]
-  (let [scroll-query (-> query
-                         (dissoc :page_num :offset)
-                         (assoc :scroll true))
-        existing-scroll-id (:CMR-Scroll-Id opts)
-        request (search-request concept-type scroll-query opts)
-        scroll-request (cond-> request
-                         existing-scroll-id (assoc-in
-                                             [:headers :CMR-Scroll-Id]
-                                             existing-scroll-id))
-        response (invoke client scroll-request opts)
-        scroll-id (get-in response [:headers :CMR-Scroll-Id])]
-    (if existing-scroll-id
-      (log/debug "Continuing scroll [" scroll-id "]")
-      (log/debug "Started new scroll session [" scroll-id "]"))
-    {:CMR-Scroll-Id scroll-id
-     :response response}))
-
-(defn query-hits
-  "Query CMR for count of available concepts that are available from
-  a given query.
-
-  Takes a query and sets a :page_size of 0 and returns
-  the CMR-Hits header string as an integer value."
-  [client concept-type query & [opts]]
-  (let [query (assoc query :page_size 0)]
-    (-> (search client concept-type query)
-        (get-in [:headers :CMR-Hits])
-        Integer/parseInt)))
-
 (defn context->client
   "Extract a CMR client from system context"
   [{:keys []
-    {:keys [connections]} :app/cmr} cmr-inst]
-  (get connections cmr-inst))
+    {:keys [instances]} :app/cmr} cmr-inst]
+  (get instances cmr-inst))
 
 (defn context->db
   "Extract the CMR db from system context"

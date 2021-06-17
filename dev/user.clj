@@ -4,12 +4,14 @@
    [clojure.pprint :refer [pprint pp]]
    [clojure.repl :refer [doc source]]
    [clojure.stacktrace :as st]
-   [clojure.tools.namespace.repl :refer [refresh]]
+   [clojure.tools.namespace.repl :refer [refresh set-refresh-dirs]]
    [integrant.repl :as ig-repl]
    [eval.system :refer [config]]
    [taoensso.timbre :as log]))
 
 (ig-repl/set-prep! config)
+
+(set-refresh-dirs "dev" "src" "test")
 
 (defn set-logging-level!
   "Set the log level for the system. "

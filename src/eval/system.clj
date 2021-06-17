@@ -49,7 +49,7 @@
   (let [clients (apply merge (for [[k v] instances]
                                {k (cmr/create-client (merge {:id k} v))}))]
     {:db db
-     :connections clients}))
+     :instances clients}))
 
 (defmethod ig/init-key :handler/webapp
   [_ {message :welcome-message}]
