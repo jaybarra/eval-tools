@@ -17,6 +17,35 @@ APIs and tools.
 
 * [Documentation](https://jaybarra.github.io/eval-tools/)
 
+## Approach
+
+This tool is designed to interact with external APIs, with simplified commands and clients to invoke those commands. The approach to the commands is to be low-level and involve only basic query and response communication with no higher logic applied. All commands should be stateless.
+
+Example Usage
+
+```clojure
+user=> (reset)
+user=> (require '[eval.cmr.core :as cmr])
+user=> (require '[eval.cmr.search :as cmr-search])
+user=> (def my-client (cmr/create-client {:id :foo :url "http://instance"}))
+user=> (def query (cmr-search/search :collection {:provider "FOO"} {:format :umm-json})))
+user=> (cmr/decode-cmr-response-body
+        (cmr/invoke my-client query))
+```
+
+The services portion of the code will build on those basic commands and provide user-facing interactions and functionality.
+
+Example Usage
+
+```clojure
+user=> (reset)
+user=> (require '[eval.services.cmr.search :as search-svc])
+user=> (def query (cmr-search/search :collection {:provider "FOO"} {:format :umm-json})))
+user=> (search-svc/search (context) :prod :collection {:provider "FOO"})
+```
+
+while these two functions will perform equivalent actions, the service version is designed to be used from within the context of the running system.
+
 ## Quickstart 
 
 ### nREPL
@@ -43,16 +72,6 @@ Create or override your `.dir-locals.el` file and run cider from Emacs
 - (reset)
 - (reset-all)
 - (context)
-
-Example workflow
-
-```clojure
-user=> (reset)
-user=> (require '[eval.cmr.core :as cmr])
-user=> (def my-client (cmr/create-client {:id :foo :url "http://instance"}))
-user=> (cmr/decode-cmr-response-body
-        (cmr/search my-client :collection {:provider "FOO"} {:format :umm-json}))
-```
 
 ## License
 
