@@ -49,7 +49,7 @@ while these two functions will perform equivalent actions, the service version i
 ## Common development tasks
 
 | Task                  | Command                  |
-|-----------------------+--------------------------|
+|-----------------------|--------------------------|
 | Download dependencies | `clj -Spath`             |
 | Start the REPL        | `clj -M:dev:nrepl`       |
 | Run tests             | `clj -M:test/runner`     |
@@ -59,7 +59,7 @@ while these two functions will perform equivalent actions, the service version i
 ## Common REPL commands
 
 | Task                              | Command           |
-|-----------------------------------+-------------------|
+|-----------------------------------|-------------------|
 | Start all components              | `(user/go)`       |
 | Stop all components               | `(user/halt)`     |
 | Reset and reload all components   | `(user/reset)`    |
