@@ -18,33 +18,28 @@
  {;; Dev environment
   :dev
   {:extra-paths ["dev"]
-   :extra-deps {integrant/repl {:mvn/version "0.3.2"}
-                org.clojure/tools.namespace {:mvn/version "1.1.0"}
+   :extra-deps {integrant/repl {:mvn/version "RELEASE"}
+                org.clojure/tools.namespace {:mvn/version "RELEASE"}
                 ring/ring-devel {:mvn/version "1.9.3"}}}
 
-  ;; Check for out of date dependencies
-  :outdated
-  {:extra-deps {com.github.liquidz/antq {:mvn/version "0.15.3"}}
-   :main-opts ["-m" "antq.core"]}
+  :nrepl
+  {:extra-deps {nrepl/nrepl {:mvn/version "RELEASE"}}
+   :main-opts ["-m" "nrepl.cmdline" "--interactive"]}
 
-  ;; launch in nREPL
-  ;; clj -M:dev:nREPL -m nrepl.cmdline --interactive
-  :nREPL
-  {:extra-deps {nrepl/nrepl {:mvn/version "0.8.3"}}}
-
-  :test
+  :test/runner
   {:extra-paths ["test"]
-   :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.861"}
-                lambdaisland/kaocha-cloverage {:mvn/version "1.0.75"}}
+   :extra-deps {lambdaisland/kaocha {:mvn/version "RELEASE"}
+                lambdaisland/kaocha-cloverage {:mvn/version "RELEASE"}}
    :main-opts ["-m" "kaocha.runner"]}
 
   ;; Run tests in CI environment
-  :test-ci
+  :test/ci
   {:extra-paths ["test"]
-   :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.861"}
-                lambdaisland/kaocha-cloverage {:mvn/version "1.0.75"}}
+   :extra-deps {lambdaisland/kaocha {:mvn/version "RELEASE"}
+                lambdaisland/kaocha-cloverage {:mvn/version "RELEASE"}}
    :main-opts ["-m" "kaocha.runner" "--profile" "ci"]}
 
   ;; Uberjar
-  :uberjar {:extra-deps {uberdeps/uberdeps {:mvn/version "1.0.4"}}
-            :main-opts  ["-m" "uberdeps.uberjar" "--target" "target/eval-tools-0.1.0.jar"]}}}
+  :project/uberjar
+  {:extra-deps {uberdeps/uberdeps {:mvn/version "RELEASE"}}
+   :main-opts  ["-m" "uberdeps.uberjar" "--target" "target/eval-tools-0.1.0.jar"]}}}

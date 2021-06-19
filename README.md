@@ -46,17 +46,27 @@ user=> (search-svc/search (context) :prod :collection {:provider "FOO"})
 
 while these two functions will perform equivalent actions, the service version is designed to be used from within the context of the running system.
 
-## Quickstart 
+## Common development tasks
 
-### nREPL
+| Task                  | Command                  |
+|-----------------------+--------------------------|
+| Download dependencies | `clj -Spath`             |
+| Start the REPL        | `clj -M:dev:nrepl`       |
+| Run tests             | `clj -M:test/runner`     |
+| Run the project       | `clj -M -m eval.system`  |
+| Package application   | `clj -X:project/uberjar` |
 
-To launch eval-tools in nREPL
+## Common REPL commands
 
-```sh
-clj -M:dev:nREPL -m nrepl.cmdline --interactive
-```
+| Task                              | Command           |
+|-----------------------------------+-------------------|
+| Start all components              | `(user/go)`       |
+| Stop all components               | `(user/halt)`     |
+| Reset and reload all components   | `(user/reset)`    |
+| Reset all components              | `(user/reset-all` |
+| Return the current system context | `(user/context)`  |
 
-### Cider
+### Emacs + Cider
 
 Create or override your `.dir-locals.el` file and run cider from Emacs
 
@@ -64,14 +74,6 @@ Create or override your `.dir-locals.el` file and run cider from Emacs
 ((clojure-mode . ((cider-preferred-build-tool . clojure-cli)
                   (cider-clojure-cli-aliases . ":dev:test"))))
 ```
-
-#### Supported Options in User
-
-- (go)
-- (halt)
-- (reset)
-- (reset-all)
-- (context)
 
 ## License
 
