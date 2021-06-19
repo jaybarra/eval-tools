@@ -24,7 +24,7 @@ jobs:
     - name: Install clojure tools
       uses: DeLaGuardo/setup-clojure@3.5
       with:
-        cli: 1.10.3.875
+        cli: 1.10.3.882
 
     - name: Cache dependencies
       uses: actions/cache@v2
