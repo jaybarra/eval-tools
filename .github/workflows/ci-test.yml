@@ -35,6 +35,6 @@ jobs:
           ${{ runner.os }}-
 
     - name: Run Tests
-      run: clojure -M:test-ci
+      run: clojure -M:test/ci
 
     - uses: codecov/codecov-action@v1
