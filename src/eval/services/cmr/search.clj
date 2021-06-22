@@ -3,16 +3,17 @@
    [clojure.core.async :as a]
    [clojure.java.io :as io]
    [clojure.string :as str]
-   [eval.cmr.core :as cmr]
+   [eval.cmr.core :as cmr-api]
    [eval.cmr.search :as cmr-search]
+   [eval.services.cmr.core :as cmr]
    [taoensso.timbre :as log]))
 
 (defn search
   "Search concepts for concepts"
   [context cmr-inst concept-type query & [opts]]
   (let [client (cmr/context->client context cmr-inst)]
-    (cmr/decode-cmr-response-body
-     (cmr/invoke client (cmr-search/search concept-type query opts)))))
+    (cmr-api/decode-cmr-response-body
+     (cmr-api/invoke client (cmr-search/search concept-type query opts)))))
 
 (defn query-hits
   "Query CMR for count of available concepts that are available from
@@ -25,14 +26,14 @@
         query (-> query
                   (as-> q (cmr-search/search concept-type q opts))
                   (assoc :page_size 0))]
-    (-> (cmr/invoke client query)
+    (-> (cmr-api/invoke client query)
         (get-in [:headers :CMR-Hits])
         Integer/parseInt)))
 
 (defn clear-scroll-session!
   [context cmr-inst session-id]
   (let [client (cmr/context->client context cmr-inst)]
-    (cmr/invoke client (cmr-search/clear-scroll-session session-id))))
+    (cmr-api/invoke client (cmr-search/clear-scroll-session session-id))))
 
 (defn scroll!
   "Begin or continue a scrolling session and returns a map with
@@ -83,7 +84,7 @@
                          existing-scroll-id (assoc-in
                                              [:headers :CMR-Scroll-Id]
                                              existing-scroll-id))
-        response (cmr/invoke client scroll-request opts)
+        response (cmr-api/invoke client scroll-request opts)
         scroll-id (get-in response [:headers :CMR-Scroll-Id])]
     (if existing-scroll-id
       (log/debug "Continuing scroll [" scroll-id "]")

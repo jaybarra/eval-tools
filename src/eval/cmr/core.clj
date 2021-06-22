@@ -166,7 +166,7 @@
     ""))
 
 (defn invoke
-  "Invoke CMR endpoints with a request map and return the response.
+  "Invoke CMR endpoints with a request map and return quit the response.
   Throws with exceptional response status (>= status 400)
 
   The [[client]] url will be prefixed to the provided url to determine
@@ -193,15 +193,3 @@
                       token (assoc-in [:headers "Echo-Token"] token))]
     (log/debug "Sending request to CMR" (:id client) (dissoc request :body))
     (-invoke client out-request)))
-
-(defn context->client
-  "Extract a CMR client from system context"
-  [{:keys []
-    {:keys [instances]} :app/cmr} cmr-inst]
-  (get instances cmr-inst))
-
-(defn context->db
-  "Extract the CMR db from system context"
-  [{:keys []
-    {:keys [db]} :app/cmr}]
-  db)

@@ -3,7 +3,9 @@
    [clojure.core.async :as a]
    [clojure.java.io :as io]
    [clojure.string :as str]
-   [eval.cmr.core :as cmr]
+   [eval.cmr.core :as cmr-api]
+   [eval.cmr.search :as search-api]
+   [eval.services.cmr.core :as cmr]
    [taoensso.timbre :as log])
   (:import
    (java.time Instant)
@@ -14,11 +16,13 @@
   And optional amount value may be specified.
 
   TODO: this is blocking and should have an async version"
-    [client query & [{ch :ch :as opts}]]
-    (let [available (cmr/query-hits client :granule query)
+    [context cmr-inst query & [{ch :ch :as opts}]]
+    (let [client (cmr/context->client context cmr-inst)
+          query (assoc query :page_size 0)
+          available (cmr-api/invoke client (search-api/search :granule query))
           limit (min available (get opts :limit available))
 
-          scroll-page (partial cmr/scroll! client :granule query)
+          scroll-page (partial cmr/invoke client :granule query)
 
           first-page (scroll-page {:format :umm_json})
           scroll-id (:CMR-Scroll-Id first-page )
