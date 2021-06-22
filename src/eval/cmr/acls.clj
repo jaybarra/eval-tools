@@ -1,6 +1,14 @@
 (ns eval.cmr.acls
   "Namespace for interacting with the access-control service. Defines
-  commands and queries for use with the [[cmr/invoke]] function."
+  commands and queries for use with the [[cmr/invoke]] function.
+
+  ## Example usage
+  (require '[eval.cmr.core :as cmr])
+  (require '[eval.cmr.acls :as acl)
+  (def client (cmr/create-client
+               {:id :prod
+                :url \"https://cmr.earthdata.nasa.gov\"})
+  (cmr/invoke client (acl/get-acls))"
   (:require
    [clojure.spec.alpha :as spec]
    [eval.cmr.core :as cmr]))
