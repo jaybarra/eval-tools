@@ -4,6 +4,7 @@
    [clojure.string :as str]
    [eval.cmr.bulk.granule :as bulk-granule]
    [eval.cmr.core :as cmr]
+   [eval.services.cmr.core :as cmr-svc]
    [muuntaja.core :as muuntaja]
    [taoensso.timbre :as log])
   (:import
@@ -43,7 +44,7 @@
   ([context cmr-inst task-id]
    (benchmark context cmr-inst task-id 3))
   ([context cmr-inst task-id time-in-sec]
-   (let [client (cmr/context->client context cmr-inst)
+   (let [client (cmr-svc/context->client context cmr-inst)
          get-counts #(->> (bulk-granule/fetch-job-status
                            client
                            task-id
