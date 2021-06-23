@@ -6,29 +6,29 @@
    [eval.cmr.core :as cmr]
    [jsonista.core :as json]))
 
-(deftest add-update-instructions-test
-  (testing "uses the transformation given for each granule-ur"
-    (let [new-job (bulk-granule/add-update-instructions
-                   {}
-                   ["gran1" "gran2"]
-                   (constantly "s3://example.com/bucket"))]
-      (is (= [["gran1" "s3://example.com/bucket"]
-              ["gran2" "s3://example.com/bucket"]]
-             (:updates new-job))))))
+(deftest post-job-test
+  (let [{:keys [body] :as req} (bulk-granule/post-job "foo" {})]
+    (is (= {:method :post
+            :url "/ingest/providers/foo/bulk-update/granules"
+            :headers {"Content-Type" "application/json"}}
+           (dissoc req :body)))
+    (is (= {}
+           (json/read-value body)))))
 
-(deftest submit-job-test
-  (let [test-client (reify cmr/CmrClient
-                      (-invoke [_ query]
-                        (let [job-def (json/read-value (:body query) json/keyword-keys-object-mapper)]
-                          (is (= :post (:method query)))
-                          (is (= "/ingest/providers/FOO_PROV/bulk-update/granules" (:url query)))
-                          (is (spec/valid? ::bulk-granule/job job-def)
-                              (spec/explain-str ::bulk-granule/job job-def))
-                          {:status 200
-                           :headers {"Content-Type" "application/json"}
-                           :body (json/write-value-as-string {:task-id 1 :status 200})}))
-                      (-echo-token [_] "mock-token"))
-        job {::bulk-granule/operation "UPDATE_FIELD"
-             ::bulk-granule/update-field "S3Link"
-             ::bulk-granule/updates ["foo-granule-1" "s3://example/foo1"]}]
-    (bulk-granule/submit-job! test-client "FOO_PROV" job)))
+(deftest trigger-update-test
+  (is (= {:method :post
+          :url "/ingest/granule-bulk-update/status"}
+         (bulk-granule/trigger-update))))
+
+(deftest get-job-status-test
+  (testing "without options"
+    (let [req (bulk-granule/get-job-status 3)]
+      (is (= {:method :get
+              :url "/ingest/granule-bulk-update/status/3"}
+             req))))
+  (testing "with options"
+    (let [req (bulk-granule/get-job-status 3 {:show_granules true})]
+      (is (= {:method :get
+              :url "/ingest/granule-bulk-update/status/3"
+              :query-params {:show_granules true}}
+             req)))))

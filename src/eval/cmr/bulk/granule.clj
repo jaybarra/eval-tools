@@ -29,47 +29,23 @@
                                  ::updates]
                            :opt [::name]))
 
-(defn add-update-instructions
-  "Add a list of update instructions to a bulk granule update request.
-  based on a transformation."
-  [job urs xf]
-  (->> urs
-       (map (fn [id] [id (xf id)]))
-       (assoc job :updates)))
+(defn post-job
+  [provider job]
+  (let [url (format "/ingest/providers/%s/bulk-update/granules" provider)]
+    {:method :post
+     :url url
+     :headers {"Content-Type" "application/json"}
+     :body (cmr/encode->json job)}))
 
-(defn submit-job!
-  "POST a bulk granule update job to CMR and return the response."
-  [client provider job-def]
-  (let [url (format "/ingest/providers/%s/bulk-update/granules" provider)
-        job (cmr/decode-cmr-response-body
-             (cmr/invoke client
-                         {:method :post
-                          :url url
-                          :headers {:content-type "application/json"}
-                          :body (cmr/encode->json job-def)}))]
-    (log/info (format "Bulk Granule Update Job created with ID [%s]" (:task-id job)))
-    job))
+(defn trigger-update
+  []
+  {:method :post
+   :url "/ingest/granule-bulk-update/status"})
 
-(defn trigger-status-update!
-  "Trigger an update of bulk granule job statuses."
-  [client]
-  (cmr/decode-cmr-response-body
-   (cmr/invoke client
-               {:method :post
-                :url "/ingest/granule-bulk-update/status"})))
-
-(defn fetch-job-status
-  "Request bulk granule update job status from CMR."
-  [client job-id & [opts]]
-  (let [{:keys [show_granules
-                show_progress
-                show_request]} opts
-        query-params {:show_granules (or show_granules false)
-                      :show_progress (or show_progress false)
-                      :show_request (or show_request false)}]
-    (cmr/decode-cmr-response-body
-     (cmr/invoke
-      client
-      {:method :get
-       :url (format "/ingest/granule-bulk-update/status/%s" job-id)
-       :query-params query-params}))))
+(defn get-job-status
+  [job-id & [opts]]
+  (let [req {:method :get
+             :url (format "/ingest/granule-bulk-update/status/%s" job-id)}]
+    (if opts
+      (assoc req :query-params opts)
+      req)))
