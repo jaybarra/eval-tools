@@ -35,14 +35,16 @@
   :test/runner
   {:extra-paths ["test"]
    :extra-deps {lambdaisland/kaocha {:mvn/version "RELEASE"}
-                lambdaisland/kaocha-cloverage {:mvn/version "RELEASE"}}
+                lambdaisland/kaocha-cloverage {:mvn/version "RELEASE"}
+                org.clojure/test.check {:mvn/version "RELEASE"}}
    :main-opts ["-m" "kaocha.runner"]}
 
   ;; Run tests in CI environment
   :test/ci
   {:extra-paths ["test"]
    :extra-deps {lambdaisland/kaocha {:mvn/version "RELEASE"}
-                lambdaisland/kaocha-cloverage {:mvn/version "RELEASE"}}
+                lambdaisland/kaocha-cloverage {:mvn/version "RELEASE"}
+                org.clojure/test.check {:mvn/version "RELEASE"}}
    :main-opts ["-m" "kaocha.runner" "--profile" "ci"]}
 
   ;; Uberjar

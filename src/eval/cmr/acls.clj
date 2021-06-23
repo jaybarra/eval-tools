@@ -19,9 +19,10 @@
                                       ::provider_id]))
 
 (spec/def ::permissions #{"create" "read" "update" "order"})
+(spec/def ::group_id string?)
 (spec/def ::group-permission (spec/keys :req-un [::group_id ::permissions]))
-(spec/def ::group-permissions (spec/* ::group-permission))
-(spec/def ::catalog-item-identity (spec/* any?))
+(spec/def ::group_permissions (spec/* ::group-permission))
+(spec/def ::catalog_item_identity map?)
 (spec/def ::acl (spec/keys :req-un [::group_permissions
                                     ::catalog_item_identity]))
 
@@ -41,17 +42,25 @@
    :body (cmr/encode->json group)})
 
 (defn get-group
+  "Constructs a query for getting a group by id.
+
+  Options
+  pretty | boolean"
   [group-id & [opts]]
-  {:method :get
-   :url (str "/access-control/groups/" group-id)
-   :query-params {:pretty (get opts :pretty false)}})
+  (let [req {:method :get
+             :url (str "/access-control/groups/" group-id)}]
+    (if-let [pretty (get opts :pretty)]
+      (assoc-in req [:query-params :pretty] pretty)
+      req)))
 
 (defn delete-group
+  "Constructs a query to delete a group by id."
   [group-id]
   {:method :delete
    :url (str "/access-control/groups/" group-id)})
 
 (defn update-group
+  "Constructs a query to update a group."
   [group-id group]
   {:method :put
    :url (str "/access-control/groups/" group-id)
@@ -60,9 +69,11 @@
 
 (defn get-group-members
   [group-id & [opts]]
-  {:method :get
-   :url (str "/access-control/groups/" group-id "/members")
-   :query-params {:pretty (get opts :pretty false)}})
+  (let [req {:method :get
+             :url (str "/access-control/groups/" group-id "/members")}]
+    (if-let [pretty (get opts :pretty false)]
+      (assoc-in req [:query-params :pretty] pretty)
+      req)))
 
 (defn remove-group-members
   [group-id users]
@@ -104,9 +115,9 @@
       query)))
 
 (defn health
-  ([]
-   (health false))
-  ([pretty]
-   {:method :get
-    :url "/access-control/health"
-    :query-params {:pretty pretty}}))
+  [& [opts]]
+  (let [req {:method :get
+             :url "/access-control/health"}]
+    (if-let [pretty (get opts :pretty)]
+      (assoc-in req [:query-params :pretty] pretty)
+      req)))
