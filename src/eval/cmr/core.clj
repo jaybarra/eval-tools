@@ -8,7 +8,6 @@
    [clojure.string :as str]
    [environ.core :refer [env]]
    [eval.db.event-store :as es]
-   [eval.utils.core :refer [defn-timed]]
    [muuntaja.core :as muuntaja]
    [muuntaja.format.json :as json-format]
    [muuntaja.format.core :as fmt-core]

@@ -2,7 +2,7 @@
   (:require
    [clojure.spec.alpha :as s]
    [clojure.test :refer :all]
-   [eval.utils.core :as utils :refer [defn-timed]]))
+   [eval.utils.core :as utils]))
 
 (deftest spec-validate-test
   (testing "throwing"
@@ -35,7 +35,3 @@
       ;; small deltas are ok
       1e-6 2.000001 2.000002 true
       1e-6 2.000001 2.000003 false)))
-
-(deftest defn-timed-test
-  (let [expanded (macroexpand-1 `(defn-timed foo-fn [x] x))]
-    (is (some? expanded))))
