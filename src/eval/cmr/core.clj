@@ -1,12 +1,7 @@
 (ns eval.cmr.core
-  "Default functionality for interacting with a Common Metadata Repository
-  instance.
+  "Default functionality for interacting with a Common Metadata Repository instance.
 
-  This namespace provides basic interaction through the [[invoke!]]
-  function.
-
-  See Also:
-  * [[eval.cmr.bulk.granule]]"
+  This namespace provides basic interaction with a CMR instance through the [[invoke]] function."
   (:require
    [clj-http.client :as http]
    [clojure.spec.alpha :as spec]
