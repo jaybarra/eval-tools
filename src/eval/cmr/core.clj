@@ -107,6 +107,9 @@
   CmrClient
 
   (-invoke [this query]
+    (log/debug "Sending request to CMR"
+               (select-keys this [id url])
+               (dissoc query :body))
     (http/request query))
 
   (-echo-token [this]
@@ -169,20 +172,18 @@
   "Invoke CMR endpoints with a request map and return quit the response.
   Throws with exceptional response status (>= status 400)
 
-  The [[client]] url will be prefixed to the provided url to determine
+  The [[CmrClient]] url will be prefixed to the provided url to determine
   where the request should be sent.
 
   Sends a query to CMR over HTTP and returns the response object.
   
-  If an echo-token is available for the provided [[client]] it will
-  be added to the \"Echo-Token\" header. This may be ignored by setting
+  If an echo-token is available for the provided [[CmrClient]], the token
+  will be added to the \"Echo-Token\" header. This may be ignored by setting
   :anonymous? to true in the options.
 
   ## Options
   :anonymous? boolean - when true, no echo-token will be added to the header
-  :echo-token string  - when set, will be used unless :anonymous? is true
-
-  TODO: make an async version of this"
+  :echo-token string  - when set, will be used unless :anonymous? is true "
   [client request & [opts]]
   (let [{root-url :url} client
         token (and (not (:anonymous? opts))
@@ -191,5 +192,4 @@
         out-request (cond-> request
                       true (assoc :url (str root-url (:url request)))
                       token (assoc-in [:headers "Echo-Token"] token))]
-    (log/debug "Sending request to CMR" (:id client) (dissoc request :body))
     (-invoke client out-request)))
