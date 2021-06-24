@@ -15,9 +15,9 @@
 
 (defn scroll
   "Returns a query with a scroll-id in the header. The output will be
-  identical to a [[search]] response. "
+  identical to a [[search]] response."
   [concept-type query scroll-id & [opts]]
-  (assoc-in (search concept-type query opts) [:headers :CMR-Scroll-Id] scroll-id))
+  (assoc-in (search concept-type query opts) [:headers "CMR-Scroll-Id"] scroll-id))
 
 (defn clear-scroll-session
   "Returns a query that will clear a specific scroll-id session."
