@@ -3,26 +3,23 @@
    [clojure.core.async :as a]
    [clojure.java.io :as io]
    [clojure.string :as str]
-   [eval.cmr.core :as cmr-api]
-   [eval.cmr.search :as search-api]
-   [eval.services.cmr.core :as cmr]
-   [taoensso.timbre :as log])
-  (:import
-   (java.time Instant)
-   (java.util Scanner)))
+   [eval.cmr.core :as cmr]
+   [eval.cmr.search :as search]
+   [eval.services.cmr.core :refer [context->client]]
+   [eval.services.cmr.search :as s]
+   [taoensso.timbre :as log]))
 
-#_(defn scroll-granule-urs
+#_(defn fetch-granule-urs
     "Return the list of granule URs from CMR based on a query.
   And optional amount value may be specified.
 
   TODO: this is blocking and should have an async version"
     [context cmr-inst query & [{ch :ch :as opts}]]
-    (let [client (cmr/context->client context cmr-inst)
-          query (assoc query :page_size 0)
-          available (cmr-api/invoke client (search-api/search :granule query))
+    (let [client (context->client context cmr-inst)
+          available (s/query-hits context cmr-inst :granule query opts)
           limit (min available (get opts :limit available))
 
-          scroll-page (partial cmr/invoke client :granule query)
+          scroll-page (partial cmr/invoke client (/)query)
 
           first-page (scroll-page {:format :umm_json})
           scroll-id (:CMR-Scroll-Id first-page )
@@ -39,7 +36,7 @@
                         (map (comp :GranuleUR :umm))
                         (concat urs)))))
         (finally
-          (cmr/clear-scroll-session! client scroll-id)))))
+          (cmr/invoke client (search/clear-scroll-session scroll-id))))))
 
 #_(defn scroll-granule-urs->file!
     "Return a filename containing the list of granule URs from CMR based

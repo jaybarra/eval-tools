@@ -16,6 +16,15 @@
           context (cmr-test/context :test test-client)]
       (search/search context :test :collection {:provider "FOO-PROV"}))))
 
+(deftest scroll-test
+  (let [test-client (cmr-test/client
+                     (fn [_ query]
+                       (is (= "/search/collections" (get query :url))
+                           {:status 200}))
+                     (constantly "test-echo-token"))
+        context (cmr-test/context :test test-client)]
+    (search/search context :test :collection {:provider "FOO-PROV"})))
+
 (deftest query-hits-test
   (testing "checks the CMR-Hits header value"
     (let [test-client (cmr-test/client

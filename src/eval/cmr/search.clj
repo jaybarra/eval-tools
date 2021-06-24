@@ -3,21 +3,24 @@
    [eval.cmr.core :as cmr]))
 
 (defn search
-  "GET the collections from the specified CMR enviroment.
+  "Returns a query for a specific concept-type"
+  [concept-type query & [opts]]
+  (let [search-url (format
+                    "/search/%ss%s"
+                    (name concept-type)
+                    (cmr/format->cmr-extension (:format opts)))]
+    {:method :get
+     :url search-url
+     :query-params query}))
 
-  Send a GET request to the search endpoint for the specific concept-type
-  as a query-param."
-  ([concept-type query & [opts]]
-   (let [search-url (format
-                     "/search/%ss%s"
-                     (name concept-type)
-                     (cmr/format->cmr-extension (:format opts)))]
-     {:method :get
-      :url search-url
-      :query-params query})))
+(defn scroll
+  "Returns a query with a scroll-id in the header. The output will be
+  identical to a [[search]] response. "
+  [concept-type query scroll-id & [opts]]
+  (assoc-in (search concept-type query opts) [:headers :CMR-Scroll-Id] scroll-id))
 
 (defn clear-scroll-session
-  "Clear the CMR scroll session."
+  "Returns a query that will clear a specific scroll-id session."
   [scroll-id]
   {:method :post
    :url "/search/clear-scroll"
