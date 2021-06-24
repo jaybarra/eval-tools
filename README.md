@@ -21,10 +21,7 @@ APIs and tools.
 
 This tool is designed to interact with external APIs, with simplified commands and clients to invoke those commands. The approach to the commands is to be low-level and involve only basic query and response communication with no higher logic applied. All commands should be stateless.
 
-Example Usage
-
 ```clojure
-user=> (reset)
 user=> (require '[eval.cmr.core :as cmr])
 user=> (require '[eval.cmr.search :as cmr-search])
 user=> (def my-client (cmr/create-client {:id :foo :url "http://instance"}))
@@ -38,10 +35,11 @@ The services portion of the code will build on those basic commands and provide 
 Example Usage
 
 ```clojure
-user=> (reset)
+user=> (go)
 user=> (require '[eval.services.cmr.search :as search-svc])
-user=> (def query (cmr-search/search :collection {:provider "FOO"} {:format :umm-json})))
-user=> (search-svc/search (context) :prod :collection {:provider "FOO"})
+user=> (require '[eval.cmr.search :as search-api])
+user=> (def query (search-api/search :collection {:provider "FOO"} {:format :umm-json})))
+user=> (search-svc/search (context) :prod query)
 ```
 
 while these two functions will perform equivalent actions, the service version is designed to be used from within the context of the running system.
