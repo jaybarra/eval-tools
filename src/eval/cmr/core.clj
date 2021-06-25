@@ -102,7 +102,7 @@
 
   (-invoke [this query]
     (log/debug "Sending request to CMR"
-               (select-keys this [id url])
+               (select-keys this [:id :url])
                (dissoc query :body))
     (http/request query))
 

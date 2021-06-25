@@ -2,10 +2,13 @@
   "Actions for interacting with the CMR legacy systems."
   (:require
    [clj-http.client :as http]
+   [clojure.xml :as xml]
    [eval.cmr.core :as cmr]))
 
 (defn- echo-token-soap-message
-  "Return a soap message for getting an echo-token from legacy systems."
+  "Return a soap message for getting an echo-token from legacy systems.
+
+  TODO: rewrite this with clojure.xml "
   [username password client-id & [ip-address act-as on-behalf-of]]
   (format
    "<Envelope xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">
@@ -17,15 +20,15 @@
            <ClientId xmlns=\"http://echo.nasa.gov/echo/v10/types\">%s</ClientId>
            <UserIpAddress xmlns=\"http://echo.nasa.gov/echo/v10/types\">%s</UserIpAddress>
          </clientInfo>
-         <actAsUserName>%s</actAsUserName>
-         <behalfOfProvider>%s</behalfOfProvider>
+         %s
+         %s
        </Login>
      </Body>
    </Envelope>"
    username password client-id
    (or ip-address "127.0.0.1")
-   (or act-as "")
-   (or on-behalf-of "")))
+   (if act-as (format "<actAsUserName>%s</actAsUserName>" act-as) "")
+   (if on-behalf-of (format "<behalfOfProvider>%s</behalfOfProvider>" on-behalf-of) "")))
 
 (defn token-xml-request-body
   [credentials]
