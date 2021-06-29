@@ -36,10 +36,8 @@ Example Usage
 
 ```clojure
 user=> (go)
-user=> (require '[eval.services.cmr.search :as search-svc])
-user=> (require '[eval.cmr.search :as search-api])
-user=> (def query (search-api/search :collection {:provider "FOO"} {:format :umm-json})))
-user=> (search-svc/search (context) :prod query)
+user=> (require '[eval.services.cmr.search :refer [search]])
+user=> (search (context) :prod :collection {:provider "FOO"} {:format :umm-json})
 ```
 
 while these two functions will perform equivalent actions, the service version is designed to be used from within the context of the running system.

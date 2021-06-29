@@ -9,11 +9,13 @@ A collection of utilities for evaluating the functionality of various components
 ```clojure
 {:db/document-store {:type :crux}
 
- :app/cmr {:instances {:prod {:url "https://cmr.earthdata.nasa.gov"}
-                       :uat {:url "https://cmr.uat.earthdata.nasa.gov"}
+ :app/cmr {:instances {:prod {:url "https://cmr.earthdata.nasa.gov"
+                       :echo-token #env "CMR_ECHO_TOKEN_PROD"}
+                       :uat {:url "https://cmr.uat.earthdata.nasa.gov"
+                       :echo-token "fixed-token-value"}
                        :sit {:url "https://cmr.sit.earthdata.nasa.gov"}
                        :local {:url "http://localhost"
-                               :token "mock-echo-system-token"
+                               :echo-token "mock-echo-system-token"
                                :port-map {"access-control" 3011
                                           "search" 3003
                                           "ingest" 3002}}}

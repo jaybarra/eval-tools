@@ -96,22 +96,23 @@
   (-invoke [client query] "Send a query to CMR")
   (-echo-token [client] "Return an echo-token"))
 
-(defrecord HttpClient [id url]
+(defrecord HttpClient [id url opts]
 
   CmrClient
 
   (-invoke [this query]
     (log/debug "Sending request to CMR"
                (select-keys this [:id :url])
-               (dissoc query :body))
+               (-> query
+                   (dissoc :body)
+                   (update-in
+                    [:headers "Echo-Token"]
+                    (fn [s] (when (and s (not= s :anonymous))
+                             (str (subs s 0 8) "-XXXX-XXXX-XXXX-XXXXXXXXXXXX"))))))
     (http/request query))
 
   (-echo-token [this]
-    (->> (:id this)
-         keyword->lowercase-str
-         (str "cmr-echo-token-")
-         keyword
-         env)))
+    (get-in this [:opts :echo-token])))
 
 (defn create-client
   "Constructs a CMR client.
@@ -122,7 +123,7 @@
       (throw (ex-info "Invalid CMR configuration"
                       (spec/explain-data ::cmr cmr-cfg))))
     ;; Return the client
-    (->HttpClient id url)))
+    (->HttpClient id url (dissoc cmr-cfg :url :id))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Functions
