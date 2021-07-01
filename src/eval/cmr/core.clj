@@ -141,7 +141,7 @@
    :json "application/json"
    :xml "application/xml"
    :native "application/metadata+xml"
-   :umm_json "application/vnd.nasa.cmr.umm+json"})
+   :umm-json "application/vnd.nasa.cmr.umm+json"})
 
 (defn format->cmr-extension
   "Takes a CMR supported format and returns the appropriate extension
