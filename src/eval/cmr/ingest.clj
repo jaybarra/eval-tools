@@ -3,34 +3,56 @@
   (:require
    [eval.cmr.core :as cmr]))
 
+(defn- update-req-content-type
+  "Set the appropriate Content-Type header based on the concept format."
+  [req fmt]
+  (assoc-in req [:headers "Content-Type"] (cmr/format->mime-type fmt)))
+
+(defn- update-req-body
+  "Determines if the body needs to be encoded and updates the :body of the request.
+  Uses the [[cmr/cmr-formats]] to determine encoding"
+  [req fmt]
+  (letfn [(process-body [data]
+            (if (some #{:umm-json :json} [fmt])
+              (cmr/encode->json data)
+              data))]
+    (update req :body process-body)))
+
 (defn validate-concept-metadata
-  "Returns a command to validate a given concept."
-  [concept-type provider-id concept & [opts]]
-  {:method :post
-   :url (format "/ingest/providers/%s/validate/%s/%s"
-                provider-id
-                (name concept-type)
-                (:native-id concept))
-   :headers {"Content-Type" (cmr/format->mime-type (:format opts))}
-   :body (if (some #{:umm-json :json} [(:format opts)])
-           (cmr/encode->json concept)
-           concept)})
+  "Returns a command to validate a given concept.
+  Supported concept-types:
+  + collection
+  + granule"
+  [concept-type provider-id concept & [{fmt :format}]]
+  (let [req {:method :post
+             :url (format "/ingest/providers/%s/validate/%s/%s"
+                          provider-id
+                          (name concept-type)
+                          (:native-id concept))
+             :body concept}]
+    (-> req
+        (update-req-content-type fmt)
+        (update-req-body fmt))))
 
 (defn create-concept
-  "Retrurns a command to create a given concept."
-  [concept-type provider-id concept & [native-id]]
-  {:method :put
-   :url (format "/ingest/providers/%s/%s%s"
-                provider-id
-                (str (name concept-type) "s")
-                (if native-id (str "/" native-id) ""))
-   :body (cmr/encode->json concept)})
+  "Returns a command to create a given concept."
+  [concept-type provider-id concept & [{fmt :format native-id :native-id}]]
+  (let [req {:method :put
+             :url (format "/ingest/providers/%s/%s%s"
+                          provider-id
+                          (str (name concept-type) "s")
+                          (if native-id (str "/" native-id) ""))
+             :body concept}]
+    (-> req
+        (update-req-content-type fmt)
+        (update-req-body fmt))))
 
 (def update-concept
   "Alias for [[create-concept]]"
   create-concept)
 
 (defn delete-concept
+  "Mark a concept as deleted in CMR"
   [concept-type provider-id concept-native-id]
   {:method :delete
    :url (format "/ingest/providers/%s/%s/%s"
@@ -39,53 +61,10 @@
                 concept-native-id)})
 
 (defn create-association
+  "Create an association beteween collection and variable"
   [collection-id collection-revision variable-id]
   {:method :put
    :url (format "/ingest/collections/%s/%s/variables/%s"
                 collection-id
                 collection-revision
                 variable-id)})
-
-
-
-
-;; /providers/<provider-id>/collections/<native-id>
-;; PUT - Create or update a collection.
-;; DELETE - Delete a collection.
-
-;; /providers/<provider-id>/granules/<native-id>
-;; PUT - Create or update a granule.
-;; DELETE - Delete a granule.
-;; /collections/<collection-concept-id>/<collection-revision-id>/variables/<native-id>
-;; PUT - Create or update a variable with assoication.
-;; /providers/<provider-id>/variables/<native-id>
-;; PUT - Update a variable.
-;; DELETE - Delete a variable.
-;; /providers/<provider-id>/services/<native-id>
-;; PUT - Create or update a service.
-;; DELETE - Delete a service.
-;; /providers/<provider-id>/tools/<native-id>
-;; PUT - Create or update a tool.
-;; DELETE - Delete a tool.
-;; /providers/<provider-id>/subscriptions
-;; POST - Create a subscription without specifying a native-id.
-;; /providers/<provider-id>/subscriptions/<native-id>
-;; POST - Create a subscription with a provided native-id.
-;; PUT - Create or Update a subscription.
-;; DELETE - Delete a subscription.
-;; Subscription Access Control
-;; /translate/collection
-;; POST - Translate collection metadata.
-;; /translate/granule
-;; POST - Translate granule metadata.
-;; /providers/<provider-id>/bulk-update/collections
-;; POST - Collection bulk update
-;; /providers/<provider-id>/bulk-update/granules
-
-
-
-;; POST - Granule bulk update
-;; /granule-bulk-update/status
-;; POST - Granule bulk update
-;; /granule-bulk-update/status/<task-id>
-;; GET - Granule bulk update status

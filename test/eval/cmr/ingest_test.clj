@@ -50,11 +50,29 @@
            (parse-xml body)))))
 
 (deftest create-concept-test
-  (let [{:keys [body] :as req} (ingest/create-concept :collection "FOO" {})]
-    (is (= {:method :put
-            :url "/ingest/providers/FOO/collections"}
-           (dissoc req :body)))
-    (is (= {} (json/read-value body)))))
+  (testing "without giving a native-id"
+    (let [{:keys [body] :as req} (ingest/create-concept
+                                  :collection
+                                  "FOO"
+                                  collection-metadata-xml
+                                  {:format :xml})]
+      (is (= {:method :put
+              :url "/ingest/providers/FOO/collections"
+              :headers {"Content-Type" "application/xml"}}
+             (dissoc req :body)))
+      (is (string? body))))
+
+  (testing "without a native-id"
+    (let [req (ingest/create-concept
+               :collection
+               "FOO"
+               collection-metadata-xml
+               {:format :json
+                :native-id "foo123"})]
+      (is (= {:method :put
+              :url "/ingest/providers/FOO/collections/foo123"
+              :headers {"Content-Type" "application/json"}}
+             (dissoc req :body))))))
 
 (deftest delete-concept-test
   (is (= {:method :delete
@@ -65,13 +83,3 @@
   (is (= {:method :put
           :url "/ingest/collections/c123/1/variables/v123"}
          (ingest/create-association "c123" 1 "v123"))))
-
-#_(deftest reindex-all-collections-test
-    (is (= {:method :post
-            :url "/ingest/jobs/reindex-all-collections"}
-           (ingest/reindex-all-collections))))
-
-#_(deftest reindex-permitted-groups-test
-    (is (= {:method :post
-            :url "/ingest/jobs/reindex-permitted-groups"}
-           (ingest/reindex-permitted-groups ["g1234"]))))
