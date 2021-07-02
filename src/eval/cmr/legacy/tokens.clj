@@ -52,15 +52,7 @@
    :body (token-xml-request-body credentials)})
 
 (defn get-token-info
-  "Retrieve information about a given token.
-
-  Example:
-  (let [res (tokens/get-token-info 'AXXXX....')]
-   (-> res
-       :body
-       .getBytes
-       io/input-stream
-       xml/parse)"
+  "Retrieve information about a given token."
   [token-id]
   {:method :post
    :url "/legacy-services/rest/tokens/get_token_info"
