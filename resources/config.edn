@@ -4,8 +4,10 @@
 
  :app/cmr {:instances {:prod {:url "https://cmr.earthdata.nasa.gov"
                               :echo-token #env "CMR_ECHO_TOKEN_PROD"}
-                       :uat {:url "https://cmr.uat.earthdata.nasa.gov"}
-                       :sit {:url "https://cmr.sit.earthdata.nasa.gov"}
+                       :uat {:url "https://cmr.uat.earthdata.nasa.gov"
+                             :echo-token #env "CMR_ECHO_TOKEN_UAT"}
+                       :sit {:url "https://cmr.sit.earthdata.nasa.gov"
+                             :echo-token #env "CMR_ECHO_TOKEN_SIT"}
                        :local {:url "http://localhost"
                                :echo-token "mock-echo-system-token"
                                :port-map {"access-control" 3011

@@ -6,8 +6,3 @@
   []
   {:method :post
    :url "/reindex-provider-collections"})
-
-(defn db-migrate-command
-  []
-  {:method :post
-   :url "/db-migrate"})

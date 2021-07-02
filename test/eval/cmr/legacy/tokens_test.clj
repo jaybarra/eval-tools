@@ -24,3 +24,12 @@
                                    </token>")))
            (xml/parse (java.io.ByteArrayInputStream.
                        (.getBytes body)))))))
+
+(deftest get-token-info-test
+  (let [{:keys [body] :as req} (tokens/get-token-info "foo")]
+    (is (= {:method :post
+            :url "/legacy-services/rest/tokens/get_token_info"
+            :headers {"Content-Type" "application/json"}}
+           (dissoc req :body)))
+    (is (= {"id" "foo"}
+           (json/read-value body)))))
