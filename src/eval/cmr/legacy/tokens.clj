@@ -8,8 +8,13 @@
 (defn- echo-token-soap-message
   "Return a soap message for getting an echo-token from legacy systems.
 
+  supported options
+  * :ip-address
+  * :act-as
+  * :on-behalf-of
+
   TODO: rewrite this with clojure.xml "
-  [username password client-id & [ip-address act-as on-behalf-of]]
+  [username password client-id & [opts]]
   (format
    "<Envelope xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">
      <Body>
@@ -26,9 +31,13 @@
      </Body>
    </Envelope>"
    username password client-id
-   (or ip-address "127.0.0.1")
-   (if act-as (format "<actAsUserName>%s</actAsUserName>" act-as) "")
-   (if on-behalf-of (format "<behalfOfProvider>%s</behalfOfProvider>" on-behalf-of) "")))
+   (get opts :ip-address "127.0.0.1")
+   (if-let [act-as (get opts :act-as)]
+     (format "<actAsUserName>%s</actAsUserName>" act-as)
+     "")
+   (if-let [on-behalf-of (get opts :on-behalf-of)]
+     (format "<behalfOfProvider>%s</behalfOfProvider>" on-behalf-of)
+     "")))
 
 (defn token-xml-request-body
   [credentials]
@@ -45,6 +54,13 @@
    (get credentials :ip-address "127.0.0.1")))
 
 (defn get-token
+  "Request a token from CMR legacy services
+
+  Credentials map:
+  * username - Earthdata username
+  * password - Earthdata password
+  * client-id - optional
+  * ip-address - optional"
   [credentials]
   {:method :post
    :url "/legacy-services/rest/tokens"
