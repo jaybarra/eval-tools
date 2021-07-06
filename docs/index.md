@@ -28,10 +28,12 @@ __Example config.edn__
 To set properties from the environment, use the `#env` keyword followed by the environment variable.
 
 #### Supported Document Stores
+
 | Key     | Description                                               | Options                                                                     |
 |---------|-----------------------------------------------------------|-----------------------------------------------------------------------------|
 | `:crux` | Bi-temporal graph document store<br> Single node instance | `:log-dir` - optional<br> `:doc-dir` - optional<br> `:index-dir` - optional |
-| `:noop` | Prints to log instead                                     |                                                                             |
+| `:noop` | Prints to console                                         |                                                                             |
+|         |                                                           |                                                                             |
 
 ### eval.services.cmr
 The difference between the `eval.cmr` and `eval.services.cmr` is the former is designed to handle commands sent to CMR only. Any logic or functionality beyond interaction with CMR belongs in a service. The services are higher level operations that can provide additional user features. 
