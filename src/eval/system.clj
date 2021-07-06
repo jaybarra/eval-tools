@@ -35,13 +35,14 @@
 
 (defmethod ig/init-key :db/document-store
   [_ opts]
-  (log/info "Document Store initialized")
-  #_(doc-store/create-document-store opts))
+  (let [store (doc-store/create-document-store opts)]
+    (log/info "Document Store initialized")
+    store))
 
 (defmethod ig/halt-key! :db/document-store
   [_ store]
   (log/info "Shutting down Document Store")
-  #_(doc-store/stop-document-store store))
+  (doc-store/stop-document-store store))
 
 (defmethod ig/init-key :app/cmr
   [_ {:keys [db instances :as opts]}]

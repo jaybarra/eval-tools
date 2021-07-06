@@ -48,7 +48,7 @@ while these two functions will perform equivalent actions, the service version i
 |-----------------------|--------------------------|
 | Download dependencies | `clj -Spath`             |
 | Start the REPL        | `clj -M:dev:nrepl`       |
-| Run tests             | `clj -M:test/runner`     |
+| Run unit tests        | `clj -M:test/unit`       |
 | Run the project       | `clj -M -m eval.system`  |
 | Package application   | `clj -X:project/uberjar` |
 

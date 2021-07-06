@@ -24,7 +24,18 @@
       (.close node)
       (dissoc this :crux-node))))
 
-(defn create-document-store
+(defmulti create-document-store :type)
+
+(defmethod create-document-store :default
+  [opts]
+  ;; TODO convert to in-memory store
+  (log/warn "NOOP document store, no persistence")
+  (reify DocumentStore
+    (save! [this document] (log/debug "NOOP save document" document))
+    (query [this query] (log/debug "NOOP query" query))
+    (halt! [this] nil)))
+
+(defmethod create-document-store :crux
   [opts]
   (letfn [(kv-store [dir]
             {:kv-store {:crux/module 'crux.rocksdb/->kv-store
@@ -37,5 +48,4 @@
 
 (defn stop-document-store
   [store]
-  ;; this is crux specific, fix with protocol
   (halt! store))
