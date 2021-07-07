@@ -58,16 +58,18 @@
   (partial muuntaja/encode m "application/json"))
 
 (defn decode-cmr-response-body
-  "Decode the body of CMR responses"
+  "Decode the body of CMR responses if Content-Type is set, otherwise return the body raw"
   [response]
   (if (get-in response [:headers "Content-Type"])
     (muuntaja/decode-response-body m response)
     (:body response)))
 
-(def umm-json-response->items "Unpack :umm_json format concepts from a response."
+(def umm-json-response->items
+  "Unpack :umm-json format concepts from a response."
   (comp :items decode-cmr-response-body))
 
-(def json-response->entry "Unpack :json format concepts from a response."
+(def json-response->entry
+  "Unpack :json format concepts from a response."
   (comp :entry :feed decode-cmr-response-body))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Specs
