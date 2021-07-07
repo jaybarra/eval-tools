@@ -18,7 +18,7 @@
 (deftest invoke-test
   (let [test-client (reify
                       cmr/CmrClient
-                      (-invoke [_client _command]
+                      (-invoke [_client _query]
                         {:status 200})
                       
                       (-echo-token [_]
@@ -26,3 +26,23 @@
     (is (= {:status 200}
            (cmr/invoke test-client {:request {:method :get
                                               :url "/a/test"}})))))
+
+(defrecord ^:private MockClient [id url opts]
+  cmr/CmrClient
+
+  (-invoke [this query]
+    (is (= "internal://localhost:32303/collections.umm_json"
+           (:url query)))
+    {:status 200})
+  (-echo-token [this]
+    "foo"))
+
+(deftest endpoints-override-test
+  (let [client (->MockClient :foo
+                             "http://test"
+                             {:endpoints {"search" "internal://localhost:32303"}})]
+    (is (= {:status 200}
+           (cmr/invoke client
+                       {:request
+                        {:method :get
+                         :url "/search/collections.umm_json"}})))))

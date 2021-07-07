@@ -105,7 +105,7 @@
 
 (defprotocol CmrClient
   (-invoke [client query] "Send a query to CMR")
-  (-echo-token [client] "Return an echo-token"))
+  (-echo-token [client] "Return the echo-token associated with this client"))
 
 (defrecord HttpClient [id url opts]
 
@@ -118,7 +118,7 @@
                    (dissoc :body)
                    (update-in
                     [:headers "Echo-Token"]
-                    (fn [s] (when (and s (not= s :anonymous))
+                    (fn [s] (when (and s (not= s :anonymous?))
                              (str (subs s 0 8) "-XXXX-XXXX-XXXX-XXXXXXXXXXXX"))))))
     (http/request query))
 
@@ -188,17 +188,33 @@
   :anonymous? to true in the options.
 
   ## Options
-  :anonymous? boolean - when true, no echo-token will be added to the header
-  :echo-token string  - when set, will be used unless :anonymous? is true "
+  :anonymous? optional boolean - when true, no echo-token will be added to the header
+  :echo-token optional string  - when set, will be used unless :anonymous? is true "
   [client command]
   (when-not (spec/valid? ::command command)
     (throw (ex-info "Invalid CMR command"
                     (spec/explain-data ::command command))))
   (let [{:keys [anonymous? echo-token]} (:opts command)
-        {root-url :url} client
+        {root-url :url
+         {endpoints :endpoints} :opts} client
+        req-url (get-in command [:request :url])
+
+        ;; check if overriding the root-url
+        override-url (when endpoints
+                       (get endpoints (second (str/split req-url #"/"))))
+        root-url (or override-url root-url)
+
+        ;; if overriding the defaul endpoint also trim the request url
+        command (if override-url
+                  (update-in command [:request :url] #(as-> % s
+                                                        (str/split s #"/")
+                                                        (drop 2 s)
+                                                        (str/join "/" s)
+                                                        (str "/" s)))
+                  command)
+        
         token (and (not anonymous?)
-                   (or echo-token
-                       (-echo-token client)))
+                   (or echo-token (-echo-token client)))
         out-request (cond-> (:request command)
                       true (assoc :url (str root-url (get-in command [:request :url])))
                       token (assoc-in [:headers "Echo-Token"] token))]
