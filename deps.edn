@@ -34,11 +34,23 @@
                 ring/ring-mock {:mvn/version "0.4.0"}}
    :main-opts ["-m" "kaocha.runner" "--focus" :unit]}
 
+  :test/features
+  {:extra-paths ["test"]
+   :extra-deps {lambdaisland/kaocha {:mvn/version "RELEASE"}
+                lambdaisland/kaocha-cloverage {:mvn/version "RELEASE"}
+                lambdaisland/kaocha-cucumber {:mvn/version "RELEASE"}
+                org.clojure/test.check {:mvn/version "RELEASE"}
+                ring/ring-mock {:mvn/version "0.4.0"}}
+   :main-opts ["-m" "kaocha.runner"
+               "--profile" :cucumber
+               "--focus" :features]}
+
   ;; Run tests in CI environment
   :test/ci
   {:extra-paths ["test"]
    :extra-deps {lambdaisland/kaocha {:mvn/version "RELEASE"}
                 lambdaisland/kaocha-cloverage {:mvn/version "RELEASE"}
+                lambdaisland/kaocha-cucumber {:mvn/version "RELEASE"}
                 org.clojure/test.check {:mvn/version "RELEASE"}
                 ring/ring-mock {:mvn/version "0.4.0"}}
    :main-opts ["-m" "kaocha.runner"
