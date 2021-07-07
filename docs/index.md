@@ -34,10 +34,7 @@ A CMR config map consists of a map of maps.
 Eval Tools allows for multiple CMR clients to be configured simulaneously. Each CMR connection should be placed into the `:instances` map of `:app/cmr`.
 The identifier should be a keyword. A corresponding configuration map should be the value.
 
-The configuration map must include 
-
-+ `:url`
-+ `:echo-token`
+The configuration map must include the `:url`. `:echo-token` is optional and may be an enviroment value or a static string. If no value is set all calls to CMR will be anonymous and the `Echo-Token` header will not be set unless supplied to the client manually in the request.
 
 And may optionally include a `:endpoints` map to override the `:url` specified earlier. This endpoints map is useful when CMR is deployed locally in development mode or not hosted behind a reverse proxy or load-balancer. The endpoints should be a map consisting of the appropriate service name followed by the url of the service. See the above configuration for example
 
