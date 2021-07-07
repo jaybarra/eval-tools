@@ -9,8 +9,10 @@
    [eval.cmr.legacy.tokens :as tokens]
    [jsonista.core :as json]))
 
+(set! *warn-on-reflection* true)
+
 (deftest get-token-test
-  (let [{:keys [body] :as req} (tokens/get-token {:username "foo" :password "bar"})]
+  (let [{:keys [^String body] :as req} (tokens/get-token {:username "foo" :password "bar"})]
     (is (= {:method :post
             :url "/legacy-services/rest/tokens"
             :headers {"Content-Type" "application/xml"}}

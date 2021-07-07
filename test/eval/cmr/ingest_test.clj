@@ -6,6 +6,8 @@
    [eval.cmr.ingest :as ingest]
    [jsonista.core :as json]))
 
+(set! *warn-on-reflection* true)
+
 (def collection-metadata-xml
   "<Collection>
     <ShortName>ShortName_Larc</ShortName>
@@ -21,7 +23,7 @@
   </Collection>")
 
 (defn parse-xml
-  [content]
+  [^String content]
   (-> content .getBytes io/input-stream xml/parse))
 
 (deftest validate-concept-metadata-test
