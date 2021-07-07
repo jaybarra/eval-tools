@@ -156,7 +156,7 @@
       (assoc command :opts opts)
       command)))
 
-(defn health
+(defn get-health
   [& [opts]]
   (let [req {:method :get
              :url "/access-control/health"}]
