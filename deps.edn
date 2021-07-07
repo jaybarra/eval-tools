@@ -22,7 +22,8 @@
    :extra-deps {integrant/repl {:mvn/version "RELEASE"}
                 nrepl/nrepl {:mvn/version "RELEASE"}
                 org.clojure/tools.namespace {:mvn/version "RELEASE"}
-                ring/ring-devel {:mvn/version "1.9.3"}}}
+                ring/ring-devel {:mvn/version "1.9.3"}
+                ring/ring-mock {:mvn/version "0.4.0"}}}
 
   ;; Check for out of date dependencies
   :outdated

@@ -11,7 +11,11 @@
    [integrant.core :as ig]
    [ring.adapter.jetty :as jetty]
    [taoensso.timbre :as log])
+  (:import
+   [org.eclipse.jetty.server Server])
   (:gen-class))
+
+(set! *warn-on-reflection* true)
 
 ;; Let Aero know how to read integrant references
 (defmethod aero/reader 'ig/ref
@@ -65,7 +69,7 @@
   (jetty/run-jetty handler (dissoc opts :handler)))
 
 (defmethod ig/halt-key! :adapter/jetty
-  [_ server]
+  [_ ^Server server]
   (.stop server))
 
 (defn -main
