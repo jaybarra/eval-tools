@@ -12,9 +12,13 @@ __Example config.edn__
 
  :app/cmr {:instances {:prod {:url "https://cmr.earthdata.nasa.gov"
                        :echo-token #env "CMR_ECHO_TOKEN_PROD"}
+
                        :uat {:url "https://cmr.uat.earthdata.nasa.gov"
                        :echo-token "fixed-token-value"}
-                       :sit {:url "https://cmr.sit.earthdata.nasa.gov"}}
+
+                       :local {:url "http://localhost"
+                               :endpoints {:search "http://localhost:3003"
+                                           :access-control "http://localhost:3011"}}
            :db #ig/ref :db/document-store}
 
  :handler/webapp {:welcome-message "Good luck!!"}
@@ -23,6 +27,19 @@ __Example config.edn__
                  :port 8880
                  :join? false}}
 ```
+
+#### CMR Configuration
+A CMR config map consists of a map of maps.
+
+Eval Tools allows for multiple CMR clients to be configured simulaneously. Each CMR connection should be placed into the `:instances` map of `:app/cmr`.
+The identifier should be a keyword. A corresponding configuration map should be the value.
+
+The configuration map must include 
+
++ `:url`
++ `:echo-token`
+
+And may optionally include a `:endpoints` map to override the `:url` specified earlier. This endpoints map is useful when CMR is deployed locally in development mode or not hosted behind a reverse proxy or load-balancer. The endpoints should be a map consisting of the appropriate service name followed by the url of the service. See the above configuration for example
 
 #### Aero config tags
 To set properties from the environment, use the `#env` keyword followed by the environment variable.
@@ -33,7 +50,6 @@ To set properties from the environment, use the `#env` keyword followed by the e
 |:--------|:----------------------------------------------------------|:----------------------------------------------------------------------------|
 | `:crux` | Bi-temporal graph document store<br> Single node instance | `:log-dir` - optional<br> `:doc-dir` - optional<br> `:index-dir` - optional |
 | `:noop` | Prints to console                                         |                                                                             |
-
 
 ### eval.services.cmr
 The difference between the `eval.cmr` and `eval.services.cmr` is the former is designed to handle commands sent to CMR only. Any logic or functionality beyond interaction with CMR belongs in a service. The services are higher level operations that can provide additional user features. 

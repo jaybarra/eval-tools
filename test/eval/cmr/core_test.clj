@@ -40,7 +40,7 @@
 (deftest endpoints-override-test
   (let [client (->MockClient :foo
                              "http://test"
-                             {:endpoints {"search" "internal://localhost:32303"}})]
+                             {:endpoints {:search "internal://localhost:32303"}})]
     (is (= {:status 200}
            (cmr/invoke client
                        {:request

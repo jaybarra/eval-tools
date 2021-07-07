@@ -201,7 +201,7 @@
 
         ;; check if overriding the root-url
         override-url (when endpoints
-                       (get endpoints (second (str/split req-url #"/"))))
+                       (get endpoints (keyword (second (str/split req-url #"/")))))
         root-url (or override-url root-url)
 
         ;; if overriding the defaul endpoint also trim the request url
