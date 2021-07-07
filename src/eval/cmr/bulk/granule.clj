@@ -30,22 +30,37 @@
                            :opt [::name]))
 
 (defn post-job
-  [provider job]
-  (let [url (format "/ingest/providers/%s/bulk-update/granules" provider)]
-    {:method :post
-     :url url
-     :headers {"Content-Type" "application/json"}
-     :body (cmr/encode->json job)}))
+  [provider job & [opts]]
+  (let [url (format "/ingest/providers/%s/bulk-update/granules" provider)
+        command {:request
+                 {:method :post
+                  :url url
+                  :headers {"Content-Type" "application/json"}
+                  :body (cmr/encode->json job)}}]
+
+    (if opts
+      (assoc command :opts opts)
+      command)))
 
 (defn trigger-update
-  []
-  {:method :post
-   :url "/ingest/granule-bulk-update/status"})
+  [& [opts]]
+  (let [command {:request {:method :post
+                           :url "/ingest/granule-bulk-update/status"}}]
+    (if opts
+      (assoc command :opts opts)
+      command)))
 
 (defn get-job-status
-  [job-id & [opts]]
-  (let [req {:method :get
-             :url (format "/ingest/granule-bulk-update/status/%s" job-id)}]
-    (if opts
-      (assoc req :query-params opts)
-      req)))
+  [job-id  & [{progress? :show-progress
+               granules? :show-granules
+               request? :show-request :as opts}]]
+  (let [req (cond-> {:method :get
+                     :url (format "/ingest/granule-bulk-update/status/%s" job-id)}
+              progress? (assoc-in [:query-params "show_progress"] true)
+              granules? (assoc-in [:query-params "show_granules"] true)
+              request? (assoc-in [:query-params "show_request"] true))
+        command {:request req}
+        command-opts (dissoc opts :show-progress :show-granules :show-request)]
+    (if (seq (keys command-opts))
+      (assoc command :opts command-opts)
+      command)))

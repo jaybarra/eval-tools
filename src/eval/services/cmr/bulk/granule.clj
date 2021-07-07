@@ -13,7 +13,7 @@
 
 (defn submit-job!
   "POST a bulk granule update job to CMR and return the response."
-  [client provider job-def]
+  [client provider job-def & [opts]]
   (let [job (cmr/decode-cmr-response-body
              (cmr/invoke client (bulk-granule/post-job provider job-def)))]
     (log/info (format "Bulk Granule Update Job created with ID [%s]" (:task-id job)))

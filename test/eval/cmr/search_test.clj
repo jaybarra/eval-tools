@@ -7,7 +7,7 @@
 (deftest search-test
   (testing "correct url for concept-type"
     (are [concept-type url]
-        (= url (:url (search/search concept-type {:provider "FOO"})))
+        (= url (get-in (search/search concept-type {:provider "FOO"}) [:request :url]))
       :collection "/search/collections"
       :granule "/search/granules"
       :variable "/search/variables")))
@@ -18,13 +18,13 @@
            (get-in (search/scroll :collection
                                   {:provider "FOO"}
                                   "1234")
-                   [:headers "CMR-Scroll-Id"])))))
+                   [:request :headers "CMR-Scroll-Id"])))))
 
 (deftest clear-scroll-session-test
-  (let [{:keys [body] :as req} (search/clear-scroll-session "12345")]
-    (is (= {:method :post
-            :url "/search/clear-scroll"
-            :headers {:content-type "application/json"}}
-           (dissoc req :body)))
+  (let [command (search/clear-scroll-session "12345")]
+    (is (= {:request {:method :post
+                      :url "/search/clear-scroll"
+                      :headers {:content-type "application/json"}}}
+           (update command :request dissoc :body)))
     (is (= {"scroll_id" "12345"}
-           (json/read-value body)))))
+           (json/read-value (get-in command [:request :body]))))))

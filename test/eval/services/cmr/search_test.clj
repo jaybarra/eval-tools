@@ -10,7 +10,7 @@
   (testing "search against the correct endpoint"
     (let [test-client (cmr-test/client
                        (fn [_ query]
-                         (is (= "/search/collections" (get query :url)))
+                         (is (= "/search/collections" (:url query)))
                          (is (= "test-echo-token" (get-in query [:headers "Echo-Token"]))))
                        (constantly "test-echo-token"))
           context (cmr-test/context :test test-client)]
@@ -19,8 +19,8 @@
   (testing "options are passed to the client properly"
     (let [test-client (cmr-test/client
                        (fn [_ query]
-                         (is (= "/search/collections.umm_json" (get query :url)))
-                         (nil? (get-in query [:headers "Echo-Token"])))
+                         (is (= "/search/collections.umm_json" (:url query)))
+                         (is (nil? (get-in query [:headers "Echo-Token"]))))
                        (constantly "test-echo-token"))
           context (cmr-test/context :test test-client)]
       (search/search
@@ -30,15 +30,6 @@
        {:provider "FOO-PROV"}
        {:format :umm-json
         :anonymous? true}))))
-
-(deftest scroll-test
-  (let [test-client (cmr-test/client
-                     (fn [_ query]
-                       (is (= "/search/collections" (get query :url))
-                           {:status 200}))
-                     (constantly "test-echo-token"))
-        context (cmr-test/context :test test-client)]
-    (search/search context :test :collection {:provider "FOO-PROV"})))
 
 (deftest query-hits-test
   (testing "checks the CMR-Hits header value"
@@ -68,6 +59,7 @@
     (let [test-client
           (reify cmr/CmrClient
             (-invoke [_client query]
+              (println query)
               (is (= "existing-foo-scroll" (get-in query [:headers :CMR-Scroll-Id])))
               {:status 200
                :headers {:CMR-Hits "0"

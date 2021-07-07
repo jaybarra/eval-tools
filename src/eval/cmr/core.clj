@@ -89,6 +89,15 @@
 (spec/def ::url string?)
 (spec/def ::cmr (spec/keys :req-un [::id ::url]))
 
+(spec/def ::method #{:get :post :put :delete :option :head})
+(spec/def ::body any?)
+(spec/def ::headers map?)
+(spec/def ::request (spec/keys :req-un [::url ::method]
+                               :opt-un [::headers ::body]))
+(spec/def ::opts map?)
+(spec/def ::command (spec/keys :req-un [::request]
+                               :opt-un [::opts]))
+
 (def ^:private keyword->lowercase-str
   (comp str/lower-case name))
 
@@ -179,12 +188,16 @@
   ## Options
   :anonymous? boolean - when true, no echo-token will be added to the header
   :echo-token string  - when set, will be used unless :anonymous? is true "
-  [client request & [opts]]
-  (let [{root-url :url} client
-        token (and (not (:anonymous? opts))
-                   (or (:echo-token opts)
+  [client command]
+  (when-not (spec/valid? ::command command)
+    (throw (ex-info "Invalid CMR command"
+                    (spec/explain-data ::command command))))
+  (let [{:keys [anonymous? echo-token]} (:opts command)
+        {root-url :url} client
+        token (and (not anonymous?)
+                   (or echo-token
                        (-echo-token client)))
-        out-request (cond-> request
-                      true (assoc :url (str root-url (:url request)))
+        out-request (cond-> (:request command)
+                      true (assoc :url (str root-url (get-in command [:request :url])))
                       token (assoc-in [:headers "Echo-Token"] token))]
     (-invoke client out-request)))

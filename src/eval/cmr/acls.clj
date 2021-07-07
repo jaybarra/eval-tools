@@ -27,19 +27,24 @@
                                     ::catalog_item_identity]))
 
 (defn get-groups
-  [& [query]]
+  [& [query opts]]
   (let [request {:method :get
-                 :url "/access-control/groups"}]
-    (if query
-      (assoc request :query-params query)
-      request)))
+                 :url "/access-control/groups"}
+        request (if query (assoc request :query-params query) request)
+        command {:request request}]
+    (if opts
+      (assoc command :opts opts)
+      command)))
 
 (defn create-group
-  [group]
-  {:method :post
-   :url "/access-control/groups"
-   :headers {"Content-Type" "application/json"}
-   :body (cmr/encode->json group)})
+  [group & [opts]]
+  (let [command {:request {:method :post
+                           :url "/access-control/groups"
+                           :headers {"Content-Type" "application/json"}
+                           :body (cmr/encode->json group)}}]
+    (if opts
+      (assoc command :opts opts)
+      command)))
 
 (defn get-group
   "Constructs a query for getting a group by id.
@@ -47,77 +52,114 @@
   Options
   pretty | boolean"
   [group-id & [opts]]
-  (let [req {:method :get
-             :url (str "/access-control/groups/" group-id)}]
-    (if-let [pretty (get opts :pretty)]
-      (assoc-in req [:query-params :pretty] pretty)
-      req)))
+  (let [base {:method :get
+              :url (str "/access-control/groups/" group-id)}
+        req (if-let [pretty (get opts :pretty)]
+              (assoc-in base [:query-params :pretty] pretty)
+              base)
+        command {:request req}
+        command-opts (dissoc opts :pretty)]
+    (if (seq (keys command-opts))
+      (assoc command :opts command-opts)
+      command)))
 
 (defn delete-group
   "Constructs a query to delete a group by id."
-  [group-id]
-  {:method :delete
-   :url (str "/access-control/groups/" group-id)})
+  [group-id & [opts]]
+  (let [command {:request {:method :delete
+                           :url (str "/access-control/groups/" group-id)}}]
+    (if opts
+      (assoc command :opts opts)
+      command)))
 
 (defn update-group
   "Constructs a query to update a group."
-  [group-id group]
-  {:method :put
-   :url (str "/access-control/groups/" group-id)
-   :headers {"Content-Type" "application/json"}
-   :body (cmr/encode->json group)})
+  [group-id group & [opts]]
+  (let [request {:method :put
+                 :url (str "/access-control/groups/" group-id)
+                 :headers {"Content-Type" "application/json"}
+                 :body (cmr/encode->json group)}
+        command {:request request}]
+    (if opts
+      (assoc command :opts opts)
+      command)))
 
 (defn get-group-members
   [group-id & [opts]]
-  (let [req {:method :get
-             :url (str "/access-control/groups/" group-id "/members")}]
-    (if-let [pretty (get opts :pretty false)]
-      (assoc-in req [:query-params :pretty] pretty)
-      req)))
+  (let [request {:method :get
+                 :url (str "/access-control/groups/" group-id "/members")}
+        request (if-let [pretty (get opts :pretty false)]
+                  (assoc-in request [:query-params :pretty] pretty)
+                  request)
+        command {:request request}
+        command-opts (dissoc opts :pretty)]
+    (if (seq (keys command-opts))
+      (assoc command :opts command-opts)
+      command)))
 
 (defn remove-group-members
-  [group-id users]
-  {:method :delete
-   :url (str "/access-control/groups/" group-id "/members")
-   :headers {"Content-Type" "application/json"}
-   :body (cmr/encode->json users)})
+  [group-id users & [opts]]
+  (let [command
+        {:request {:method :delete
+                   :url (str "/access-control/groups/" group-id "/members")
+                   :headers {"Content-Type" "application/json"}
+                   :body (cmr/encode->json users)}}]
+    (if opts
+      (assoc command :opts opts)
+      command)))
 
 (defn get-acls
   "Return a query for requesting ACLs from "
-  [& [query]]
+  [& [query opts]]
   (let [request {:method :get
-                 :url "/access-control/acls"}]
-    (if query
-      (assoc request :query-params query)
-      request)))
+                 :url "/access-control/acls"}
+        request (if query
+                  (assoc request :query-params query)
+                  request)
+        command {:request request}]
+    (if opts
+      (assoc command :opts opts)
+      command)))
 
 (defn create-acl
   "Return a query for requesting ACLs from "
-  [acl]
-  {:method :post
-   :url "/access-control/acls"
-   :headers {"Content-Type" "application/json"}
-   :body (cmr/encode->json acl)})
+  [acl & [opts]]
+  (let [command
+        {:request {:method :post
+                   :url "/access-control/acls"
+                   :headers {"Content-Type" "application/json"}
+                   :body (cmr/encode->json acl)}}]
+    (if opts
+      (assoc command :opts opts)
+      command)))
 
 (defn get-permissions
-  [query]
-  {:method :get
-   :url (str "/access-control/permissions")
-   :query-params query})
+  [query & [opts]]
+  (let [command
+        {:request {:method :get
+                   :url (str "/access-control/permissions")
+                   :query-params query}}]
+    (if opts
+      (assoc command :opts opts)
+      command)))
 
 (defn get-s3-buckets
-  [user-id & [providers]]
+  [user-id & [providers opts]]
   (let [query {:method :get
                :url "/access-control/s3-buckets"
-               :query-params {:user-id user-id}}]
-    (if providers
-      (assoc-in query [:query-params :provider] providers)
-      query)))
+               :query-params {:user-id user-id}}
+        request (if providers
+                  (assoc-in query [:query-params :provider] providers)
+                  query)
+        command {:request request}]
+    (if opts
+      (assoc command :opts opts)
+      command)))
 
 (defn health
   [& [opts]]
   (let [req {:method :get
              :url "/access-control/health"}]
-    (if-let [pretty (get opts :pretty)]
-      (assoc-in req [:query-params :pretty] pretty)
-      req)))
+    {:request (if-let [pretty (get opts :pretty)]
+                (assoc-in req [:query-params :pretty] pretty)
+                req)}))

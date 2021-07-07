@@ -25,9 +25,9 @@ This tool is designed to interact with external APIs, with simplified commands a
 user=> (require '[eval.cmr.core :as cmr])
 user=> (require '[eval.cmr.search :as cmr-search])
 user=> (def my-client (cmr/create-client {:id :foo :url "http://instance"}))
-user=> (def query (cmr-search/search :collection {:provider "FOO"} {:format :umm-json})))
+user=> (def command (cmr-search/search :collection {:provider "FOO"} {:format :umm-json})))
 user=> (cmr/decode-cmr-response-body
-        (cmr/invoke my-client query))
+        (cmr/invoke my-client command))
 ```
 
 The services portion of the code will build on those basic commands and provide user-facing interactions and functionality.

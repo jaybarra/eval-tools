@@ -10,8 +10,8 @@
 
   (reify cmr/CmrClient
 
-    (-invoke [client query]
-      (invoke-fn client query))
+    (-invoke [client command]
+      (invoke-fn client command))
 
     (-echo-token [client]
       (echo-fn client))))

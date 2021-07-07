@@ -24,4 +24,5 @@
                       (-echo-token [_]
                         "test-token"))]
     (is (= {:status 200}
-           (cmr/invoke test-client {:foo :bar})))))
+           (cmr/invoke test-client {:request {:method :get
+                                              :url "/a/test"}})))))

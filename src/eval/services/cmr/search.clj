@@ -79,15 +79,13 @@
                          (dissoc :page_num :offset)
                          (assoc :scroll true))
         existing-scroll-id (:CMR-Scroll-Id opts)
-        request (search-api/search concept-type scroll-query opts)
-        scroll-request (cond-> request
+        command (search-api/search concept-type scroll-query opts)
+        scroll-request (cond-> command
                          existing-scroll-id (assoc-in
-                                             [:headers :CMR-Scroll-Id]
+                                             [:request :headers :CMR-Scroll-Id]
                                              existing-scroll-id))
-        response (cmr/invoke client scroll-request opts)
+        response (cmr/invoke client scroll-request)
         scroll-id (get-in response [:headers :CMR-Scroll-Id])]
-    (if existing-scroll-id
-      (log/debug "Continuing scroll [" scroll-id "]")
-      (log/debug "Started new scroll session [" scroll-id "]"))
+    (log/debug "Scroll session [" scroll-id "]")
     {:CMR-Scroll-Id scroll-id
      :response response}))
