@@ -10,11 +10,26 @@
   (testing "search against the correct endpoint"
     (let [test-client (cmr-test/client
                        (fn [_ query]
-                         (is (= "/search/collections" (get query :url))
-                             {:status 200}))
+                         (is (= "/search/collections" (get query :url)))
+                         (is (= "test-echo-token" (get-in query [:headers "Echo-Token"]))))
                        (constantly "test-echo-token"))
           context (cmr-test/context :test test-client)]
-      (search/search context :test :collection {:provider "FOO-PROV"}))))
+      (search/search context :test :collection {:provider "FOO-PROV"})))
+
+  (testing "options are passed to the client properly"
+    (let [test-client (cmr-test/client
+                       (fn [_ query]
+                         (is (= "/search/collections.umm_json" (get query :url)))
+                         (nil? (get-in query [:headers "Echo-Token"])))
+                       (constantly "test-echo-token"))
+          context (cmr-test/context :test test-client)]
+      (search/search
+       context
+       :test
+       :collection
+       {:provider "FOO-PROV"}
+       {:format :umm-json
+        :anonymous? true}))))
 
 (deftest scroll-test
   (let [test-client (cmr-test/client
