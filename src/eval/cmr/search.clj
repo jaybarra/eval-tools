@@ -30,4 +30,4 @@
   {:request {:method :post
              :url "/search/clear-scroll"
              :headers {:content-type "application/json"}
-             :body (cmr/encode->json {:scroll_id scroll-id})}})
+             :body (cmr/encode->json {:scroll_id (str scroll-id)})}})

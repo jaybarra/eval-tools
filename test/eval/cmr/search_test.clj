@@ -27,4 +27,12 @@
                       :headers {:content-type "application/json"}}}
            (update command :request dissoc :body)))
     (is (= {"scroll_id" "12345"}
+           (json/read-value (get-in command [:request :body])))))
+
+  (let [command (search/clear-scroll-session 56789)]
+    (is (= {:request {:method :post
+                      :url "/search/clear-scroll"
+                      :headers {:content-type "application/json"}}}
+           (update command :request dissoc :body)))
+    (is (= {"scroll_id" "56789"}
            (json/read-value (get-in command [:request :body]))))))
