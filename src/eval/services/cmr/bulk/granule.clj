@@ -13,27 +13,31 @@
 
 (defn submit-job!
   "POST a bulk granule update job to CMR and return the response."
-  [client provider job-def & [opts]]
-  (let [job (cmr/decode-cmr-response-body
+  [context cmr-inst provider job-def & [opts]]
+  (let [client (cmr-svc/context->client context cmr-inst)
+        job (cmr/decode-cmr-response-body
              (cmr/invoke client (bulk-granule/post-job provider job-def)))]
     (log/info (format "Bulk Granule Update Job created with ID [%s]" (:task-id job)))
     job))
 
 (defn trigger-status-update!
   "Trigger an update of bulk granule job statuses."
-  [client & [opts]]
-  (cmr/decode-cmr-response-body
-   (cmr/invoke client (bulk-granule/trigger-update opts))))
+  [context cmr-inst & [opts]]
+  (let [client (cmr-svc/context->client context cmr-inst)]
+    (cmr/decode-cmr-response-body
+     (cmr/invoke client (bulk-granule/trigger-update opts)))))
 
 (defn fetch-job-status
   "Request bulk granule update job status from CMR."
-  [client job-id & [opts]]
-  (let [{:keys [show_granules
-                show_progress
-                show_request]} opts
-        query-params {:show_granules (or show_granules false)
-                      :show_progress (or show_progress false)
-                      :show_request (or show_request false)}]
+  [context cmr-inst job-id & [opts]]
+
+  (let [client (cmr-svc/context->client context cmr-inst)
+        {:keys [show-granules
+                show-progress
+                show-request]} opts
+        query-params {:show_granules (or show-granules false)
+                      :show_progress (or show-progress false)
+                      :show_request (or show-request false)}]
     (cmr/decode-cmr-response-body
      (cmr/invoke client (bulk-granule/get-job-status job-id query-params)))))
 
