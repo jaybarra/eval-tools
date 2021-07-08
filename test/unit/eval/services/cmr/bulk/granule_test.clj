@@ -7,9 +7,7 @@
    [eval.cmr.core :as cmr]
    [eval.services.cmr.bulk.granule :as bulk-granule]
    [eval.services.cmr.test-core :as cmr-test]
-   [jsonista.core :as json])
-  (:import
-   [java.nio.file Files Path]))
+   [jsonista.core :as json]))
 
 (deftest benchmark-test
   (let [test-client (cmr-test/client
@@ -46,3 +44,12 @@
              ::bg/update-field "S3Link"
              ::bg/updates ["foo-granule-1" "s3://example/foo1"]}]
     (bulk-granule/submit-job! test-client "FOO_PROV" job)))
+
+(deftest fetch-job-status-test
+  (let [test-client (reify cmr/CmrClient
+                      (-invoke [_ query]
+                        (let [job-def (json/read-value (:body query) json/keyword-keys-object-mapper)]
+                          (is (= :get (:method query)))
+                          (is (= "/ingest/granule-bulk-update/status/12345" (:url query)))))
+                      (-echo-token [_] "mock-token"))]
+    (bulk-granule/fetch-job-status test-client 12345)))
