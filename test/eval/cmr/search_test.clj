@@ -9,7 +9,9 @@
     (are [concept-type url]
         (= url (get-in (search/search concept-type {:provider "FOO"}) [:request :url]))
       :collection "/search/collections"
+      :collections "/search/collections"
       :granule "/search/granules"
+      :granules "/search/granules"
       :variable "/search/variables")))
 
 (deftest scroll-test

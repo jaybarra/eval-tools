@@ -1,13 +1,19 @@
 (ns eval.cmr.search
   (:require
+   [clojure.string :as str]
    [eval.cmr.core :as cmr]))
 
 (defn search
   "Returns a query for a specific concept-type"
   [concept-type query & [opts]]
-  (let [search-url (format
-                    "/search/%ss%s"
-                    (name concept-type)
+
+  (let [concept-name (name concept-type)
+        path (if (str/ends-with? concept-name "s")
+               concept-name
+               (str concept-name "s"))
+        search-url (format
+                    "/search/%s%s"
+                    path
                     (cmr/format->cmr-extension (:format opts)))
         command {:request {:method :get
                            :url search-url
