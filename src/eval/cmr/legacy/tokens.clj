@@ -5,15 +5,13 @@
    [clojure.xml :as xml]
    [eval.cmr.core :as cmr]))
 
-(defn- echo-token-soap-message
+(defn echo-token-soap-message
   "Return a soap message for getting an echo-token from legacy systems.
 
   supported options
   * :ip-address
   * :act-as
-  * :on-behalf-of
-
-  TODO: rewrite this with clojure.xml "
+  * :on-behalf-of"
   [username password client-id & [opts]]
   (format
    "<Envelope xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">

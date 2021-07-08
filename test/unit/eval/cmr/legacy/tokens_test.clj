@@ -35,3 +35,7 @@
            (dissoc req :body)))
     (is (= {"id" "foo"}
            (json/read-value body)))))
+
+(deftest echo-token-soap-message-test
+  (is (string? (tokens/token-xml-request-body {:username "foo"
+                                               :password "bar"}))))

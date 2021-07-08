@@ -2,7 +2,8 @@
   (:require
    [clojure.test :refer [deftest testing is are]]
    [eval.cmr.core :as cmr]
-   [jsonista.core :as json]))
+   [jsonista.core :as json]
+   [muuntaja.core :as m]))
 
 (deftest client-test
   (is (some?
@@ -30,6 +31,14 @@
       (is (thrown-with-msg? clojure.lang.ExceptionInfo
                             #"Invalid CMR command"
                             (cmr/invoke test-client {:bad :command}))))))
+
+(deftest xml-formats-handled
+  (let [data (m/decode-response-body
+              cmr/m
+              {:status 200
+               :headers {"Content-Type" "application/xml"}
+               :body "<xml>value</xml>"})]
+    (is (= "<xml>value</xml>" data))))
 
 (defrecord ^:private MockClient [id url opts]
   cmr/CmrClient
