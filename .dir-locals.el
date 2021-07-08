@@ -1,2 +1,2 @@
 ((clojure-mode . ((cider-preferred-build-tool . clojure-cli)
-                  (cider-clojure-cli-aliases . ":env/dev:test/features"))))
+                  (cider-clojure-cli-aliases . ":env/dev"))))

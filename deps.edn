@@ -35,7 +35,7 @@
    :main-opts ["-m" "kaocha.runner" "--focus" :unit]}
 
   :test/features
-  {:extra-paths ["test"]
+  {:extra-paths ["test_features"]
    :extra-deps {lambdaisland/kaocha {:mvn/version "RELEASE"}
                 lambdaisland/kaocha-cloverage {:mvn/version "RELEASE"}
                 lambdaisland/kaocha-cucumber {:mvn/version "RELEASE"}
