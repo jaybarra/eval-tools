@@ -4,9 +4,10 @@
 
 The central CMR interaction namespace.
 
-### Example:
+### Examples:
 
-```cl
+#### Get a list of acls
+```clojure
 (go)                                            ;; start the service and load in the configuration
 (require '[eval.cmr.core :as cmr])              ;; required for sending commands to CMR
 (require '[eval.cmr.acls :as acls])             ;; required for generating ACL commands
@@ -20,4 +21,11 @@ The central CMR interaction namespace.
   (-> response
       cmr/decode-cmr-response-body
       :items))
+```
+
+#### Get a list of tags
+```clojure
+(->> (search (context) :prod :tag {:page_size 100})
+     :items
+     (map :tag_key))
 ```

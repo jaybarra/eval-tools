@@ -170,7 +170,8 @@
     :json ".json"
     :native ".native"
     :umm-json ".umm_json"
-    ;; default to empty, CMR will return XML(native) by default
+    :xml ".xml"
+    ;; default to empty, CMR will return default for the endpoint
     ""))
 
 (defn invoke
