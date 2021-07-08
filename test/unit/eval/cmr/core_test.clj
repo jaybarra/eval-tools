@@ -25,7 +25,11 @@
                         "test-token"))]
     (is (= {:status 200}
            (cmr/invoke test-client {:request {:method :get
-                                              :url "/a/test"}})))))
+                                              :url "/a/test"}})))
+    (testing "it rejects invalid commands"
+      (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                            #"Invalid CMR command"
+                            (cmr/invoke test-client {:bad :command}))))))
 
 (defrecord ^:private MockClient [id url opts]
   cmr/CmrClient
