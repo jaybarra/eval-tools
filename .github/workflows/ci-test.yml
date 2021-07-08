@@ -34,7 +34,36 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-
 
-    - name: Run Tests
+    - name: Run Unit Tests
       run: clojure -M:test/ci
 
     - uses: codecov/codecov-action@v1
+
+  feature-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - - uses: actions/checkout@v2
+
+    - name: Install Java
+      uses: actions/setup-java@v2
+      with:
+        distribution: adopt
+        java-version: '15'
+
+    - name: Install clojure tools
+      uses: DeLaGuardo/setup-clojure@3.5
+      with:
+        cli: 1.10.3.882
+
+    - name: Cache dependencies
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('deps.edn') }}
+        restore-keys: |
+          ${{ runner.os }}-
+
+    - name: Run Feature Tests
+      run: clojure -M:test/features
