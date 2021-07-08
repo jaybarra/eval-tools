@@ -37,5 +37,5 @@
            (json/read-value body)))))
 
 (deftest echo-token-soap-message-test
-  (is (string? (tokens/token-xml-request-body {:username "foo"
-                                               :password "bar"}))))
+  (is (string? (tokens/echo-token-soap-message
+                "username" "secret" "client"))))
