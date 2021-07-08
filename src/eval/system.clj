@@ -5,7 +5,6 @@
    [clojure.java.io :as io]
    [environ.core :refer [env]]
    [eval.cmr.core :as cmr]
-   [eval.db.event-store :as event-store]
    [eval.db.document-store :as doc-store]
    [eval.handler :as app]
    [integrant.core :as ig]
