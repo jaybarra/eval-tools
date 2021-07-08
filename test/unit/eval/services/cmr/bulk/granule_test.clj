@@ -53,3 +53,12 @@
                           (is (= "/ingest/granule-bulk-update/status/12345" (:url query)))))
                       (-echo-token [_] "mock-token"))]
     (bulk-granule/fetch-job-status test-client 12345)))
+
+(deftest trigger-status-update-test
+  (let [test-client (reify cmr/CmrClient
+                      (-invoke [_ query]
+                        (let [job-def (json/read-value (:body query) json/keyword-keys-object-mapper)]
+                          (is (= :post (:method query)))
+                          (is (= "/ingest/granule-bulk-update/status" (:url query)))))
+                      (-echo-token [_] "mock-token"))]
+    (bulk-granule/trigger-status-update! test-client)))
