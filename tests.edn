@@ -25,6 +25,7 @@
  :fail-fast? false
 
  :reporter #profile {:default kaocha.report/dots
+                     :cucumber kaocha.report/documentation
                      :ci kaocha.report/documentation}
 
  :kaocha.plugin.profiling/profiling? #profile {:default true :ci false}
