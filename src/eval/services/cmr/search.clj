@@ -86,6 +86,5 @@
                                              existing-scroll-id))
         response (cmr/invoke client scroll-request)
         scroll-id (get-in response [:headers :CMR-Scroll-Id])]
-    (log/debug "Scroll session [" scroll-id "]")
-    {:CMR-Scroll-Id scroll-id
-     :response response}))
+    (log/info "Scroll session [" scroll-id "]")
+    response))

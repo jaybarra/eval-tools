@@ -27,42 +27,45 @@
   (-> content .getBytes io/input-stream xml/parse))
 
 (deftest validate-concept-metadata-test
-  (let [{:keys [body] :as req} (ingest/validate-concept-metadata
-                                :granule
-                                "FOO"
-                                {:granule-ur "gr1"}
-                                {:format :umm-json})]
-    (is (= {:method :post
-            :headers {"Content-Type" "application/vnd.nasa.cmr.umm+json"}
-            :url "/ingest/providers/FOO/validate/granule/null"}
-           (dissoc req :body)))
+  (let [command (ingest/validate-concept-metadata
+                 :granule
+                 "FOO"
+                 {:granule-ur "gr1"}
+                 {:format :umm-json})]
+    (is (= {:request
+            {:method :post
+             :headers {"Content-Type" "application/vnd.nasa.cmr.umm+json"}
+             :url "/ingest/providers/FOO/validate/granule/null"}}
+           (update command :request dissoc :body)))
     (is (= {"granule-ur" "gr1"}
-           (json/read-value body))))
+           (json/read-value (get-in command [:request :body])))))
 
-  (let [{:keys [body] :as req} (ingest/validate-concept-metadata
-                                :collection
-                                "FOO"
-                                collection-metadata-xml
-                                {:format :xml})]
-    (is (= {:method :post
-            :headers {"Content-Type" "application/xml"}
-            :url "/ingest/providers/FOO/validate/collection/null"}
-           (dissoc req :body)))
+  (let [command (ingest/validate-concept-metadata
+                 :collection
+                 "FOO"
+                 collection-metadata-xml
+                 {:format :xml})]
+    (is (= {:request
+            {:method :post
+             :headers {"Content-Type" "application/xml"}
+             :url "/ingest/providers/FOO/validate/collection/null"}}
+           (update command :request dissoc :body)))
     (is (= (parse-xml collection-metadata-xml)
-           (parse-xml body)))))
+           (parse-xml (get-in command [:request :body]))))))
 
 (deftest create-concept-test
   (testing "without giving a native-id"
-    (let [{:keys [body] :as req} (ingest/create-concept
-                                  :collection
-                                  "FOO"
-                                  collection-metadata-xml
-                                  {:format :xml})]
-      (is (= {:method :put
-              :url "/ingest/providers/FOO/collections"
-              :headers {"Content-Type" "application/xml"}}
-             (dissoc req :body)))
-      (is (string? body))))
+    (let [command (ingest/create-concept
+                   :collection
+                   "FOO"
+                   collection-metadata-xml
+                   {:format :xml})]
+      (is (= {:request
+              {:method :put
+               :url "/ingest/providers/FOO/collections"
+               :headers {"Content-Type" "application/xml"}}}
+             (update command :request dissoc :body)))
+      (is (string? (get-in command [:request :body])))))
 
   (testing "without a native-id"
     (let [req (ingest/create-concept
@@ -71,17 +74,20 @@
                collection-metadata-xml
                {:format :json
                 :native-id "foo123"})]
-      (is (= {:method :put
-              :url "/ingest/providers/FOO/collections/foo123"
-              :headers {"Content-Type" "application/json"}}
-             (dissoc req :body))))))
+      (is (= {:request
+              {:method :put
+               :url "/ingest/providers/FOO/collections/foo123"
+               :headers {"Content-Type" "application/json"}}}
+             (update req :request dissoc :body))))))
 
 (deftest delete-concept-test
-  (is (= {:method :delete
-          :url "/ingest/providers/FOO/collections/1234"}
+  (is (= {:request
+          {:method :delete
+           :url "/ingest/providers/FOO/collections/1234"}}
          (ingest/delete-concept :collection "FOO" "1234"))))
 
 (deftest create-association-test
-  (is (= {:method :put
-          :url "/ingest/collections/c123/1/variables/v123"}
+  (is (= {:request
+          {:method :put
+           :url "/ingest/collections/c123/1/variables/v123"}}
          (ingest/create-association "c123" 1 "v123"))))

@@ -29,10 +29,11 @@
                           provider-id
                           (name concept-type)
                           (:native-id concept))
-             :body concept}]
-    (-> req
-        (update-req-content-type fmt)
-        (update-req-body fmt))))
+             :body concept}
+        request (-> req
+                    (update-req-content-type fmt)
+                    (update-req-body fmt))]
+    {:request request}))
 
 (defn create-concept
   "Returns a command to create a given concept."
@@ -42,10 +43,11 @@
                           provider-id
                           (str (name concept-type) "s")
                           (if native-id (str "/" native-id) ""))
-             :body concept}]
-    (-> req
-        (update-req-content-type fmt)
-        (update-req-body fmt))))
+             :body concept}
+        request (-> req
+                    (update-req-content-type fmt)
+                    (update-req-body fmt))]
+    {:request request}))
 
 (def update-concept
   "Alias for [[create-concept]]"
@@ -54,17 +56,19 @@
 (defn delete-concept
   "Mark a concept as deleted in CMR"
   [concept-type provider-id concept-native-id]
-  {:method :delete
-   :url (format "/ingest/providers/%s/%s/%s"
-                provider-id
-                (str (name concept-type) "s")
-                concept-native-id)})
+  {:request
+   {:method :delete
+    :url (format "/ingest/providers/%s/%s/%s"
+                 provider-id
+                 (str (name concept-type) "s")
+                 concept-native-id)}})
 
 (defn create-association
   "Create an association beteween collection and variable"
   [collection-id collection-revision variable-id]
-  {:method :put
-   :url (format "/ingest/collections/%s/%s/variables/%s"
-                collection-id
-                collection-revision
-                variable-id)})
+  {:request
+   {:method :put
+    :url (format "/ingest/collections/%s/%s/variables/%s"
+                 collection-id
+                 collection-revision
+                 variable-id)}})

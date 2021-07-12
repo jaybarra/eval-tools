@@ -11,17 +11,18 @@
   ([force-version-update?]
    (let [req {:method :post
               :url "/ingest/jobs/reindex-all-collections"}]
-     (if force-version-update?
-       (assoc req :query-params {:force_version "true"})
-       req))))
+     {:request (if force-version-update?
+                 (assoc req :query-params {:force_version "true"})
+                 req)})))
 
 (defn reindex-collection-permitted-groups
   "Schedule an immediate job to reindex permitted groups on collections. This is
   useful when altering ACLs and search results need to be made available
   quickly."
   []
-  {:method :post
-   :url "/ingest/jobs/reindex-collection-permitted-groups"})
+  {:request
+   {:method :post
+    :url "/ingest/jobs/reindex-collection-permitted-groups"}})
 
 (defn reindex-autocomplete-suggestions
   "Schedule a job to update the autocomplete suggestions list. The autocomplete
@@ -29,27 +30,32 @@
   running this will index all newly ingested items and the autocomplete suggestions
   will become available."
   []
-  {:method :post
-   :url "/ingest/jobs/reindex-autocomplete-suggestions"})
+  {:request
+   {:method :post
+    :url "/ingest/jobs/reindex-autocomplete-suggestions"}})
 
 (defn cleanup-expired-collections
   "Schedule a job to cleanup expired collections."
   []
-  {:method :post
-   :url "/ingest/jobs/cleanup-expired-collections"})
+  {:request
+   {:method :post
+    :url "/ingest/jobs/cleanup-expired-collections"}})
 
 (defn trigger-full-collection-granule-aggregate-cache-refresh
   "Schedule a job to refresh granule aggregate cache."
   []
-  {:method :post
-   :url "/ingest/jobs/trigger-full-collection-granule-aggregate-cache-refresh"})
+  {:request
+   {:method :post
+    :url "/ingest/jobs/trigger-full-collection-granule-aggregate-cache-refresh"}})
 
 (defn trigger-partial-collection-granule-aggregate-cache-refresh
   []
-  {:method :post
-   :url "/ingest/jobs/trigger-partial-collection-granule-aggregate-cache-refresh"})
+  {:request
+   {:method :post
+    :url "/ingest/jobs/trigger-partial-collection-granule-aggregate-cache-refresh"}})
 
 (defn trigger-granule-task-cleanup
   []
-  {:method :post
-   :url "/ingest/jobs/trigger-granule-task-cleanup-job"})
+  {:request
+   {:method :post
+    :url "/ingest/jobs/trigger-granule-task-cleanup-job"}})
