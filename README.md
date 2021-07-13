@@ -44,14 +44,15 @@ while these two functions will perform equivalent actions, the service version i
 
 ## Common development tasks
 
-| Task                  | Command                  |
-|-----------------------|--------------------------|
-| Download dependencies | `clj -Spath`             |
-| Start the REPL        | `clj -M:env/dev`         |
-| Run unit tests        | `clj -M:test/unit`       |
-| Run the project       | `clj -M -m eval.system`  |
+| Task                  | Command                   |
+|-----------------------|---------------------------|
+| Download dependencies | `clj -Spath`              |
+| Start the REPL        | `clj -M:env/dev`          |
+| Run unit tests        | `clj -M:test/unit`        |
+| Run feature tests     | `clj -M:test/features`    |
+| Run the project       | `clj -M -m eval.system`   |
 | Check deps            | `clj -X:project/outdated` |
-| Package application   | `clj -X:project/uberjar` |
+| Package application   | `clj -X:project/uberjar`  |
 
 ## Common REPL commands
 
@@ -63,13 +64,21 @@ while these two functions will perform equivalent actions, the service version i
 | Reset all components              | `(user/reset-all` |
 | Return the current system context | `(user/context)`  |
 
+## Shadow-CLJS 
+
+To start the Shadow-CLJS REPL
+```sh
+npm install
+npx shadow-cljs watch app
+```
+
 ### Emacs + Cider
 
 Create or override your `.dir-locals.el` file and run cider from Emacs
 
 ```cl
 ((clojure-mode . ((cider-preferred-build-tool . clojure-cli)
-                  (cider-clojure-cli-aliases . ":env/dev"))))
+                  (cider-clojure-cli-aliases . "env/dev:env/cljs"))))
 ```
 
 ## License
