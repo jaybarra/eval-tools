@@ -8,7 +8,8 @@
 (deftest api-route-test
   (let [app (handler/create-app)]
     (is (= {:status 200
-            :headers {"Content-Type" "application/json; charset=utf-8"}
+            :headers {"Content-Type" "application/json; charset=utf-8"
+                      "Access-Control-Allow-Origin" "*"}
             :body {:status "green"
                    :name "Eval Tools"
                    :version "0.1.0-SNAPSHOT"}}

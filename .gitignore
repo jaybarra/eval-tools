@@ -1,6 +1,7 @@
 ## OS stuff
 .DS_Store
 
+## Local data
 data/
 
 ## Created things
@@ -16,23 +17,25 @@ pom.xml.asc
 .lsp
 .clj-kondo
 .cider-repl-history
-.nrepl-port
 .cpcache/
 
 ## leiningen
-.lein-deps-sum
-.lein-repl-history
 .lein-plugins/
-.lein-failures
+.lein-*
+.nrepl-*
 
 ## Files
 *.jar
 *.class
 *.log
-node_modules
 
 ## local configurations
 profiles.clj
 
 ## IDE files
 .idea
+
+## Clojurescript
+node_modules/
+resources/public/js
+.shadow-cljs
