@@ -56,11 +56,11 @@
      :instances clients}))
 
 (defmethod ig/init-key :handler/webapp
-  [_ {message :welcome-message}]
+  [_ {message :welcome-message cmr :cmr}]
   (log/info (or message "Good Luck!!"))
   (when-let [banner (io/resource "banner.txt")]
     (log/info (slurp banner)))
-  (app/create-app))
+  (app/create-app cmr))
 
 (defmethod ig/init-key :adapter/jetty
   [_ {:keys [handler port] :as opts}]

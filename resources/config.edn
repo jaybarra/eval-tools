@@ -12,10 +12,12 @@
                                :echo-token "mock-echo-system-token"
                                :endpoints {:access-control "http://localhost:3011"
                                            :search "http://localhost:3003"
-                                           :ingest "http://localhost:3002"}}}
+                                           :ingest "http://localhost:3002"
+                                           :metadata-db "http://localhost:3001"}}}
            :db #ig/ref :db/document-store}
 
- :handler/webapp {:welcome-message "Good luck!!"}
+ :handler/webapp {:welcome-message "Good luck!!"
+                  :cmr #ig/ref :app/cmr}
 
  :adapter/jetty {:handler #ig/ref :handler/webapp
                  :port 8880

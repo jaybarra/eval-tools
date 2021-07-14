@@ -4,7 +4,6 @@
    [clojure.string :as str]
    [eval.cmr.bulk.granule :as bulk-granule]
    [eval.cmr.core :as cmr]
-   [eval.services.cmr.core :as cmr-svc]
    [muuntaja.core :as muuntaja]
    [taoensso.timbre :as log])
   (:import
@@ -13,26 +12,23 @@
 
 (defn submit-job!
   "POST a bulk granule update job to CMR and return the response."
-  [context cmr-inst provider job-def & [opts]]
-  (let [client (cmr-svc/context->client context cmr-inst)
-        job (cmr/decode-cmr-response-body
+  [client provider job-def & [opts]]
+  (let [job (cmr/decode-cmr-response-body
              (cmr/invoke client (bulk-granule/post-job provider job-def)))]
     (log/info (format "Bulk Granule Update Job created with ID [%s]" (:task-id job)))
     job))
 
 (defn trigger-status-update!
   "Trigger an update of bulk granule job statuses."
-  [context cmr-inst & [opts]]
-  (let [client (cmr-svc/context->client context cmr-inst)]
-    (cmr/decode-cmr-response-body
-     (cmr/invoke client (bulk-granule/trigger-update opts)))))
+  [client & [opts]]
+  (cmr/decode-cmr-response-body
+   (cmr/invoke client (bulk-granule/trigger-update opts))))
 
 (defn fetch-job-status
   "Request bulk granule update job status from CMR."
-  [context cmr-inst job-id & [opts]]
+  [client job-id & [opts]]
 
-  (let [client (cmr-svc/context->client context cmr-inst)
-        {:keys [show-granules
+  (let [{:keys [show-granules
                 show-progress
                 show-request]} opts
         query-params {:show_granules (or show-granules false)
@@ -45,11 +41,10 @@
   "Request status with a delay to compute per-second updates happening
   in the bulk granule update job.
   TODO: make an async, non-blocking version"
-  ([context cmr-inst task-id]
-   (benchmark context cmr-inst task-id 1))
-  ([context cmr-inst task-id time-in-sec]
-   (let [client (cmr-svc/context->client context cmr-inst)
-         resp (cmr/decode-cmr-response-body
+  ([client task-id]
+   (benchmark client task-id 1))
+  ([client task-id time-in-sec]
+   (let [resp (cmr/decode-cmr-response-body
                (cmr/invoke client
                            (bulk-granule/get-job-status
                             task-id

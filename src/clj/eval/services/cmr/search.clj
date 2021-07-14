@@ -5,15 +5,13 @@
    [clojure.string :as str]
    [eval.cmr.core :as cmr]
    [eval.cmr.search :as search-api]
-   [eval.services.cmr.core :refer [context->client]]
    [taoensso.timbre :as log]))
 
 (defn search
   "Search concepts for concepts"
-  [context cmr-inst concept-type query & [opts]]
-  (let [client (context->client context cmr-inst)]
-    (cmr/decode-cmr-response-body
-     (cmr/invoke client (search-api/search concept-type query opts)))))
+  [client concept-type query & [opts]]
+  (cmr/decode-cmr-response-body
+   (cmr/invoke client (search-api/search concept-type query opts))))
 
 (defn query-hits
   "Query CMR for count of available concepts that are available from
@@ -21,9 +19,8 @@
 
   Takes a query and sets a :page_size of 0 and returns
   the CMR-Hits header string as an integer value."
-  [context cmr-inst concept-type query & [opts]]
-  (let [client (context->client context cmr-inst)
-        query (-> query
+  [client concept-type query & [opts]]
+  (let [query (-> query
                   (as-> q (search-api/search concept-type q opts))
                   (assoc :page_size 0))]
     (-> (cmr/invoke client query)
@@ -31,9 +28,8 @@
         Integer/parseInt)))
 
 (defn clear-scroll-session!
-  [context cmr-inst session-id]
-  (let [client (context->client context cmr-inst)]
-    (cmr/invoke client (search-api/clear-scroll-session session-id))))
+  [client session-id]
+  (cmr/invoke client (search-api/clear-scroll-session session-id)))
 
 (defn scroll!
   "Begin or continue a scrolling session and returns a map with
@@ -73,9 +69,8 @@
   Repeated calls will yield additional results.
 
   Be sure to call [[clear-scroll-session!]] when finished. "
-  [context cmr-inst concept-type query & [opts]]
-  (let [client (context->client context cmr-inst)
-        scroll-query (-> query
+  [client concept-type query & [opts]]
+  (let [scroll-query (-> query
                          (dissoc :page_num :offset)
                          (assoc :scroll true))
         existing-scroll-id (:CMR-Scroll-Id opts)

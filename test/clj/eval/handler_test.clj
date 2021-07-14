@@ -6,7 +6,7 @@
    [ring.mock.request :as mock]))
 
 (deftest api-route-test
-  (let [app (handler/create-app)]
+  (let [app (handler/create-app nil)]
     (is (= {:status 200
             :headers {"Content-Type" "application/json; charset=utf-8"
                       "Access-Control-Allow-Origin" "*"}
