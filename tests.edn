@@ -1,14 +1,15 @@
 #kaocha/v1
-{:tests [{:id :unit
-          :test-paths ["test/clj"]}
+#meta-merge [#include "tests.common.edn"
+             {:tests [{:id :unit
+                       :test-paths ["test/clj"]}
 
-         {:id :features
-          :type :kaocha.type/cucumber
-          :test-paths ["test_features/features"]
-          :cucumber/glue-paths ["test_features/steps_definitions"]}]
+                      {:id :features
+                       :type :kaocha.type/cucumber
+                       :test-paths ["test_features/features"]
+                       :cucumber/glue-paths ["test_features/steps_definitions"]}]
 
- :kaocha/plugins [:kaocha.plugin/cloverage]
+              :kaocha/plugins [:kaocha.plugin/cloverage]
 
- :kaocha/reporter #profile {:default kaocha.report/dots
-                            :cucumber kaocha.report/documentation
-                            :ci kaocha.report/documentation}}
+              :kaocha/reporter #profile {:default kaocha.report/dots
+                                         :cucumber kaocha.report/documentation
+                                         :ci kaocha.report/documentation}}]
