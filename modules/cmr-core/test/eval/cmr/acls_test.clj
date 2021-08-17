@@ -3,8 +3,7 @@
    [clojure.spec.alpha :as spec]
    [clojure.spec.gen.alpha :as gen]
    [clojure.test :refer :all]
-   [eval.cmr.acls :as acls]
-   [jsonista.core :as json]))
+   [eval.cmr.acls :as acls]))
 
 (deftest get-groups-test
   (is (= {:request {:url "/access-control/groups"
@@ -55,10 +54,10 @@
                       :url "/access-control/groups"
                       :headers {"Content-Type" "application/json"}}}
            (update command :request dissoc :body)))
-    (is (= {"name" "admins"
-            "description" "super duper users"
-            "members" ["user1" "user2"]}
-           (json/read-value (get-in command [:request :body])))))
+    (is (= {:name "admins"
+            :description "super duper users"
+            :members ["user1" "user2"]}
+           (get-in command [:request :body]))))
   (testing "with additional options"
     (let [command (acls/create-group
                    {:name "admins"
@@ -87,8 +86,8 @@
                       :method :put
                       :headers {"Content-Type" "application/json"}}}
            (update command :request dissoc :body)))
-    (is (= {"description" "a better description"}
-           (json/read-value (get-in command [:request :body])))))
+    (is (= {:description "a better description"}
+           (get-in command [:request :body]))))
 
   (testing "with options"
     (let [command (acls/update-group "foo-id" {:description "a worse description"} {:foo :buz})]
@@ -122,7 +121,7 @@
                       :headers {"Content-Type" "application/json"}}}
            (update command :request dissoc :body)))
     (is (= ["user1" "user2"]
-           (json/read-value (get-in command [:request :body])))))
+           (get-in command [:request :body]))))
   (testing "with options"
     (let [command (acls/remove-group-members "foo-group" ["user1" "user2"] {:x :y})]
       (is (= {:request {:method :delete
@@ -161,14 +160,14 @@
                       :url "/access-control/acls"
                       :headers {"Content-Type" "application/json"}}}
            (update command :request dissoc :body)))
-    (is (= {"group_permissions"
-            [{"group_id" "foo"
-              "permissions" ["read" "order"]}]
-            "catalog_item_identity"
-            {"name" "all granules"
-             "provider_id" "foo"
-             "granule_applicable" true}}
-           (json/read-value (get-in command [:request :body])))))
+    (is (= {:group_permissions
+            [{:group_id "foo"
+              :permissions ["read" "order"]}]
+            :catalog_item_identity
+            {:name "all granules"
+             :provider_id "foo"
+             :granule_applicable true}}
+           (get-in command [:request :body]))))
 
   (testing "passing options"
     (let [command (acls/create-acl

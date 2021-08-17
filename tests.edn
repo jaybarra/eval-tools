@@ -7,33 +7,8 @@
           :test-paths ["test_features/features"]
           :cucumber/glue-paths ["test_features/steps_definitions"]}]
 
- :plugins #profile {:default [:kaocha.plugin.alpha/info
-                              :kaocha.plugin/cloverage
-                              :kaocha.plugin/randomize
-                              :capture-output
-                              :print-invocations
-                              :profiling]
+ :kaocha/plugins [:kaocha.plugin/cloverage]
 
-                    :cucumber [:kaocha.plugin.alpha/info
-                               :kaocha.plugin/randomize
-                               :capture-output
-                               :print-invocations
-                               :profiling]}
-
- :color? #profile {:default true :ci false}
-
- :fail-fast? false
-
- :reporter #profile {:default kaocha.report/dots
-                     :cucumber kaocha.report/documentation
-                     :ci kaocha.report/documentation}
-
- :kaocha.plugin.profiling/profiling? #profile {:default true :ci false}
- :kaocha.plugin.profiling/count 3
-
- :kaocha.plugin.randomize/randomize? true
-
- :cloverage/opts
- {:summary? false
-  :html? #profile {:default true :ci false}
-  :codecov? #profile {:default false :ci true}}}
+ :kaocha/reporter #profile {:default kaocha.report/dots
+                            :cucumber kaocha.report/documentation
+                            :ci kaocha.report/documentation}}

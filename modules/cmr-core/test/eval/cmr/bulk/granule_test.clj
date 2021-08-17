@@ -3,8 +3,7 @@
    [clojure.spec.alpha :as spec]
    [clojure.test :refer :all]
    [eval.cmr.bulk.granule :as bulk-granule]
-   [eval.cmr.core :as cmr]
-   [jsonista.core :as json]))
+   [eval.cmr.core :as cmr]))
 
 (deftest post-job-test
   (let [command (bulk-granule/post-job "foo" {})]
@@ -13,7 +12,7 @@
                       :headers {"Content-Type" "application/json"}}}
            (update-in command [:request] dissoc :body)))
     (is (= {}
-           (json/read-value (get-in command [:request :body]))))))
+           (get-in command [:request :body])))))
 
 (deftest trigger-update-test
   (is (= {:request {:method :post

@@ -2,8 +2,7 @@
   "Actions for interacting with the CMR legacy systems."
   (:require
    [clj-http.client :as http]
-   [clojure.xml :as xml]
-   [eval.cmr.core :as cmr]))
+   [clojure.xml :as xml]))
 
 (defn echo-token-soap-message
   "Return a soap message for getting an echo-token from legacy systems.
@@ -71,4 +70,4 @@
   {:method :post
    :url "/legacy-services/rest/tokens/get_token_info"
    :headers {"Content-Type" "application/json"}
-   :body (cmr/encode->json {:id token-id})})
+   :body {:id token-id}})

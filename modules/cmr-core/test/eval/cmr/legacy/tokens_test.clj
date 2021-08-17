@@ -6,8 +6,7 @@
    [clojure.xml :as xml]
    [clj-http.client :as http]
    [eval.cmr.core :as cmr]
-   [eval.cmr.legacy.tokens :as tokens]
-   [jsonista.core :as json]))
+   [eval.cmr.legacy.tokens :as tokens]))
 
 (set! *warn-on-reflection* true)
 
@@ -33,8 +32,7 @@
             :url "/legacy-services/rest/tokens/get_token_info"
             :headers {"Content-Type" "application/json"}}
            (dissoc req :body)))
-    (is (= {"id" "foo"}
-           (json/read-value body)))))
+    (is (= {:id "foo"} body))))
 
 (deftest echo-token-soap-message-test
   (is (string? (tokens/echo-token-soap-message

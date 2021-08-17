@@ -48,16 +48,14 @@
   (doc-store/stop-document-store store))
 
 (defmethod ig/init-key :app/cmr
-  [_ {:keys [db instances :as opts]}]
+  [_ {:keys [instances :as opts]}]
   (log/info "CMR application initialized")
   (let [clients (apply merge (for [[k v] instances]
                                {k (cmr/create-client (merge {:id k} v))}))]
-    {:db db
-     :instances clients}))
+    {:instances clients}))
 
 (defmethod ig/init-key :handler/webapp
-  [_ {message :welcome-message cmr :cmr}]
-  (log/info (or message "Good Luck!!"))
+  [_ {:keys [cmr]}]
   (when-let [banner (io/resource "banner.txt")]
     (log/info (slurp banner)))
   (app/create-app cmr))

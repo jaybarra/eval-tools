@@ -110,15 +110,12 @@
   CmrClient
 
   (-invoke [this query]
-    (log/debug "Sending request to CMR"
-               (select-keys this [:id :url])
-               (-> query
-                   (dissoc :body)
-                   (update-in
-                    [:headers "Echo-Token"]
-                    (fn [s] (when (and s (not= s :anonymous?))
-                             (str (subs s 0 8) "-XXXX-XXXX-XXXX-XXXXXXXXXXXX"))))))
-    (http/request query))
+    (letfn [(obfuscate-token [q]
+              (if (string? (get-in q [:headers "Echo-Token"]))
+                (update-in q [:headers "Echo-Token"] #(str (subs % 0 8) "-XXXX-XXXX-XXXX-XXXXXXXXXXXX"))
+                q))]
+      (log/debug (format"Sending request to CMR [%s]" (get this :url)) (obfuscate-token query))
+      (http/request query)))
 
   (-echo-token [this]
     (get-in this [:opts :echo-token])))
@@ -172,6 +169,16 @@
     :xml ".xml"
     ;; default to empty, CMR will return default for the endpoint
     ""))
+
+(defn- encode-req-body
+  "Determines if the body needs to be encoded and updates the :body of the request.
+  Uses the [[cmr-formats]] to determine encoding"
+  [req fmt]
+  (letfn [(process-body [data]
+            (if (some #{:umm-json :json} [fmt])
+              (encode->json data)
+              data))]
+    (update req :body process-body)))
 
 (defn invoke
   "Invoke CMR endpoints with a request map and return quit the response.

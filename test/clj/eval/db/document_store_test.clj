@@ -3,7 +3,7 @@
    [clojure.test :refer [deftest testing is]]
    [eval.db.document-store :as ds]))
 
-(deftest create-document-store-test
+(deftest ^:kaocha/skip create-document-store-test
   (let [dbstore (ds/create-document-store {:type :noop})]
     (is (not (nil? dbstore)))
 
@@ -11,7 +11,7 @@
     (.query dbstore {})
     (.halt! dbstore)))
 
-(deftest stop-document-store-test
+(deftest ^:kaocha/skip stop-document-store-test
   (let [dbstore (reify ds/DocumentStore
                   (save! [this document] nil)
                   (query [this query] nil)

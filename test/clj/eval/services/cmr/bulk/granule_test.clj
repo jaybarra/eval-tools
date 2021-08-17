@@ -8,28 +8,10 @@
    [eval.services.cmr.bulk.granule :as bulk-granule]
    [jsonista.core :as json]))
 
-(deftest benchmark-test
-  (let [client (reify cmr/CmrClient
-                 (-invoke [_ query]
-                   (is (= "/ingest/granule-bulk-update/status/1" (get query :url))
-                       {:status 200}))
-                 (-echo-token [_] "test-echo-token"))]
-    (bulk-granule/benchmark client 1)))
-
-(deftest add-update-instructions-test
-  (testing "uses the transformation given for each granule-ur"
-    (let [new-job (bulk-granule/add-update-instructions
-                   {}
-                   ["gran1" "gran2"]
-                   (constantly "s3://example.com/bucket"))]
-      (is (= [["gran1" "s3://example.com/bucket"]
-              ["gran2" "s3://example.com/bucket"]]
-             (:updates new-job))))))
-
 (deftest submit-job-test
   (let [client (reify cmr/CmrClient
                  (-invoke [_ query]
-                   (let [job-def (json/read-value (:body query) json/keyword-keys-object-mapper)]
+                   (let [job-def (:body query)]
                      (is (= :post (:method query)))
                      (is (= "/ingest/providers/FOO_PROV/bulk-update/granules" (:url query)))
                      (is (spec/valid? ::bg/job job-def)
@@ -46,7 +28,7 @@
 (deftest fetch-job-status-test
   (let [client (reify cmr/CmrClient
                  (-invoke [_ query]
-                   (let [job-def (json/read-value (:body query) json/keyword-keys-object-mapper)]
+                   (let [job-def (:body query)]
                      (is (= :get (:method query)))
                      (is (= "/ingest/granule-bulk-update/status/12345" (:url query)))))
                  (-echo-token [_] "mock-token"))]
@@ -55,7 +37,7 @@
 (deftest trigger-status-update-test
   (let [client (reify cmr/CmrClient
                  (-invoke [_ query]
-                   (let [job-def (json/read-value (:body query) json/keyword-keys-object-mapper)]
+                   (let [job-def (:body query)]
                      (is (= :post (:method query)))
                      (is (= "/ingest/granule-bulk-update/status" (:url query)))))
                  (-echo-token [_] "mock-token"))]

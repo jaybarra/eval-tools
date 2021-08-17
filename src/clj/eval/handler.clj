@@ -2,8 +2,10 @@
   "Core web handler"
   (:require
    [clojure.java.io :as io]
+
    [eval.api.health :as health]
-   [eval.api.providers :as providers]
+   [eval.api.cmr :as cmr]
+
    [integrant.core :as ig]
    [muuntaja.core :as m]
    [reitit.coercion.spec]
@@ -39,12 +41,30 @@
    :description "add cmr context to requests"
    :wrap cmr-middlware-wrapper})
 
+(derive ::not-found ::exception)
+(derive ::failure ::exception)
+(derive ::error ::exception)
+
+(defn local-error-handler
+  [message ex request]
+  {:status 500
+   :body {:message message
+          ;; :exception (.getClass ex)
+          :data (ex-data ex)
+          :uri (:uri request)}})
+
+(def cmr-exception-middleware
+  (exception/create-exception-middleware
+   (merge
+    exception/default-handlers
+    {:cmr (partial local-error-handler "CMR Error")})))
+
 (defn create-app
   "Return a configured handler instance."
   [cmr]
   (ring/ring-handler
    (ring/router
-    ["/api" [providers/routes
+    ["/api" [cmr/routes
              health/routes]]
     {:data {:coercion reitit.coercion.spec/coercion
             :muuntaja m/instance
@@ -56,8 +76,11 @@
                          rrc/coerce-request-middleware
                          rrc/coerce-response-middleware
                          multipart/multipart-middleware
+
+                         ;; Custom middleware
                          cors-middleware
-                         [cmr-middleware cmr]]}
+                         [cmr-middleware cmr]
+                         cmr-exception-middleware]}
      :exception pretty/exception})
    (ring/routes
     (ring/create-resource-handler {:path "/"})

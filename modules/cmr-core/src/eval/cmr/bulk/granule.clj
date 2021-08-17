@@ -9,10 +9,8 @@
   * Check the status of jobs"
   (:require
    [clojure.core.async :as a]
-   [clojure.data.csv :as csv]
    [clojure.spec.alpha :as spec]
    [clojure.string :as str]
-   [eval.cmr.core :as cmr]
    [muuntaja.core :as muuntaja]
    [taoensso.timbre :as log]))
 
@@ -21,7 +19,8 @@
 (spec/def ::operation #{"UPDATE_FIELD"
                         "APPEND_TO_FIELD"})
 (spec/def ::update-field #{"OPeNDAPLink"
-                           "S3Link"})
+                           "S3Link"
+                           "Checksum"})
 (spec/def ::name string?)
 (spec/def ::provider string?)
 (spec/def ::job (spec/keys :req [::operation
@@ -36,7 +35,7 @@
                  {:method :post
                   :url url
                   :headers {"Content-Type" "application/json"}
-                  :body (cmr/encode->json job)}}]
+                  :body job}}]
 
     (if opts
       (assoc command :opts opts)

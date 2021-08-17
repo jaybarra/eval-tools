@@ -82,4 +82,22 @@
         response (cmr/invoke client scroll-request)
         scroll-id (get-in response [:headers :CMR-Scroll-Id])]
     (log/info "Scroll session [" scroll-id "]")
-    response))
+    {:CMR-Scroll-Id scroll-id
+     :response response}))
+
+(defn scroll-for-ddi
+  [client query & [opts]]
+  (let [{:keys [scroll-id response]} (scroll! client :collection query opts)
+        items (cmr/umm-json-response->items response)]
+    (try
+      (loop [scrolled (count items)
+             batch items]
+        (if (or (zero? items)
+                (> scrolled 100))
+          (clojure.pprint/pprint batch)
+          (recur (+ scrolled (count batch))
+                 (-> (scroll! client :collection query {:CMR-Scroll-Id scroll-id})
+                     :response
+                     cmr/umm-json-response->items))))
+      (finally
+        (cmr/invoke client (search-api/clear-scroll-session scroll-id))))))

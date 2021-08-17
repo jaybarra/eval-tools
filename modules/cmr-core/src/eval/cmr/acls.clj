@@ -10,8 +10,7 @@
                 :url \"https://cmr.earthdata.nasa.gov\"})
   (cmr/invoke client (acl/get-acls))"
   (:require
-   [clojure.spec.alpha :as spec]
-   [eval.cmr.core :as cmr]))
+   [clojure.spec.alpha :as spec]))
 
 (spec/def ::group (spec/keys :req-un [::name]
                              :opt-un [::description
@@ -41,7 +40,7 @@
   (let [command {:request {:method :post
                            :url "/access-control/groups"
                            :headers {"Content-Type" "application/json"}
-                           :body (cmr/encode->json group)}}]
+                           :body group}}]
     (if opts
       (assoc command :opts opts)
       command)))
@@ -78,7 +77,7 @@
   (let [request {:method :put
                  :url (str "/access-control/groups/" group-id)
                  :headers {"Content-Type" "application/json"}
-                 :body (cmr/encode->json group)}
+                 :body group}
         command {:request request}]
     (if opts
       (assoc command :opts opts)
@@ -103,7 +102,7 @@
         {:request {:method :delete
                    :url (str "/access-control/groups/" group-id "/members")
                    :headers {"Content-Type" "application/json"}
-                   :body (cmr/encode->json users)}}]
+                   :body users}}]
     (if opts
       (assoc command :opts opts)
       command)))
@@ -125,10 +124,11 @@
   "Return a query for requesting ACLs from "
   [acl & [opts]]
   (let [command
-        {:request {:method :post
-                   :url "/access-control/acls"
-                   :headers {"Content-Type" "application/json"}
-                   :body (cmr/encode->json acl)}}]
+        {:request
+         {:method :post
+          :url "/access-control/acls"
+          :headers {"Content-Type" "application/json"}
+          :body acl}}]
     (if opts
       (assoc command :opts opts)
       command)))
@@ -136,9 +136,10 @@
 (defn get-permissions
   [query & [opts]]
   (let [command
-        {:request {:method :get
-                   :url (str "/access-control/permissions")
-                   :query-params query}}]
+        {:request
+         {:method :get
+          :url (str "/access-control/permissions")
+          :query-params query}}]
     (if opts
       (assoc command :opts opts)
       command)))

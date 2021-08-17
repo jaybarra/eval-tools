@@ -3,10 +3,7 @@
    [clojure.java.io :as io]
    [clojure.test :refer [deftest testing is are]]
    [clojure.xml :as xml]
-   [eval.cmr.ingest :as ingest]
-   [jsonista.core :as json]))
-
-(set! *warn-on-reflection* true)
+   [eval.cmr.ingest :as ingest]))
 
 (def collection-metadata-xml
   "<Collection>
@@ -37,8 +34,8 @@
              :headers {"Content-Type" "application/vnd.nasa.cmr.umm+json"}
              :url "/ingest/providers/FOO/validate/granule/null"}}
            (update command :request dissoc :body)))
-    (is (= {"granule-ur" "gr1"}
-           (json/read-value (get-in command [:request :body])))))
+    (is (= {:granule-ur "gr1"}
+           (get-in command [:request :body]))))
 
   (let [command (ingest/validate-concept-metadata
                  :collection

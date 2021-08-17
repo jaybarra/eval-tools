@@ -1,0 +1,9 @@
+#kaocha/v1
+{:kaocha/plugins []
+
+ :kaocha/fail-fast? false
+
+ :kaocha.plugin.randomize/randomize? true
+
+ :cloverage/opts {:html? #profile {:default true :ci false}
+                  :codecov? #profile {:default false :ci true}}}

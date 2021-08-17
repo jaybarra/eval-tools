@@ -2,7 +2,8 @@
   (:require
    [eval.cmr.core :as cmr]
    [eval.cmr.providers :as providers]
-   [ring.util.response :refer [response]]))
+   [ring.util.response :refer [response]]
+   [taoensso.timbre :as log]))
 
 (defn create-provider
   [client provider & [opts]]

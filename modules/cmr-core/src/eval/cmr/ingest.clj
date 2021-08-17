@@ -8,16 +8,6 @@
   [req fmt]
   (assoc-in req [:headers "Content-Type"] (cmr/format->mime-type fmt)))
 
-(defn- update-req-body
-  "Determines if the body needs to be encoded and updates the :body of the request.
-  Uses the [[cmr/cmr-formats]] to determine encoding"
-  [req fmt]
-  (letfn [(process-body [data]
-            (if (some #{:umm-json :json} [fmt])
-              (cmr/encode->json data)
-              data))]
-    (update req :body process-body)))
-
 (defn validate-concept-metadata
   "Returns a command to validate a given concept.
   Supported concept-types:
@@ -30,9 +20,7 @@
                           (name concept-type)
                           (:native-id concept))
              :body concept}
-        request (-> req
-                    (update-req-content-type fmt)
-                    (update-req-body fmt))]
+        request (update-req-content-type req fmt)]
     {:request request}))
 
 (defn create-concept
@@ -44,9 +32,7 @@
                           (str (name concept-type) "s")
                           (if native-id (str "/" native-id) ""))
              :body concept}
-        request (-> req
-                    (update-req-content-type fmt)
-                    (update-req-body fmt))]
+        request (update-req-content-type req fmt)]
     {:request request}))
 
 (def update-concept
