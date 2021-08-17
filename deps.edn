@@ -52,19 +52,6 @@
                "--profile" :cucumber
                "--focus" :features]}
 
-  ;; Run tests in CI environment
-  :test/ci
-  {:extra-paths ["test/clj"]
-
-   :main-opts ["-m" "kaocha.runner"
-               "--focus" :unit
-               "--profile" :ci]}
-
-  ;; Check for out of date dependencies
-  :project/outdated
-  {:extra-deps {com.github.liquidz/antq {:mvn/version "RELEASE"}}
-   :main-opts ["-m" "antq.core"]}
-
   ;; Uberjar
   :project/uberjar
   {:extra-deps {uberdeps/uberdeps {:mvn/version "RELEASE"}}
