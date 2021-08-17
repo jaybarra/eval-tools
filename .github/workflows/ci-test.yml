@@ -44,7 +44,7 @@ jobs:
       if: ${{ matrix.java == '16'}}
       with:
         name: cmr-test-coverage
-        path: target/coverage/codecov.json
+        path: modules/cmr-core/target/coverage/codecov.json
         
   app-unit-tests:
     runs-on: ubuntu-latest
