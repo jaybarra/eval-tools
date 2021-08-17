@@ -5,12 +5,15 @@ on:
   pull_request:
 
 jobs:
-  unit-tests:
+  cmr-unit-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: modules/cmr-core
+
     strategy:
       matrix:
-        java: ['8', '11', '15']
-        
-    runs-on: ubuntu-latest
+        java: ['8', '16']
 
     steps:
     - uses: actions/checkout@v2
@@ -35,10 +38,70 @@ jobs:
           ${{ runner.os }}-
 
     - name: Run Unit Tests
-      run: clojure -M:test/ci
+      run: clojure -M:test --profile :ci
+      
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v2.2.4
+      with:
+        name: cmr-test-coverage
+        path: target/coverage/codecov.json
+        
+  app-unit-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: ['8', '16']
 
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install Java
+      uses: actions/setup-java@v2
+      with:
+        distribution: adopt
+        java-version: ${{ matrix.java }}
+
+    - name: Install clojure tools
+      uses: DeLaGuardo/setup-clojure@3.5
+      with:
+        cli: 1.10.3.905
+
+    - name: Cache dependencies
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('deps.edn') }}
+        restore-keys: |
+          ${{ runner.os }}-
+
+    - name: Run Unit Tests
+      run: clojure -M:test --profile :ci
+      
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v2.2.4
+      with:
+        name: app-test-coverage
+        path: target/coverage/codecov.json
+      
+  aggreagate-coverage:
+    runs-on: ubuntu-latest
+    needs: [cmr-unit-tests, app-unit-tests]
+    
+    steps:
+    - name: Download a Build Artifact 
+      uses: actions/download-artifact@v2.0.10  
+      with:
+       name: cmr-unit-test
+       path: modules/cmr-core/target/coverage
+
+    - name: Download a Build Artifact 
+      uses: actions/download-artifact@v2.0.10  
+      with:
+       name: app-unit-test
+       path: modules/cmr-core/target/coverage
+       
     - uses: codecov/codecov-action@v1
-
+    
   feature-tests:
     runs-on: ubuntu-latest
     steps:
@@ -48,7 +111,7 @@ jobs:
       uses: actions/setup-java@v2
       with:
         distribution: adopt
-        java-version: '15'
+        java-version: '16'
 
     - name: Install clojure tools
       uses: DeLaGuardo/setup-clojure@3.5
