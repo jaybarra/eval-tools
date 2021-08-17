@@ -40,8 +40,8 @@ jobs:
     - name: Run Unit Tests
       run: clojure -M:test/unit --profile :ci
       
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v2.2.4
+    - uses: actions/upload-artifact@v2.2.4
+      if: ${{ matrix.java == '16'}}
       with:
         name: cmr-test-coverage
         path: target/coverage/codecov.json
@@ -77,8 +77,8 @@ jobs:
     - name: Run Unit Tests
       run: clojure -M:test/unit --profile :ci
       
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v2.2.4
+    - uses: actions/upload-artifact@v2.2.4
+      if: ${{ matrix.java == '16'}}
       with:
         name: app-test-coverage
         path: target/coverage/codecov.json
@@ -90,17 +90,15 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Download a Build Artifact 
-      uses: actions/download-artifact@v2.0.10  
+    - uses: actions/download-artifact@v2.0.10  
       with:
        name: cmr-test-coverage
        path: modules/cmr-core/target/coverage/
 
-    - name: Download a Build Artifact 
-      uses: actions/download-artifact@v2.0.10  
+    - uses: actions/download-artifact@v2.0.10  
       with:
        name: app-test-coverage
-       path: modules/cmr-core/target/coverage/
+       path: target/coverage/
        
     - uses: codecov/codecov-action@v1
     
