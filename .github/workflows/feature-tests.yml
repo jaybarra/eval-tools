@@ -1,0 +1,33 @@
+name: Run Feature Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  feature-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install Java
+      uses: actions/setup-java@v2
+      with:
+        distribution: adopt
+        java-version: '16'
+
+    - name: Install clojure tools
+      uses: DeLaGuardo/setup-clojure@3.5
+      with:
+        cli: 1.10.3.949
+
+    - name: Cache dependencies
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('deps.edn') }}
+        restore-keys: |
+          ${{ runner.os }}-
+
+    - name: Run Feature Tests
+      run: clojure -M:test/features
