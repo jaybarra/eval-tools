@@ -5,7 +5,7 @@
 
 (defn upload-collection
   "Submit a collection to CMR and return the response."
-  [client provider-id collection & [opts]]
+  [client provider-id collection]
   (cmr/invoke client
               (ingest/create-concept :collection
                                      provider-id

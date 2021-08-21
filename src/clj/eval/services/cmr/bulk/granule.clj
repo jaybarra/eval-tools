@@ -1,18 +1,14 @@
 (ns eval.services.cmr.bulk.granule
   (:require
-   [clojure.java.io :as io]
-   [clojure.string :as str]
    [eval.cmr.bulk.granule :as bulk-granule]
    [eval.cmr.core :as cmr]
-   [muuntaja.core :as muuntaja]
    [taoensso.timbre :as log])
   (:import
-   (java.util Scanner)
    (java.time Instant)))
 
 (defn submit-job!
   "POST a bulk granule update job to CMR and return the response."
-  [client provider job-def & [opts]]
+  [client provider job-def]
   (let [job (cmr/decode-cmr-response-body
              (cmr/invoke client (bulk-granule/post-job provider job-def)))]
     (log/info (format "Bulk Granule Update Job created with ID [%s]" (:task-id job)))

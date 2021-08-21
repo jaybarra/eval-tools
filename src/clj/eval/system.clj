@@ -1,7 +1,7 @@
 (ns eval.system
   "Main entrypoint to the Eval Tools system."
   (:require
-   [aero.core :as aero :refer [read-config]]
+   [aero.core :as aero]
    [clojure.java.io :as io]
    [environ.core :refer [env]]
    [eval.cmr.core :as cmr]
@@ -17,9 +17,7 @@
 (set! *warn-on-reflection* true)
 
 ;; Let Aero know how to read integrant references
-(defmethod aero/reader 'ig/ref
-  [{:keys [profile] :as opts} _tag value]
-  (ig/ref value))
+(defmethod aero/reader 'ig/ref [_ _ value] (ig/ref value))
 
 ;; default handler for integrant
 (defmethod ig/init-key :default [_ _cfg])
@@ -48,7 +46,7 @@
   (doc-store/stop-document-store store))
 
 (defmethod ig/init-key :app/cmr
-  [_ {:keys [instances :as opts]}]
+  [_ {:keys [instances]}]
   (log/info "CMR application initialized")
   (let [clients (apply merge (for [[k v] instances]
                                {k (cmr/create-client (merge {:id k} v))}))]

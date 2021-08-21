@@ -27,7 +27,7 @@
 (defmulti create-document-store :type)
 
 (defmethod create-document-store :default
-  [opts]
+  [_]
   ;; TODO convert to in-memory store
   (log/warn "NOOP document store, no persistence")
   (reify DocumentStore

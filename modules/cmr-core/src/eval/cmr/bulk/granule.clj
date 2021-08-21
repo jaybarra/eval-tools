@@ -8,11 +8,7 @@
   * Submit jobs for processing
   * Check the status of jobs"
   (:require
-   [clojure.core.async :as a]
-   [clojure.spec.alpha :as spec]
-   [clojure.string :as str]
-   [muuntaja.core :as muuntaja]
-   [taoensso.timbre :as log]))
+   [clojure.spec.alpha :as spec]))
 
 (spec/def ::instruction (spec/cat :granule-ur string? :value string?))
 (spec/def ::updates (spec/+ ::instruction))

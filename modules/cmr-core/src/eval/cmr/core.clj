@@ -98,9 +98,6 @@
 (spec/def ::command (spec/keys :req-un [::request]
                                :opt-un [::opts]))
 
-(def ^:private keyword->lowercase-str
-  (comp str/lower-case name))
-
 (defprotocol CmrClient
   (-invoke [client query] "Send a query to CMR")
   (-echo-token [client] "Return the echo-token associated with this client"))
@@ -124,7 +121,7 @@
   "Constructs a CMR client.
   An invalid configuration will result in an exception being thrown."
   [cmr-cfg]
-  (let [{:keys [id url] :as cfg} cmr-cfg]
+  (let [{:keys [id url]} cmr-cfg]
     (when-not (spec/valid? ::cmr cmr-cfg)
       (throw (ex-info "Invalid CMR configuration"
                       (spec/explain-data ::cmr cmr-cfg))))
@@ -169,16 +166,6 @@
     :xml ".xml"
     ;; default to empty, CMR will return default for the endpoint
     ""))
-
-(defn- encode-req-body
-  "Determines if the body needs to be encoded and updates the :body of the request.
-  Uses the [[cmr-formats]] to determine encoding"
-  [req fmt]
-  (letfn [(process-body [data]
-            (if (some #{:umm-json :json} [fmt])
-              (encode->json data)
-              data))]
-    (update req :body process-body)))
 
 (defn invoke
   "Invoke CMR endpoints with a request map and return quit the response.

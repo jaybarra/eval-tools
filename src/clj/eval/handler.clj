@@ -1,23 +1,17 @@
 (ns eval.handler
   "Core web handler"
   (:require
-   [clojure.java.io :as io]
-
    [eval.api.health :as health]
    [eval.api.cmr :as cmr]
-
-   [integrant.core :as ig]
    [muuntaja.core :as m]
    [reitit.coercion.spec]
    [reitit.dev.pretty :as pretty]
    [reitit.ring :as ring]
    [reitit.ring.coercion :as rrc]
-   [reitit.middleware :as middleware]
    [reitit.ring.middleware.exception :as exception]
    [reitit.ring.middleware.multipart :as multipart]
    [reitit.ring.middleware.muuntaja :as muuntaja]
-   [reitit.ring.middleware.parameters :as parameters]
-   [taoensso.timbre :as log]))
+   [reitit.ring.middleware.parameters :as parameters]))
 
 (defn cors-middleware-wrapper
   [handler]

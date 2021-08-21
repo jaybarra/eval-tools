@@ -1,8 +1,5 @@
 (ns eval.cmr.legacy.tokens
-  "Actions for interacting with the CMR legacy systems."
-  (:require
-   [clj-http.client :as http]
-   [clojure.xml :as xml]))
+  "Actions for interacting with the CMR legacy systems.")
 
 (defn echo-token-soap-message
   "Return a soap message for getting an echo-token from legacy systems.

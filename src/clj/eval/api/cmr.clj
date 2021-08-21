@@ -1,10 +1,6 @@
 (ns eval.api.cmr
   (:require
-   [clj-http.client :as http]
-   [clojure.spec.alpha :as spec]
-   [clojure.walk :as walk]
    [eval.services.cmr.providers :as providers]
-   [taoensso.timbre :as log]
    [ring.util.response :refer [response not-found]]))
 
 (defn cmr-not-found-wrapper

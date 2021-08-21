@@ -1,6 +1,6 @@
 (ns eval.core
   (:require
-   [ajax.core :refer [GET POST]]
+   [ajax.core :refer [GET]]
    [reagent.core :as reagent]
    [reagent.dom :as reagent-dom]))
 
@@ -11,26 +11,24 @@
 
 (GET "http://localhost:8880/api/health"
      {:handler       (fn [res] (swap! state assoc :health res))
-      :error-handler (fn [res] (swap! state assoc :health "Failed Connection"))})
+      :error-handler (fn [_] (swap! state assoc :health "Failed Connection"))})
 
 (GET "http://localhost:8880/api/cmr/local/providers"
      {:handler       (fn [res] (swap! state update :local assoc :providers res))
-      :error-handler (fn [res] (swap! state update :local dissoc :providers))})
+      :error-handler (fn [_] (swap! state update :local dissoc :providers))})
 
 (GET "http://localhost:3003/collections.umm_json"
      {:handler       (fn [res] (swap! state update :local assoc :collections (:items res)))
-      :error-handler (fn [res] (swap! state update :local dissoc :collections))})
+      :error-handler (fn [_] (swap! state update :local dissoc :collections))})
 
 (defn provider-card [{short-name :short-name
-                      provider-id :provider-id
-                      cmr-only :cmr-only
-                      small :small}]
+                      provider-id :provider-id}]
   [:div.card {:key provider-id}
    [:div.card-content
     [:div.media-content
      [:p.title short-name]]]])
 
-(defn collection-card [{umm :umm
+(defn collection-card [{_ :umm
                         {concept-id :concept-id
                          entry-title :entry-title} :meta}]
   [:div.card {:key concept-id}

@@ -1,8 +1,5 @@
 (ns eval.services.cmr.search
   (:require
-   [clojure.core.async :as a]
-   [clojure.java.io :as io]
-   [clojure.string :as str]
    [eval.cmr.core :as cmr]
    [eval.cmr.search :as search-api]
    [taoensso.timbre :as log]))
@@ -84,20 +81,3 @@
     (log/info "Scroll session [" scroll-id "]")
     {:CMR-Scroll-Id scroll-id
      :response response}))
-
-(defn scroll-for-ddi
-  [client query & [opts]]
-  (let [{:keys [scroll-id response]} (scroll! client :collection query opts)
-        items (cmr/umm-json-response->items response)]
-    (try
-      (loop [scrolled (count items)
-             batch items]
-        (if (or (zero? items)
-                (> scrolled 100))
-          (clojure.pprint/pprint batch)
-          (recur (+ scrolled (count batch))
-                 (-> (scroll! client :collection query {:CMR-Scroll-Id scroll-id})
-                     :response
-                     cmr/umm-json-response->items))))
-      (finally
-        (cmr/invoke client (search-api/clear-scroll-session scroll-id))))))
