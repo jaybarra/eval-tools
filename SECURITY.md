@@ -2,8 +2,7 @@
 
 ## Supported Versions
 
-This project is in the alpha of Alpha, alpha squared if you will. Versioning has not been properly established yet 
-and is prone to drastic changes.
+This project is in the alpha of Alpha, alpha squared if you will. Versioning has not been properly established yet and is prone to drastic changes.
 
 | Version | Supported          |
 | ------- | ------------------ |

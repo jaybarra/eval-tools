@@ -49,7 +49,7 @@ To set properties from the environment, use the `#env` keyword followed by the e
 | `:noop` | Prints to console                                         |                                                                             |
 
 ### eval.services.cmr
-The difference between the `eval.cmr` and `eval.services.cmr` is the former is designed to handle commands sent to CMR only. Any logic or functionality beyond interaction with CMR belongs in a service. The services are higher level operations that can provide additional user features. 
+The difference between the `eval.cmr` and `eval.services.cmr` is the former is designed to handle commands sent to CMR only. Any logic or functionality beyond interaction with CMR belongs in a service. The services are higher level operations that can provide additional user features.
 
 ### eval.cmr.core
 The central CMR interaction namespace. This namespace provides low-level queries to CMR.

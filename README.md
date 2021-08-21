@@ -68,7 +68,7 @@ while these two functions will perform equivalent actions, the service version i
 | Reset all components              | `(user/reset-all` |
 | Return the current system context | `(user/context)`  |
 
-## Shadow-CLJS 
+## Shadow-CLJS
 
 To start the Shadow-CLJS REPL
 ```sh

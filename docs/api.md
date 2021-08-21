@@ -4,9 +4,9 @@
 
 The central CMR interaction namespace.
 
-## Examples:
+## Examples
 
-### Get a list of acls
+### Get a list of ACLs
 ```clojure
 (go)                                            ;; start the service and load in the configuration
 (require '[eval.cmr.core :as cmr])              ;; required for sending commands to CMR
