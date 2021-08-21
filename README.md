@@ -8,6 +8,12 @@
     <img alt="Code Coverage Report"
          src="https://codecov.io/gh/jaybarra/eval-tools/branch/core/graph/badge.svg?token=IUCQG02UCE"/>
   </a>
+
+  <a href="#">
+    <img alt="Linter Report"
+         src="https://github.com/jaybarra/eval-tools/workflows/Lint%20Code%20Base/badge.svg"/>
+  </a>
+
 </p>
 
 # Eval Tools
