@@ -1,9 +1,7 @@
 (ns eval.cmr.bulk.granule-test
   (:require
-   [clojure.spec.alpha :as spec]
-   [clojure.test :refer :all]
-   [eval.cmr.bulk.granule :as bulk-granule]
-   [eval.cmr.core :as cmr]))
+   [clojure.test :refer [deftest testing is]]
+   [eval.cmr.bulk.granule :as bulk-granule]))
 
 (deftest post-job-test
   (let [command (bulk-granule/post-job "foo" {})]

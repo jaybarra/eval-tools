@@ -1,7 +1,7 @@
 (ns eval.cmr.ingest-test
   (:require
    [clojure.java.io :as io]
-   [clojure.test :refer [deftest testing is are]]
+   [clojure.test :refer [deftest testing is]]
    [clojure.xml :as xml]
    [eval.cmr.ingest :as ingest]))
 

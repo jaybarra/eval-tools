@@ -1,8 +1,7 @@
 (ns eval.services.cmr.bulk.granule-test
   (:require
-   [clojure.java.io :as io]
    [clojure.spec.alpha :as spec]
-   [clojure.test :refer [deftest is testing use-fixtures]]
+   [clojure.test :refer [deftest is]]
    [eval.cmr.bulk.granule :as bg]
    [eval.cmr.core :as cmr]
    [eval.services.cmr.bulk.granule :as bulk-granule]
@@ -28,17 +27,15 @@
 (deftest fetch-job-status-test
   (let [client (reify cmr/CmrClient
                  (-invoke [_ query]
-                   (let [job-def (:body query)]
-                     (is (= :get (:method query)))
-                     (is (= "/ingest/granule-bulk-update/status/12345" (:url query)))))
+                   (is (= :get (:method query)))
+                   (is (= "/ingest/granule-bulk-update/status/12345" (:url query))))
                  (-echo-token [_] "mock-token"))]
     (bulk-granule/fetch-job-status client 12345)))
 
 (deftest trigger-status-update-test
   (let [client (reify cmr/CmrClient
                  (-invoke [_ query]
-                   (let [job-def (:body query)]
-                     (is (= :post (:method query)))
-                     (is (= "/ingest/granule-bulk-update/status" (:url query)))))
+                   (is (= :post (:method query)))
+                   (is (= "/ingest/granule-bulk-update/status" (:url query))))
                  (-echo-token [_] "mock-token"))]
     (bulk-granule/trigger-status-update! client)))

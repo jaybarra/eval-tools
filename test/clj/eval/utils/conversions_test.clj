@@ -1,6 +1,6 @@
 (ns eval.utils.conversions-test
   (:require
-   [clojure.test :refer :all]
+   [clojure.test :refer [deftest is are]]
    [eval.utils.conversions :as conversions]
    [eval.utils.core :refer [within?]]))
 

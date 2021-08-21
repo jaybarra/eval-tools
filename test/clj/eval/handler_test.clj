@@ -1,6 +1,6 @@
 (ns eval.handler-test
   (:require
-   [clojure.test :refer [deftest testing is]]
+   [clojure.test :refer [deftest is]]
    [eval.handler :as handler]
    [jsonista.core :as json]
    [ring.mock.request :as mock]))

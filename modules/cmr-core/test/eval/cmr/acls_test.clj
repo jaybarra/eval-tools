@@ -1,8 +1,6 @@
 (ns eval.cmr.acls-test
   (:require
-   [clojure.spec.alpha :as spec]
-   [clojure.spec.gen.alpha :as gen]
-   [clojure.test :refer :all]
+   [clojure.test :refer [deftest testing is]]
    [eval.cmr.acls :as acls]))
 
 (deftest get-groups-test

@@ -15,5 +15,6 @@ jobs:
         uses: github/super-linter@v4
         env:
           DEFAULT_BRANCH: core
+          FILTER_REGEX_EXCLUDE: .*test_features/.*
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         

@@ -8,8 +8,8 @@
  :aliases
  {:test/unit
   {:extra-paths ["test"]
-   :extra-deps {lambdaisland/kaocha {:mvn/version "RELEASE"}
-                lambdaisland/kaocha-cloverage {:mvn/version "RELEASE"}
-                metosin/jsonista {:mvn/version "RELEASE"}
-                org.clojure/test.check {:mvn/version "RELEASE"}}
+   :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.861"}
+                lambdaisland/kaocha-cloverage {:mvn/version "1.0.75"}
+                metosin/jsonista {:mvn/version "0.3.3"}
+                org.clojure/test.check {:mvn/version "1.1.0"}}
    :main-opts ["-m" "kaocha.runner" "--focus" :unit]}}}

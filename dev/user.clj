@@ -1,10 +1,7 @@
 (ns user
-  "Developer namespace for controlling the app."
   (:require
-   [clojure.pprint :refer [pprint pp]]
-   [clojure.repl :refer [doc source]]
-   [clojure.stacktrace :as st]
    [integrant.repl :as ig-repl]
+   [integrant.repl.state]
    [eval.system :refer [config]]
    [taoensso.timbre :as log]))
 

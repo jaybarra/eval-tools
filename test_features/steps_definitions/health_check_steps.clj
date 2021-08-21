@@ -4,7 +4,7 @@
    [clojure.string :as str]
    [clojure.test :refer [is]]
    [eval.system :as system]
-   [lambdaisland.cucumber.dsl :refer [Given When Then pending!]]))
+   [lambdaisland.cucumber.dsl :refer [Given When Then]]))
 
 (Given "The server is running" [state]
   (assoc state :system (system/-main)))

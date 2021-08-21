@@ -1,6 +1,6 @@
 (ns eval.services.cmr.search-test
   (:require
-   [clojure.test :refer [deftest testing is are]]
+   [clojure.test :refer [deftest testing is]]
    [eval.cmr.core :as cmr]
    [eval.services.cmr.search :as search]
    [jsonista.core :as json]))

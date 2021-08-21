@@ -20,9 +20,9 @@
  {;; Dev environment
   :env/dev
   {:extra-paths ["dev"]
-   :extra-deps {integrant/repl {:mvn/version "RELEASE"}
-                nrepl/nrepl {:mvn/version "RELEASE"}
-                org.clojure/tools.namespace {:mvn/version "RELEASE"}
+   :extra-deps {integrant/repl {:mvn/version "0.3.2"}
+                nrepl/nrepl {:mvn/version "0.8.3"}
+                org.clojure/tools.namespace {:mvn/version "1.1.0"}
                 ring/ring-devel {:mvn/version "1.9.4"}
                 ring/ring-mock {:mvn/version "0.4.0"}}}
 
@@ -31,22 +31,22 @@
    :extra-deps {cljs-ajax/cljs-ajax {:mvn/version "0.8.3"}
                 org.clojure/clojurescript {:mvn/version "1.10.879"}
                 reagent/reagent {:mvn/version "1.1.0"}
-                thheller/shadow-cljs {:mvn/version "RELEASE"}}}
+                thheller/shadow-cljs {:mvn/version "2.15.5"}}}
 
   :test/unit
   {:extra-paths ["test/clj"]
-   :extra-deps {lambdaisland/kaocha {:mvn/version "RELEASE"}
-                lambdaisland/kaocha-cloverage {:mvn/version "RELEASE"}
-                org.clojure/test.check {:mvn/version "RELEASE"}
+   :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.861"}
+                lambdaisland/kaocha-cloverage {:mvn/version "1.0.75"}
+                org.clojure/test.check {:mvn/version "1.1.0"}
                 ring/ring-mock {:mvn/version "0.4.0"}}
    :main-opts ["-m" "kaocha.runner" "--focus" :unit]   }
 
   :test/features
   {:extra-paths ["test_features"]
-   :extra-deps {lambdaisland/kaocha {:mvn/version "RELEASE"}
-                lambdaisland/kaocha-cloverage {:mvn/version "RELEASE"}
-                lambdaisland/kaocha-cucumber {:mvn/version "RELEASE"}
-                org.clojure/test.check {:mvn/version "RELEASE"}
+   :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.861"}
+                lambdaisland/kaocha-cloverage {:mvn/version "1.0.75"}
+                lambdaisland/kaocha-cucumber {:mvn/version "0.0-53"}
+                org.clojure/test.check {:mvn/version "1.1.0"}
                 ring/ring-mock {:mvn/version "0.4.0"}}
    :main-opts ["-m" "kaocha.runner"
                "--profile" :cucumber
@@ -54,5 +54,5 @@
 
   ;; Uberjar
   :project/uberjar
-  {:extra-deps {uberdeps/uberdeps {:mvn/version "RELEASE"}}
+  {:extra-deps {uberdeps/uberdeps {:mvn/version "1.0.4"}}
    :main-opts  ["-m" "uberdeps.uberjar" "--target" "target/eval-tools-0.1.0.jar"]}}}

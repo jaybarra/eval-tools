@@ -1,11 +1,8 @@
 (ns eval.cmr.legacy.tokens-test
   "Actions for interacting with the CMR legacy systems."
   (:require
-   [clojure.string :as str]
-   [clojure.test :refer [deftest testing is are]]
+   [clojure.test :refer [deftest is]]
    [clojure.xml :as xml]
-   [clj-http.client :as http]
-   [eval.cmr.core :as cmr]
    [eval.cmr.legacy.tokens :as tokens]))
 
 (set! *warn-on-reflection* true)

@@ -1,6 +1,6 @@
 (ns eval.db.document-store-test
   (:require
-   [clojure.test :refer [deftest testing is]]
+   [clojure.test :refer [deftest is]]
    [eval.db.document-store :as ds]))
 
 (deftest ^:kaocha/skip create-document-store-test

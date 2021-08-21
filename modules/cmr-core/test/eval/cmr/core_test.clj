@@ -1,8 +1,7 @@
 (ns eval.cmr.core-test
   (:require
-   [clojure.test :refer [deftest testing is are]]
+   [clojure.test :refer [deftest testing is]]
    [eval.cmr.core :as cmr]
-   [jsonista.core :as json]
    [muuntaja.core :as m]))
 
 (deftest client-test
@@ -43,11 +42,11 @@
 (defrecord ^:private MockClient [id url opts]
   cmr/CmrClient
 
-  (-invoke [this query]
+  (-invoke [_ query]
     (is (= "internal://localhost:32303/collections.umm_json"
            (:url query)))
     {:status 200})
-  (-echo-token [this]
+  (-echo-token [_]
     "foo"))
 
 (deftest endpoints-override-test

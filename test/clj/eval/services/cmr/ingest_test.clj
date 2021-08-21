@@ -1,6 +1,6 @@
 (ns eval.services.cmr.ingest-test
   (:require
-   [clojure.test :refer [deftest testing is]]
+   [clojure.test :refer [deftest is]]
    [eval.cmr.core :as cmr]
    [eval.services.cmr.ingest :as ingest]))
 
