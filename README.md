@@ -3,7 +3,7 @@
 <p align="center">
   <a href="https://github.com/jaybarra/eval-tools/actions/workflows/ci-test.yml">
     <img alt="Build Status"
-         src="https://img.shields.io/github/workflow/status/jaybarra/eval-tools/ci-test">
+         src="https://github.com/jaybarra/eval-tools/workflows/Run%20Unit%20Tests/badge.svg"/>
   </a>
 
   <a href="https://codecov.io/gh/jaybarra/eval-tools">
@@ -11,11 +11,10 @@
          src="https://codecov.io/gh/jaybarra/eval-tools/branch/core/graph/badge.svg?token=IUCQG02UCE"/>
   </a>
 
-  <a href="#">
+  <a href="https://github.com/jaybarra/eval-tools/actions/workflows/linter.yml">
     <img alt="Linter Report"
          src="https://github.com/jaybarra/eval-tools/workflows/Lint%20Code%20Base/badge.svg"/>
   </a>
-
 </p>
 
 A Clojure library designed to assist with evalutating and testing REST
