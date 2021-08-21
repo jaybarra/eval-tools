@@ -1,12 +1,12 @@
-## API Guide
+# API Guide
 
-### eval.cmr.core
+## eval.cmr.core
 
 The central CMR interaction namespace.
 
-### Examples:
+## Examples:
 
-#### Get a list of acls
+### Get a list of acls
 ```clojure
 (go)                                            ;; start the service and load in the configuration
 (require '[eval.cmr.core :as cmr])              ;; required for sending commands to CMR
@@ -23,7 +23,7 @@ The central CMR interaction namespace.
       :items))
 ```
 
-#### Get a list of tags
+### Get a list of tags
 ```clojure
 (->> (search (context) :prod :tag {:page_size 100})
      :items

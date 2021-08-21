@@ -5,20 +5,19 @@ on:
   pull_request:
 
 jobs:
-  cmr-unit-tests:
+  unit-tests:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: modules/cmr-core
 
     strategy:
       matrix:
         java: ['8', '16']
+        work-dir: ['.', 'modules/cmr-core']
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout Code
+      uses: actions/checkout@v2
 
-    - name: Install Java
+    - name: Prepare Java
       uses: actions/setup-java@v2
       with:
         distribution: adopt
@@ -29,48 +28,10 @@ jobs:
       with:
         cli: 1.10.3.949
 
-    - name: Cache dependencies
-      uses: actions/cache@v2
-      with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('deps.edn') }}
-        restore-keys: |
-          ${{ runner.os }}-
-
     - name: Run Unit Tests
       run: clojure -M:test/unit --profile :ci
+      working-directory: ${{ matrix.work-dir }}
 
-    - uses: codecov/codecov-action@v2.0.2
-
-  app-unit-tests:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        java: ['8', '16']
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Install Java
-      uses: actions/setup-java@v2
-      with:
-        distribution: adopt
-        java-version: ${{ matrix.java }}
-
-    - name: Install clojure tools
-      uses: DeLaGuardo/setup-clojure@3.5
-      with:
-        cli: 1.10.3.949
-
-    - name: Cache dependencies
-      uses: actions/cache@v2
-      with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('deps.edn') }}
-        restore-keys: |
-          ${{ runner.os }}-
-
-    - name: Run Unit Tests
-      run: clojure -M:test/unit --profile :ci
-      
-    - uses: codecov/codecov-action@v2.0.2
+    - name: Upload coverage
+      if: ${{ matrix.java == '16' }}
+      uses: codecov/codecov-action@v2.0.2

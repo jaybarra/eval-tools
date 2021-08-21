@@ -64,4 +64,3 @@ The central CMR interaction namespace. This namespace provides low-level queries
 
 ## Documentation
 * [API Docs](/api.md)
-
