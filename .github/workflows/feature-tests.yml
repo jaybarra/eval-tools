@@ -2,7 +2,9 @@ name: Run Feature Tests
 
 on:
   push:
-  pull_request: ['core']
+  pull_request:
+    branch:
+      - core
 
 jobs:
   feature-tests:

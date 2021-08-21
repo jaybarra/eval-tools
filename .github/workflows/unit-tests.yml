@@ -2,7 +2,9 @@ name: Run Unit Tests
 
 on:
   push:
-  pull_request: ['core']
+  pull_request:
+    branch:
+      - core
 
 jobs:
   unit-tests:
@@ -10,7 +12,9 @@ jobs:
     strategy:
       matrix:
         java: ['8', '16']
-        work-dir: ['modules/cmr', 'projects/cli-app']
+        work-dir:
+        - modules/cmr
+        - projects/cli-app
 
     steps:
     - name: Checkout Code
