@@ -1,8 +1,8 @@
 # Eval Tools
 
 <p align="center">
-  <a href="https://github.com/jaybarra/eval-tools/actions/workflows/ci-test.yml">
-    <img alt="Build Status"
+  <a href="https://github.com/jaybarra/eval-tools/actions/workflows/unit-tests.yml">
+    <img alt="Unit Test Status"
          src="https://github.com/jaybarra/eval-tools/workflows/Run%20Unit%20Tests/badge.svg"/>
   </a>
 
