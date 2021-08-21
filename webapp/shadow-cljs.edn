@@ -1,5 +1,5 @@
-{:deps {:aliases [:env/dev :env/cljs]}
+{:deps {}
  :dev-http {4828 "classpath:public"}
  :builds {:app {:target :browser
                 :output-dir "resources/public/js"
-                :modules {:main {:entries [eval.core]}}}}}
+                :modules {:main {:entries [eval.webapp.core]}}}}}

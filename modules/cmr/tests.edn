@@ -1,4 +1,4 @@
 #kaocha/v1
-#meta-merge [#include "../../tests.common.edn"
+#meta-merge [#include "../tests.common.edn"
              {:tests [{:id :unit}]
               :kaocha/plugins [:kaocha.plugin/cloverage]}]

@@ -2,16 +2,15 @@ name: Run Unit Tests
 
 on:
   push:
-  pull_request:
+  pull_request: ['core']
 
 jobs:
   unit-tests:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         java: ['8', '16']
-        work-dir: ['.', 'modules/cmr-core']
+        work-dir: ['modules/cmr', 'projects/cli-app']
 
     steps:
     - name: Checkout Code
