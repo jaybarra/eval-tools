@@ -1,0 +1,257 @@
+<html>
+ <head>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" href="../../../coverage.css"/>  <title> eval/services/cmr/search.clj </title>
+ </head>
+ <body>
+<span class="covered" title="1 out of 1 forms covered">
+                001&nbsp;&nbsp;(ns&nbsp;eval.services.cmr.search
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                002&nbsp;&nbsp;&nbsp;&nbsp;(:require
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                003&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[eval.cmr.core&nbsp;:as&nbsp;cmr]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                004&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[eval.cmr.search&nbsp;:as&nbsp;search-api]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                005&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[taoensso.timbre&nbsp;:as&nbsp;log]))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                006&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                007&nbsp;&nbsp;(defn&nbsp;search
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                008&nbsp;&nbsp;&nbsp;&nbsp;&quot;Search&nbsp;concepts&nbsp;for&nbsp;concepts&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                009&nbsp;&nbsp;&nbsp;&nbsp;[client&nbsp;concept-type&nbsp;query&nbsp;&amp;&nbsp;[opts]]
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                010&nbsp;&nbsp;&nbsp;&nbsp;(cmr&#x2F;decode-cmr-response-body
+                </span><br/>
+<span class="not-covered" title="0 out of 8 forms covered">
+                011&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cmr&#x2F;invoke&nbsp;client&nbsp;(search-api&#x2F;search&nbsp;concept-type&nbsp;query&nbsp;opts))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                012&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                013&nbsp;&nbsp;(defn&nbsp;query-hits
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                014&nbsp;&nbsp;&nbsp;&nbsp;&quot;Query&nbsp;CMR&nbsp;for&nbsp;count&nbsp;of&nbsp;available&nbsp;concepts&nbsp;that&nbsp;are&nbsp;available&nbsp;from
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                015&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;given&nbsp;query.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                016&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                017&nbsp;&nbsp;&nbsp;&nbsp;Takes&nbsp;a&nbsp;query&nbsp;and&nbsp;sets&nbsp;a&nbsp;:page_size&nbsp;of&nbsp;0&nbsp;and&nbsp;returns
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                018&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;CMR-Hits&nbsp;header&nbsp;string&nbsp;as&nbsp;an&nbsp;integer&nbsp;value.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                019&nbsp;&nbsp;&nbsp;&nbsp;[client&nbsp;concept-type&nbsp;query&nbsp;&amp;&nbsp;[opts]]
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                020&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[query&nbsp;(-&gt;&nbsp;query
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                021&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(as-&gt;&nbsp;q&nbsp;(search-api&#x2F;search&nbsp;concept-type&nbsp;q&nbsp;opts))
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                022&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assoc&nbsp;:page_size&nbsp;0))]
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                023&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(-&gt;&nbsp;(cmr&#x2F;invoke&nbsp;client&nbsp;query)
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                024&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(get-in&nbsp;[:headers&nbsp;:CMR-Hits])
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                025&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Integer&#x2F;parseInt)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                026&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                027&nbsp;&nbsp;(defn&nbsp;clear-scroll-session!
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                028&nbsp;&nbsp;&nbsp;&nbsp;[client&nbsp;session-id]
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                029&nbsp;&nbsp;&nbsp;&nbsp;(cmr&#x2F;invoke&nbsp;client&nbsp;(search-api&#x2F;clear-scroll-session&nbsp;session-id)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                030&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                031&nbsp;&nbsp;(defn&nbsp;scroll!
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                032&nbsp;&nbsp;&nbsp;&nbsp;&quot;Begin&nbsp;or&nbsp;continue&nbsp;a&nbsp;scrolling&nbsp;session&nbsp;and&nbsp;returns&nbsp;a&nbsp;map&nbsp;with
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                033&nbsp;&nbsp;&nbsp;&nbsp;:CMR-Scroll-Id&nbsp;and&nbsp;:response.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                034&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                035&nbsp;&nbsp;&nbsp;&nbsp;##&nbsp;CMR-Scroll-Id
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                036&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                037&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;first&nbsp;scroll!&nbsp;query&nbsp;will&nbsp;return&nbsp;the&nbsp;CMR-Scroll-Id&nbsp;in&nbsp;the&nbsp;header
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                038&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;the&nbsp;response.&nbsp;Add&nbsp;this&nbsp;to&nbsp;the&nbsp;options&nbsp;map&nbsp;of&nbsp;subsequent&nbsp;calls&nbsp;to
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                039&nbsp;&nbsp;&nbsp;&nbsp;continue&nbsp;getting&nbsp;results.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                040&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                041&nbsp;&nbsp;&nbsp;&nbsp;e.g.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                042&nbsp;&nbsp;&nbsp;&nbsp;%&gt;&nbsp;(scroll!&nbsp;cmr&nbsp;:granules&nbsp;query)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                043&nbsp;&nbsp;&nbsp;&nbsp;{:CMR-Scroll-Id&nbsp;\&quot;612341\&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                044&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:response&nbsp;&lt;page&nbsp;1&nbsp;of&nbsp;results&gt;}
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                045&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                046&nbsp;&nbsp;&nbsp;&nbsp;%&gt;&nbsp;(scroll!&nbsp;cmr&nbsp;:granules&nbsp;query&nbsp;{:CMR-Scroll-Id&nbsp;\&quot;612341\&quot;})
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                047&nbsp;&nbsp;&nbsp;&nbsp;{:CMR-Scroll-Id&nbsp;\&quot;612341\&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                048&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:response&nbsp;&lt;page&nbsp;2&nbsp;of&nbsp;results&gt;}
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                049&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                050&nbsp;&nbsp;&nbsp;&nbsp;%&gt;&nbsp;(get-in&nbsp;(clear-scroll-session!&nbsp;cmr&nbsp;\&quot;612341\&quot;)&nbsp;:status)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                051&nbsp;&nbsp;&nbsp;&nbsp;204
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                052&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                053&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;ideal&nbsp;use&nbsp;case&nbsp;is&nbsp;to&nbsp;always&nbsp;run&nbsp;in&nbsp;a&nbsp;try-finally
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                054&nbsp;&nbsp;&nbsp;&nbsp;e.g.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                055&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                056&nbsp;&nbsp;&nbsp;&nbsp;(try
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                057&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(scroll!&nbsp;cmr&nbsp;query&nbsp;{:CMR-Scroll-id&nbsp;scroll-id)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                058&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(finally&nbsp;(clear-scroll-session!&nbsp;cmr&nbsp;scroll-id))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                059&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                060&nbsp;&nbsp;&nbsp;&nbsp;##&nbsp;Query&nbsp;Parameters
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                061&nbsp;&nbsp;&nbsp;&nbsp;Standard&nbsp;[[search]]&nbsp;parameters&nbsp;are&nbsp;accepted&nbsp;with&nbsp;the&nbsp;following&nbsp;exceptions.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                062&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                063&nbsp;&nbsp;&nbsp;&nbsp;:page_num&nbsp;and&nbsp;:offset&nbsp;are&nbsp;not&nbsp;valid&nbsp;params&nbsp;when&nbsp;using&nbsp;the&nbsp;scrolling&nbsp;endpoint.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                064&nbsp;&nbsp;&nbsp;&nbsp;:page_size&nbsp;is&nbsp;a&nbsp;valid&nbsp;query&nbsp;param&nbsp;and&nbsp;must&nbsp;be&nbsp;below&nbsp;2000
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                065&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                066&nbsp;&nbsp;&nbsp;&nbsp;Repeated&nbsp;calls&nbsp;will&nbsp;yield&nbsp;additional&nbsp;results.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                067&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                068&nbsp;&nbsp;&nbsp;&nbsp;Be&nbsp;sure&nbsp;to&nbsp;call&nbsp;[[clear-scroll-session!]]&nbsp;when&nbsp;finished.&nbsp;&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                069&nbsp;&nbsp;&nbsp;&nbsp;[client&nbsp;concept-type&nbsp;query&nbsp;&amp;&nbsp;[opts]]
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                070&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[scroll-query&nbsp;(-&gt;&nbsp;query
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                071&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(dissoc&nbsp;:page_num&nbsp;:offset)
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                072&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assoc&nbsp;:scroll&nbsp;true))
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                073&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;existing-scroll-id&nbsp;(:CMR-Scroll-Id&nbsp;opts)
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                074&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;command&nbsp;(search-api&#x2F;search&nbsp;concept-type&nbsp;scroll-query&nbsp;opts)
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                075&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scroll-request&nbsp;(cond-&gt;&nbsp;command
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                076&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;existing-scroll-id&nbsp;(assoc-in
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                077&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[:request&nbsp;:headers&nbsp;:CMR-Scroll-Id]
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                078&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;existing-scroll-id))
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                079&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;response&nbsp;(cmr&#x2F;invoke&nbsp;client&nbsp;scroll-request)
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                080&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scroll-id&nbsp;(get-in&nbsp;response&nbsp;[:headers&nbsp;:CMR-Scroll-Id])]
+                </span><br/>
+<span class="not-covered" title="0 out of 18 forms covered">
+                081&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(log&#x2F;info&nbsp;&quot;Scroll&nbsp;session&nbsp;[&quot;&nbsp;scroll-id&nbsp;&quot;]&quot;)
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                082&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{:CMR-Scroll-Id&nbsp;scroll-id
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                083&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:response&nbsp;response}))
+                </span><br/>
+ </body>
+</html>

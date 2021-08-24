@@ -1,0 +1,161 @@
+<html>
+ <head>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" href="../../coverage.css"/>  <title> eval/db/document_store.clj </title>
+ </head>
+ <body>
+<span class="covered" title="1 out of 1 forms covered">
+                001&nbsp;&nbsp;(ns&nbsp;eval.db.document-store
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                002&nbsp;&nbsp;&nbsp;&nbsp;(:require
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                003&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[clojure.java.io&nbsp;:as&nbsp;io]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                004&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[crux.api&nbsp;:as&nbsp;crux]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                005&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[taoensso.timbre&nbsp;:as&nbsp;log]))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                006&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                007&nbsp;&nbsp;(defprotocol&nbsp;DocumentStore
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                008&nbsp;&nbsp;&nbsp;&nbsp;(save!&nbsp;[this&nbsp;document])
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                009&nbsp;&nbsp;&nbsp;&nbsp;(query&nbsp;[this&nbsp;query])
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                010&nbsp;&nbsp;&nbsp;&nbsp;(halt!&nbsp;[this]))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                011&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                012&nbsp;&nbsp;(defrecord&nbsp;CruxStore&nbsp;[crux-node]
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                013&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                014&nbsp;&nbsp;&nbsp;&nbsp;DocumentStore
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                015&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                016&nbsp;&nbsp;&nbsp;&nbsp;(save!&nbsp;[this&nbsp;document]
+                </span><br/>
+<span class="not-covered" title="0 out of 9 forms covered">
+                017&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(crux&#x2F;submit-tx&nbsp;(:crux-node&nbsp;this)&nbsp;[[:crux.tx&#x2F;put&nbsp;document]]))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                018&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                019&nbsp;&nbsp;&nbsp;&nbsp;(query&nbsp;[this&nbsp;query]
+                </span><br/>
+<span class="not-covered" title="0 out of 8 forms covered">
+                020&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(crux&#x2F;q&nbsp;(crux&#x2F;db&nbsp;(:crux-node&nbsp;this))&nbsp;query))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                021&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                022&nbsp;&nbsp;&nbsp;&nbsp;(halt!&nbsp;[this]
+                </span><br/>
+<span class="not-covered" title="0 out of 9 forms covered">
+                023&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when-let&nbsp;[node&nbsp;(:crux-node&nbsp;this)]
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                024&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(.close&nbsp;node)
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                025&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(dissoc&nbsp;this&nbsp;:crux-node))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                026&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                027&nbsp;&nbsp;(defmulti&nbsp;create-document-store&nbsp;:type)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                028&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                029&nbsp;&nbsp;(defmethod&nbsp;create-document-store&nbsp;:default
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                030&nbsp;&nbsp;&nbsp;&nbsp;[_]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                031&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;TODO&nbsp;convert&nbsp;to&nbsp;in-memory&nbsp;store
+                </span><br/>
+<span class="not-covered" title="0 out of 16 forms covered">
+                032&nbsp;&nbsp;&nbsp;&nbsp;(log&#x2F;warn&nbsp;&quot;NOOP&nbsp;document&nbsp;store,&nbsp;no&nbsp;persistence&quot;)
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                033&nbsp;&nbsp;&nbsp;&nbsp;(reify&nbsp;DocumentStore
+                </span><br/>
+<span class="not-covered" title="0 out of 17 forms covered">
+                034&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(save!&nbsp;[this&nbsp;document]&nbsp;(log&#x2F;debug&nbsp;&quot;NOOP&nbsp;save&nbsp;document&quot;&nbsp;document))
+                </span><br/>
+<span class="not-covered" title="0 out of 17 forms covered">
+                035&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(query&nbsp;[this&nbsp;query]&nbsp;(log&#x2F;debug&nbsp;&quot;NOOP&nbsp;query&quot;&nbsp;query))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                036&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(halt!&nbsp;[this]&nbsp;nil)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                037&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                038&nbsp;&nbsp;(defmethod&nbsp;create-document-store&nbsp;:crux
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                039&nbsp;&nbsp;&nbsp;&nbsp;[opts]
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                040&nbsp;&nbsp;&nbsp;&nbsp;(letfn&nbsp;[(kv-store&nbsp;[dir]
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                041&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{:kv-store&nbsp;{:crux&#x2F;module&nbsp;&#x27;crux.rocksdb&#x2F;-&gt;kv-store
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                042&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:db-dir&nbsp;(io&#x2F;file&nbsp;dir)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                043&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:sync?&nbsp;true}})]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                044&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(-&gt;CruxStore&nbsp;(crux&#x2F;start-node
+                </span><br/>
+<span class="covered" title="11 out of 11 forms covered">
+                045&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{:crux&#x2F;tx-log&nbsp;(kv-store&nbsp;(get&nbsp;opts&nbsp;:log-dir&nbsp;&quot;data&#x2F;dev&#x2F;tx-log&quot;))
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                046&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:crux&#x2F;document-store&nbsp;(kv-store&nbsp;(get&nbsp;opts&nbsp;:doc-dir&nbsp;&quot;data&#x2F;dev&#x2F;doc-store&quot;))
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                047&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:crux&#x2F;index-store&nbsp;(kv-store&nbsp;(get&nbsp;opts&nbsp;:index-dir&nbsp;&quot;data&#x2F;dev&#x2F;index-store&quot;))}))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                048&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                049&nbsp;&nbsp;(defn&nbsp;stop-document-store
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                050&nbsp;&nbsp;&nbsp;&nbsp;[store]
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                051&nbsp;&nbsp;&nbsp;&nbsp;(halt!&nbsp;store))
+                </span><br/>
+ </body>
+</html>

@@ -1,0 +1,236 @@
+<html>
+ <head>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" href="../coverage.css"/>  <title> eval/system.clj </title>
+ </head>
+ <body>
+<span class="covered" title="1 out of 1 forms covered">
+                001&nbsp;&nbsp;(ns&nbsp;eval.system
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                002&nbsp;&nbsp;&nbsp;&nbsp;&quot;Main&nbsp;entrypoint&nbsp;to&nbsp;the&nbsp;Eval&nbsp;Tools&nbsp;system.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                003&nbsp;&nbsp;&nbsp;&nbsp;(:require
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                004&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[aero.core&nbsp;:as&nbsp;aero]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                005&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[clojure.java.io&nbsp;:as&nbsp;io]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                006&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[environ.core&nbsp;:refer&nbsp;[env]]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                007&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[eval.cmr.core&nbsp;:as&nbsp;cmr]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                008&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[eval.db.document-store&nbsp;:as&nbsp;doc-store]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                009&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[eval.handler&nbsp;:as&nbsp;app]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                010&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[integrant.core&nbsp;:as&nbsp;ig]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                011&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ring.adapter.jetty&nbsp;:as&nbsp;jetty]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                012&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[taoensso.timbre&nbsp;:as&nbsp;log])
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                013&nbsp;&nbsp;&nbsp;&nbsp;(:import
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                014&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[org.eclipse.jetty.server&nbsp;Server])
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                015&nbsp;&nbsp;&nbsp;&nbsp;(:gen-class))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                016&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                017&nbsp;&nbsp;(set!&nbsp;*warn-on-reflection*&nbsp;true)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                018&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                019&nbsp;&nbsp;;;&nbsp;Let&nbsp;Aero&nbsp;know&nbsp;how&nbsp;to&nbsp;read&nbsp;integrant&nbsp;references
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                020&nbsp;&nbsp;(defmethod&nbsp;aero&#x2F;reader&nbsp;&#x27;ig&#x2F;ref&nbsp;[_&nbsp;_&nbsp;value]&nbsp;(ig&#x2F;ref&nbsp;value))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                021&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                022&nbsp;&nbsp;;;&nbsp;default&nbsp;handler&nbsp;for&nbsp;integrant
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                023&nbsp;&nbsp;(defmethod&nbsp;ig&#x2F;init-key&nbsp;:default&nbsp;[_&nbsp;_cfg])
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                024&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                025&nbsp;&nbsp;(defn&nbsp;config
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                026&nbsp;&nbsp;&nbsp;&nbsp;&quot;Read&nbsp;the&nbsp;config&nbsp;file&nbsp;and&nbsp;return&nbsp;a&nbsp;value&nbsp;or&nbsp;map.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                027&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;no&nbsp;keys&nbsp;are&nbsp;specified,&nbsp;the&nbsp;entire&nbsp;map&nbsp;will&nbsp;be&nbsp;returned,&nbsp;otherwise
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                028&nbsp;&nbsp;&nbsp;&nbsp;specific&nbsp;keys&nbsp;may&nbsp;be&nbsp;passed&nbsp;in&nbsp;to&nbsp;get&nbsp;specific&nbsp;value.&nbsp;Nil&nbsp;will&nbsp;be&nbsp;returned
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                029&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;no&nbsp;matching&nbsp;value&nbsp;exists.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                030&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                031&nbsp;&nbsp;&nbsp;&nbsp;Config&nbsp;location&nbsp;looks&nbsp;for&nbsp;:eval-config-location&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                032&nbsp;&nbsp;&nbsp;&nbsp;[&amp;&nbsp;keys]
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                033&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[cfg-file&nbsp;(env&nbsp;:eval-config-location&nbsp;&quot;config.edn&quot;)
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                034&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cfg&nbsp;(aero&#x2F;read-config&nbsp;(io&#x2F;resource&nbsp;cfg-file))]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                035&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(get-in&nbsp;cfg&nbsp;keys)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                036&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                037&nbsp;&nbsp;(defmethod&nbsp;ig&#x2F;init-key&nbsp;:db&#x2F;document-store
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                038&nbsp;&nbsp;&nbsp;&nbsp;[_&nbsp;opts]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                039&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[store&nbsp;(doc-store&#x2F;create-document-store&nbsp;opts)]
+                </span><br/>
+<span class="covered" title="16 out of 16 forms covered">
+                040&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(log&#x2F;info&nbsp;&quot;Document&nbsp;Store&nbsp;initialized&quot;)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                041&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;store))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                042&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                043&nbsp;&nbsp;(defmethod&nbsp;ig&#x2F;halt-key!&nbsp;:db&#x2F;document-store
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                044&nbsp;&nbsp;&nbsp;&nbsp;[_&nbsp;store]
+                </span><br/>
+<span class="not-covered" title="0 out of 16 forms covered">
+                045&nbsp;&nbsp;&nbsp;&nbsp;(log&#x2F;info&nbsp;&quot;Shutting&nbsp;down&nbsp;Document&nbsp;Store&quot;)
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                046&nbsp;&nbsp;&nbsp;&nbsp;(doc-store&#x2F;stop-document-store&nbsp;store))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                047&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                048&nbsp;&nbsp;(defmethod&nbsp;ig&#x2F;init-key&nbsp;:app&#x2F;cmr
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                049&nbsp;&nbsp;&nbsp;&nbsp;[_&nbsp;{:keys&nbsp;[instances]}]
+                </span><br/>
+<span class="covered" title="16 out of 16 forms covered">
+                050&nbsp;&nbsp;&nbsp;&nbsp;(log&#x2F;info&nbsp;&quot;CMR&nbsp;application&nbsp;initialized&quot;)
+                </span><br/>
+<span class="covered" title="33 out of 33 forms covered">
+                051&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[clients&nbsp;(apply&nbsp;merge&nbsp;(for&nbsp;[[k&nbsp;v]&nbsp;instances]
+                </span><br/>
+<span class="covered" title="10 out of 10 forms covered">
+                052&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{k&nbsp;(cmr&#x2F;create-client&nbsp;(merge&nbsp;{:id&nbsp;k}&nbsp;v))}))]
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                053&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{:instances&nbsp;clients}))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                054&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                055&nbsp;&nbsp;(defmethod&nbsp;ig&#x2F;init-key&nbsp;:handler&#x2F;webapp
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                056&nbsp;&nbsp;&nbsp;&nbsp;[_&nbsp;{:keys&nbsp;[cmr]}]
+                </span><br/>
+<span class="covered" title="9 out of 9 forms covered">
+                057&nbsp;&nbsp;&nbsp;&nbsp;(when-let&nbsp;[banner&nbsp;(io&#x2F;resource&nbsp;&quot;banner.txt&quot;)]
+                </span><br/>
+<span class="covered" title="18 out of 18 forms covered">
+                058&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(log&#x2F;info&nbsp;(slurp&nbsp;banner)))
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                059&nbsp;&nbsp;&nbsp;&nbsp;(app&#x2F;create-app&nbsp;cmr))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                060&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                061&nbsp;&nbsp;(defmethod&nbsp;ig&#x2F;init-key&nbsp;:adapter&#x2F;jetty
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                062&nbsp;&nbsp;&nbsp;&nbsp;[_&nbsp;{:keys&nbsp;[handler&nbsp;port]&nbsp;:as&nbsp;opts}]
+                </span><br/>
+<span class="covered" title="17 out of 17 forms covered">
+                063&nbsp;&nbsp;&nbsp;&nbsp;(log&#x2F;info&nbsp;&quot;Starting&nbsp;server&nbsp;on&nbsp;port&nbsp;&quot;&nbsp;port)
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                064&nbsp;&nbsp;&nbsp;&nbsp;(jetty&#x2F;run-jetty&nbsp;handler&nbsp;(dissoc&nbsp;opts&nbsp;:handler)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                065&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                066&nbsp;&nbsp;(defmethod&nbsp;ig&#x2F;halt-key!&nbsp;:adapter&#x2F;jetty
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                067&nbsp;&nbsp;&nbsp;&nbsp;[_&nbsp;^Server&nbsp;server]
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                068&nbsp;&nbsp;&nbsp;&nbsp;(.stop&nbsp;server))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                069&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                070&nbsp;&nbsp;(defn&nbsp;-main
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                071&nbsp;&nbsp;&nbsp;&nbsp;&quot;Main&nbsp;entrypoint&nbsp;when&nbsp;running&nbsp;from&nbsp;uberjar&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                072&nbsp;&nbsp;&nbsp;&nbsp;[&amp;&nbsp;args]
+                </span><br/>
+<span class="partial" title="4 out of 5 forms covered">
+                073&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;(seq&nbsp;args)
+                </span><br/>
+<span class="not-covered" title="0 out of 32 forms covered">
+                074&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[arg&nbsp;args]
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                075&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(println&nbsp;arg)))
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                076&nbsp;&nbsp;&nbsp;&nbsp;(ig&#x2F;init&nbsp;(config)))
+                </span><br/>
+ </body>
+</html>
