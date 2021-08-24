@@ -18,7 +18,7 @@
                      {:status 200
                       :headers {"Content-Type" "application/json"}
                       :body (json/write-value-as-string {:task-id 1 :status 200})}))
-                 (-echo-token [_] "mock-token"))
+                 (-token [_] "mock-token"))
         job {::bg/operation "UPDATE_FIELD"
              ::bg/update-field "S3Link"
              ::bg/updates ["foo-granule-1" "s3://example/foo1"]}]
@@ -29,7 +29,7 @@
                  (-invoke [_ query]
                    (is (= :get (:method query)))
                    (is (= "/ingest/granule-bulk-update/status/12345" (:url query))))
-                 (-echo-token [_] "mock-token"))]
+                 (-token [_] "mock-token"))]
     (bulk-granule/fetch-job-status client 12345)))
 
 (deftest trigger-status-update-test
@@ -37,5 +37,5 @@
                  (-invoke [_ query]
                    (is (= :post (:method query)))
                    (is (= "/ingest/granule-bulk-update/status" (:url query))))
-                 (-echo-token [_] "mock-token"))]
+                 (-token [_] "mock-token"))]
     (bulk-granule/trigger-status-update! client)))

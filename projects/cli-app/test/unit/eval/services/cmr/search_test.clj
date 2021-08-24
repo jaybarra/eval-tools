@@ -10,16 +10,16 @@
     (let [client (reify cmr/CmrClient
                    (-invoke [_ query]
                      (is (= "/search/collections" (:url query)))
-                     (is (= "test-echo-token" (get-in query [:headers "Echo-Token"]))))
-                   (-echo-token [_] "test-echo-token"))]
+                     (is (= "test-echo-token" (get-in query [:headers :authorization]))))
+                   (-token [_] "test-echo-token"))]
       (search/search client  :collection {:provider "FOO-PROV"})))
 
   (testing "options are passed to the client properly"
     (let [client (reify cmr/CmrClient
                    (-invoke [_ query]
                      (is (= "/search/collections.umm_json" (:url query)))
-                     (is (nil? (get-in query [:headers "Echo-Token"]))))
-                   (-echo-token [_] "test-echo-token"))]
+                     (is (nil? (get-in query [:headers :authorization]))))
+                   (-token [_] "test-echo-token"))]
       (search/search
        client
        :collection
@@ -33,7 +33,7 @@
                    (-invoke [_ _]
                      {:status 200
                       :headers {:CMR-Hits "187"}})
-                   (-echo-token [_] "test-echo-token"))]
+                   (-token [_] "test-echo-token"))]
       (is (= 187 (search/query-hits client :collection {:provider "FOO-PROV"}))))))
 
 (deftest scroll-test
@@ -46,7 +46,7 @@
                        :CMR-Scroll-Id "foo-scroll"
                        :content-type "application/vnd.nasa.cmr.umm+json"}
                       :body (json/write-value-as-string {:feed {:items []}})})
-                   (-echo-token [_] "test-echo-token"))]
+                   (-token [_] "test-echo-token"))]
       (is (some? (search/scroll! client :collection {:provider "FOO-PROV"})))))
 
   (testing "existing scroll-id is used in header"
@@ -60,7 +60,7 @@
                 :CMR-Scroll-Id "existing-foo-scroll"
                 :content-type "application/vnd.nasa.cmr.umm+json"}
                :body (json/write-value-as-string {:feed {:items []}})})
-            (-echo-token [_] "test-token"))]
+            (-token [_] "test-token"))]
       (is (some? (search/scroll!
                   client
                   :collection
@@ -76,5 +76,5 @@
                    (json/read-value (:body query) json/keyword-keys-object-mapper)))
             (is (= "/search/clear-scroll" (get-in query [:url])))
             {:status 200})
-          (-echo-token [_] "test-token"))]
+          (-token [_] "test-token"))]
     (is (some? (search/clear-scroll-session! client "clear-foo-scroll")))))

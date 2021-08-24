@@ -9,5 +9,5 @@
                  (-invoke [_ query]
                    (is (= "/ingest/providers/FOO/collections" (:url query)))
                    (is (= {} (:body query))))
-                 (-echo-token [_] "test-echo-token"))]
+                 (-token [_] "test-echo-token"))]
     (ingest/upload-collection client "FOO" {})))

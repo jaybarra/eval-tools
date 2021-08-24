@@ -48,24 +48,13 @@
 (defmethod ig/init-key :app/cmr
   [_ {:keys [instances]}]
   (log/info "CMR application initialized")
+
+  (when-let [banner (io/resource "banner.txt")]
+    (log/info (slurp banner)))
+
   (let [clients (apply merge (for [[k v] instances]
                                {k (cmr/create-client (merge {:id k} v))}))]
     {:instances clients}))
-
-(defmethod ig/init-key :handler/webapp
-  [_ {:keys [cmr]}]
-  (when-let [banner (io/resource "banner.txt")]
-    (log/info (slurp banner)))
-  (app/create-app cmr))
-
-(defmethod ig/init-key :adapter/jetty
-  [_ {:keys [handler port] :as opts}]
-  (log/info "Starting server on port " port)
-  (jetty/run-jetty handler (dissoc opts :handler)))
-
-(defmethod ig/halt-key! :adapter/jetty
-  [_ ^Server server]
-  (.stop server))
 
 (defn -main
   "Main entrypoint when running from uberjar"

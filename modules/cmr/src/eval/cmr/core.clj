@@ -100,7 +100,7 @@
 
 (defprotocol CmrClient
   (-invoke [client query] "Send a query to CMR")
-  (-echo-token [client] "Return the echo-token associated with this client"))
+  (-token [client] "Return the authorization-token associated with this client"))
 
 (defrecord HttpClient [id url opts]
 
@@ -108,14 +108,15 @@
 
   (-invoke [this query]
     (letfn [(obfuscate-token [q]
-              (if (string? (get-in q [:headers "Echo-Token"]))
-                (update-in q [:headers "Echo-Token"] #(str (subs % 0 8) "-XXXX-XXXX-XXXX-XXXXXXXXXXXX"))
-                q))]
+              (if-let [token (get-in q [:headers :authorization])]
+                (case (count token)
+                  (= 36 token) (update-in q [:headers :authorization] #(str (subs % 0 8) "-XXXX-XXXX-XXXX-XXXXXXXXXXXX"))
+                  q)))]
       (log/debug (format"Sending request to CMR [%s]" (get this :url)) (obfuscate-token query))
       (http/request query)))
 
-  (-echo-token [this]
-    (get-in this [:opts :echo-token])))
+  (-token [this]
+    (get-in this [:opts :token])))
 
 (defn create-client
   "Constructs a CMR client.
@@ -176,18 +177,18 @@
 
   Sends a query to CMR over HTTP and returns the response object.
   
-  If an echo-token is available for the provided [[CmrClient]], the token
-  will be added to the \"Echo-Token\" header. This may be ignored by setting
+  If an authorization-token is available for the provided [[CmrClient]], the token
+  will be added to the \"Authorization\" header. This may be ignored by setting
   :anonymous? to true in the options.
 
   ## Options
-  :anonymous? optional boolean - when true, no echo-token will be added to the header
-  :echo-token optional string  - when set, will be used unless :anonymous? is true "
+  :anonymous? optional boolean - when true, no authorization-token will be added to the header
+  :token optional string  - when set, will be used unless :anonymous? is true "
   [client command]
   (when-not (spec/valid? ::command command)
     (throw (ex-info "Invalid CMR command"
                     (spec/explain-data ::command command))))
-  (let [{:keys [anonymous? echo-token]} (:opts command)
+  (let [{:keys [anonymous? token]} (:opts command)
         {root-url :url
          {endpoints :endpoints} :opts} client
         req-url (get-in command [:request :url])
@@ -207,8 +208,8 @@
                   command)
         
         token (and (not anonymous?)
-                   (or echo-token (-echo-token client)))
+                   (or token (-token client)))
         out-request (cond-> (:request command)
                       true (assoc :url (str root-url (get-in command [:request :url])))
-                      token (assoc-in [:headers "Echo-Token"] token))]
+                      token (assoc-in [:headers :authorization] token))]
     (-invoke client out-request)))
