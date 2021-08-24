@@ -39,9 +39,9 @@
   (testing "passing in opts"
     (is (= {:request {:url "/access-control/groups/foo-id"
                       :method :get}
-            :opts {:echo-token "FLOO"}}
+            :opts {:token "FLOO"}}
            (acls/get-group "foo-id" {:pretty false
-                                     :echo-token "FLOO"})))))
+                                     :token "FLOO"})))))
 
 (deftest create-group-test
   (let [command (acls/create-group

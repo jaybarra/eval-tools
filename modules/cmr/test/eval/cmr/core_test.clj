@@ -21,7 +21,7 @@
                       (-invoke [_client _query]
                         {:status 200})
                       
-                      (-echo-token [_]
+                      (-token [_]
                         "test-token"))]
     (is (= {:status 200}
            (cmr/invoke test-client {:request {:method :get
@@ -46,8 +46,7 @@
     (is (= "internal://localhost:32303/collections.umm_json"
            (:url query)))
     {:status 200})
-  (-echo-token [_]
-    "foo"))
+  (-token [_] "foo"))
 
 (deftest endpoints-override-test
   (let [client (->MockClient :foo
