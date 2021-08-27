@@ -13,6 +13,7 @@ pom.xml
 pom.xml.asc
 
 ## Linting and dev files
+.rebel_readline_history
 .eastwood
 .lsp
 .clj-kondo
