@@ -42,7 +42,10 @@
   * application/iso:smap+xml
   
   JSON formats:
-  * application/vnd.nasa.cmr.umm+json"
+  * application/json
+  * application/opendata+json
+  * application/vnd.nasa.cmr.umm+json
+  * application/vnd.nasa.cmr.legacy_umm_results+json"
   (muuntaja/create
    (-> muuntaja/default-options
        (assoc-in 
@@ -79,10 +82,13 @@
     :echo10
     :iso 
     :iso19115
-    :json 
-    :xml
+    :json
     :native
-    :umm-json})
+    :opendata
+    :umm-json
+    :umm-json-legacy
+    :xml})
+
 (spec/def ::cmr-formats cmr-formats)
 (spec/def ::concept-type #{:collection :granule :service :tool :concept})
 (spec/def ::id (spec/or :id-kw keyword? :id-str string?))
@@ -110,8 +116,10 @@
     (letfn [(obfuscate-token [q]
               (if-let [token (get-in q [:headers :authorization])]
                 (case (count token)
-                  (= 36 token) (update-in q [:headers :authorization] #(str (subs % 0 8) "-XXXX-XXXX-XXXX-XXXXXXXXXXXX"))
-                  q)))]
+                  36 (update-in q [:headers :authorization] #(str (subs % 0 8) "-XXXX-XXXX-XXXX-XXXXXXXXXXXX"))
+                  ;; default
+                  (update-in q [:headers :authorization] "[redacted]"))
+                q))]
       (log/debug (format"Sending request to CMR [%s]" (get this :url)) (obfuscate-token query))
       (http/request query)))
 
@@ -143,9 +151,11 @@
    :iso "application/iso19115+xml"
    :iso19115 "application/iso19115+xml"
    :json "application/json"
-   :xml "application/xml"
    :native "application/metadata+xml"
-   :umm-json "application/vnd.nasa.cmr.umm+json"})
+   :opendata "application/opendata+json"
+   :umm-json "application/vnd.nasa.cmr.umm+json"
+   :umm-json-legacy "application/vnd.nasa.cmr.legacy_umm_results+json"
+   :xml "application/xml"})
 
 (defn format->cmr-extension
   "Takes a CMR supported format and returns the appropriate extension
@@ -198,15 +208,17 @@
                        (get endpoints (keyword (second (str/split req-url #"/")))))
         root-url (or override-url root-url)
 
-        ;; if overriding the defaul endpoint also trim the request url
+        ;; if overriding the default endpoint also trim the request url
         command (if override-url
-                  (update-in command [:request :url] #(as-> % s
-                                                        (str/split s #"/")
-                                                        (drop 2 s)
-                                                        (str/join "/" s)
-                                                        (str "/" s)))
+                  (update-in command
+                             [:request :url]
+                             #(as-> % s
+                                (str/split s #"/")
+                                (drop 2 s)
+                                (str/join "/" s)
+                                (str "/" s)))
                   command)
-        
+
         token (and (not anonymous?)
                    (or token (-token client)))
         out-request (cond-> (:request command)

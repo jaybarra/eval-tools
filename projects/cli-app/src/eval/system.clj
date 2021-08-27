@@ -61,5 +61,5 @@
   [& args]
   (when (seq args)
     (doseq [arg args]
-      (println arg)))
+      (log/info arg)))
   (ig/init (config)))
