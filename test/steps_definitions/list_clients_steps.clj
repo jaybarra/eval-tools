@@ -1,13 +1,9 @@
 (ns list-clients-steps
   (:require
-   [clojure.string :as str]
-   [clojure.test :refer [is]]
-   [eval.system :as sys]
-   [eval.services.cmr.search :refer [search]]
    [lambdaisland.cucumber.dsl :refer [Given When Then pending!]]))
 
 (Given "the input {string}" [state string]
-       (peding!))
+       (pending!))
 
 (When "the tool is run" [state]
       ;; Write code here that turns the phrase above into concrete actions
