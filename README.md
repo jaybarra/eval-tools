@@ -67,7 +67,7 @@ while these two functions will perform equivalent actions, the service version i
 | Return the current system context | `(user/context)`  |
 
 
-# Building
+## Building
 
 ```bash
 clj -T:build clean
