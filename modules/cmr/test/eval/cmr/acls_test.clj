@@ -56,6 +56,7 @@
             :description "super duper users"
             :members ["user1" "user2"]}
            (get-in command [:request :body]))))
+
   (testing "with additional options"
     (let [command (acls/create-group
                    {:name "admins"

@@ -55,7 +55,6 @@ while these two functions will perform equivalent actions, the service version i
 | Run feature tests     | `clj -M:test/features`    |
 | Run the project       | `clj -M -m eval.system`   |
 | Check deps            | `clj -X:project/outdated` |
-| Package application   | `clj -X:project/uberjar`  |
 
 ## Common REPL commands
 
@@ -67,19 +66,10 @@ while these two functions will perform equivalent actions, the service version i
 | Reset all components              | `(user/reset-all` |
 | Return the current system context | `(user/context)`  |
 
-## Shadow-CLJS
 
-To start the Shadow-CLJS REPL
-```sh
-npm install
-npx shadow-cljs watch app
-```
+# Building
 
-### Emacs + Cider
-
-Create or override your `.dir-locals.el` file and run cider from Emacs
-
-```cl
-((clojure-mode . ((cider-preferred-build-tool . clojure-cli)
-                  (cider-clojure-cli-aliases . "env/dev:env/cljs"))))
+```bash
+clj -T:build clean
+clj -T:build jar
 ```
