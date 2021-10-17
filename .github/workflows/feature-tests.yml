@@ -10,19 +10,19 @@ jobs:
   feature-tests:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v2
 
-    - name: Install Java
-      uses: actions/setup-java@v2
-      with:
-        distribution: adopt
-        java-version: '16'
+      - name: Install Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: adopt
+          java-version: "16"
 
-    - name: Install clojure tools
-      uses: DeLaGuardo/setup-clojure@3.5
-      with:
-        cli: 1.10.3.986
+      - name: Install clojure tools
+        uses: DeLaGuardo/setup-clojure@3.5
+        with:
+          cli: 1.10.3.986
 
-    - name: Run Feature Tests
-      run: clojure -M:test/features
+      - name: Run Feature Tests
+        run: clojure -M:test/features

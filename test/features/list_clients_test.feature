@@ -6,4 +6,3 @@ Feature: CMR Search Test
     Given the input "cmr ls"
     When the tool is run
     Then I get a list of cmr clients
-

@@ -10,10 +10,10 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          
+
       - name: Run super-linter
         uses: github/super-linter@v4
         env:
           DEFAULT_BRANCH: core
-          FILTER_REGEX_EXCLUDE: .*steps_definitions/.*
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}        
+          FILTER_REGEX_EXCLUDE: .*(steps_definitions|features)/.*
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

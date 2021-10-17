@@ -6,12 +6,8 @@
    [environ.core :refer [env]]
    [eval.cmr.core :as cmr]
    [eval.db.document-store :as doc-store]
-   [eval.handler :as app]
    [integrant.core :as ig]
-   [ring.adapter.jetty :as jetty]
    [taoensso.timbre :as log])
-  (:import
-   [org.eclipse.jetty.server Server])
   (:gen-class))
 
 (set! *warn-on-reflection* true)

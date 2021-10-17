@@ -25,6 +25,7 @@
                            :opt [::name]))
 
 (defn post-job
+  "Returns a command what will post a bulk-granule-update job to CMR."
   [provider job & [opts]]
   (let [url (format "/ingest/providers/%s/bulk-update/granules" provider)
         command {:request
@@ -38,6 +39,7 @@
       command)))
 
 (defn trigger-update
+  "Returns a command that will trigger an update to the status of bulk-granule-job statuses"
   [& [opts]]
   (let [command {:request {:method :post
                            :url "/ingest/granule-bulk-update/status"}}]
@@ -46,9 +48,10 @@
       command)))
 
 (defn get-job-status
-  [job-id  & [{progress? :show-progress
-               granules? :show-granules
-               request? :show-request :as opts}]]
+  "Returns a command that will return the status of a given job."
+  [job-id & [{progress? :show-progress
+              granules? :show-granules
+              request? :show-request :as opts}]]
   (let [req (cond-> {:method :get
                      :url (format "/ingest/granule-bulk-update/status/%s" job-id)}
               progress? (assoc-in [:query-params "show_progress"] true)

@@ -48,10 +48,10 @@
   * application/vnd.nasa.cmr.legacy_umm_results+json"
   (muuntaja/create
    (-> muuntaja/default-options
-       (assoc-in 
+       (assoc-in
         [:formats "application/extended+json"]
         extended-json-formats)
-       (assoc-in 
+       (assoc-in
         [:formats "application/extended+xml"]
         extended-xml-formats))))
 
@@ -77,10 +77,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def cmr-formats "Set of supported CMR data format keywords."
   #{:atom
-    :dif 
-    :dif10 
+    :dif
+    :dif10
     :echo10
-    :iso 
+    :iso
     :iso19115
     :json
     :native
@@ -118,9 +118,9 @@
                 (case (count token)
                   36 (update-in q [:headers :authorization] #(str (subs % 0 8) "-XXXX-XXXX-XXXX-XXXXXXXXXXXX"))
                   ;; default
-                  (update-in q [:headers :authorization] "[redacted]"))
+                  (update-in q [:headers :authorization] (constantly "[redacted]")))
                 q))]
-      (log/debug (format"Sending request to CMR [%s]" (get this :url)) (obfuscate-token query))
+      (log/debug (format "Sending request to CMR [%s]" (get this :url)) (obfuscate-token query))
       (http/request query)))
 
   (-token [this]

@@ -11,30 +11,30 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: ['8', '16']
+        java: ["8", "16"]
         work-dir:
-        - modules/cmr
-        - '.'
+          - modules/cmr
+          - "."
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v2
 
-    - name: Prepare Java
-      uses: actions/setup-java@v2
-      with:
-        distribution: adopt
-        java-version: ${{ matrix.java }}
+      - name: Prepare Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: adopt
+          java-version: ${{ matrix.java }}
 
-    - name: Install clojure tools
-      uses: DeLaGuardo/setup-clojure@3.5
-      with:
-        cli: 1.10.3.986
+      - name: Install clojure tools
+        uses: DeLaGuardo/setup-clojure@3.5
+        with:
+          cli: 1.10.3.986
 
-    - name: Run Unit Tests
-      run: clojure -M:test/unit --profile :ci
-      working-directory: ${{ matrix.work-dir }}
+      - name: Run Unit Tests
+        run: clojure -M:test/unit --profile :ci
+        working-directory: ${{ matrix.work-dir }}
 
-    - name: Upload coverage
-      if: ${{ matrix.java == '16' }}
-      uses: codecov/codecov-action@v2.1.0
+      - name: Upload coverage
+        if: ${{ matrix.java == '16' }}
+        uses: codecov/codecov-action@v2.1.0
