@@ -1,0 +1,2 @@
+{:linters {:unused-referred-var
+           {:exclude {clojure.test [is deftest testing are]}}}}
