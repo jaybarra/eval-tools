@@ -1,7 +1,7 @@
 (ns eval.services.cmr.providers
   (:require
    [eval.cmr.core :as cmr]
-   [eval.cmr.providers :as providers]))
+   [eval.cmr.commands.providers :as providers]))
 
 (defn create-provider
   [client provider & [opts]]

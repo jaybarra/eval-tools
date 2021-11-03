@@ -1,4 +1,4 @@
-(ns eval.cmr.ingest
+(ns eval.cmr.commands.ingest
   "Ingest commands for use with [[cmr/invoke]]."
   (:require
    [eval.cmr.core :as cmr]))

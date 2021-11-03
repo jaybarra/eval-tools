@@ -2,14 +2,19 @@
  {clj-http/clj-http {:mvn/version "3.12.3"}
   com.taoensso/timbre {:mvn/version "5.1.2"}
   metosin/muuntaja {:mvn/version "0.6.8"}
-  org.clojure/core.async {:mvn/version "1.3.618"}
+  org.clojure/core.async {:mvn/version "1.3.622"}
   org.clojure/clojure {:mvn/version "1.10.3"}}
 
  :aliases
- {:test/unit
+ {:dev
   {:extra-paths ["test"]
-   :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.861"}
+   :extra-deps {metosin/jsonista {:mvn/version "0.3.4"}
+                org.clojure/test.check {:mvn/version "1.1.0"}}}
+
+  :test/unit
+  {:extra-paths ["test"]
+   :extra-deps {lambdaisland/kaocha {:mvn/version "1.60.945"}
                 lambdaisland/kaocha-cloverage {:mvn/version "1.0.75"}
-                metosin/jsonista {:mvn/version "0.3.3"}
+                metosin/jsonista {:mvn/version "0.3.4"}
                 org.clojure/test.check {:mvn/version "1.1.0"}}
    :main-opts ["-m" "kaocha.runner" "--focus" :unit]}}}

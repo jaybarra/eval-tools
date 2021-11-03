@@ -1,7 +1,7 @@
 (ns eval.cmr.core
   "Default functionality for interacting with a Common Metadata Repository instance.
 
-  This namespace provides basic interaction with a CMR instance through the [[invoke]] function."
+  This namespace provides basic interaction with a CMR instance through the [[eval.cmr.core/invoke]] function."
   (:require
    [clj-http.client :as http]
    [clojure.spec.alpha :as spec]
@@ -11,9 +11,9 @@
    [muuntaja.format.core :as fmt-core]
    [taoensso.timbre :as log]))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ============================================================================
 ;; Muuntaja codec
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ============================================================================
 (def extended-json-formats
   "Let the decoder know how to decode UMM JSON"
   {:decoder [json-format/decoder {:decode-key-fn true}]
@@ -28,10 +28,10 @@
    :matches #"^application/((.*)\+)?xml.*"})
 
 (def m
-  "Muuntaja instance for handling CMR content types. This contains
-  decoders for the following format types. Version information may be
-  additionally appended.
-
+  "Muuntaja instance for handling CMR content types. 
+   
+  This contains decoders for the following format types. Version information 
+  may be additionally appended.
   e.g \"Content-Type: application/vnd.nasa.cmr.umm+json;version=1.16.2\"
   
   XML formats:
@@ -72,10 +72,13 @@
 (def json-response->entry
   "Unpack :json format concepts from a response."
   (comp :entry :feed decode-cmr-response-body))
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; ============================================================================
 ;; Specs
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(def cmr-formats "Set of supported CMR data format keywords."
+;; ============================================================================
+
+(def cmr-formats
+  "Set of supported CMR data format keywords."
   #{:atom
     :dif
     :dif10
@@ -89,57 +92,15 @@
     :umm-json-legacy
     :xml})
 
-(spec/def ::cmr-formats cmr-formats)
-(spec/def ::concept-type #{:collection :granule :service :tool :concept})
-(spec/def ::id (spec/or :id-kw keyword? :id-str string?))
-(spec/def ::url string?)
-(spec/def ::cmr (spec/keys :req-un [::id ::url]))
-
-(spec/def ::method #{:get :post :put :delete :option :head})
-(spec/def ::body any?)
-(spec/def ::headers map?)
-(spec/def ::request (spec/keys :req-un [::url ::method]
-                               :opt-un [::headers ::body]))
-(spec/def ::opts map?)
-(spec/def ::command (spec/keys :req-un [::request]
-                               :opt-un [::opts]))
-
-(defprotocol CmrClient
-  (-invoke [client query] "Send a query to CMR")
-  (-token [client] "Return the authorization-token associated with this client"))
-
-(defrecord HttpClient [id url opts]
-
-  CmrClient
-
-  (-invoke [this query]
-    (letfn [(obfuscate-token [q]
-              (if-let [token (get-in q [:headers :authorization])]
-                (case (count token)
-                  36 (update-in q [:headers :authorization] #(str (subs % 0 8) "-XXXX-XXXX-XXXX-XXXXXXXXXXXX"))
-                  ;; default
-                  (update-in q [:headers :authorization] (constantly "[redacted]")))
-                q))]
-      (log/debug (format "Sending request to CMR [%s]" (get this :url)) (obfuscate-token query))
-      (http/request query)))
-
-  (-token [this]
-    (get-in this [:opts :token])))
-
-(defn create-client
-  "Constructs a CMR client.
-  An invalid configuration will result in an exception being thrown."
-  [cmr-cfg]
-  (let [{:keys [id url]} cmr-cfg]
-    (when-not (spec/valid? ::cmr cmr-cfg)
-      (throw (ex-info "Invalid CMR configuration"
-                      (spec/explain-data ::cmr cmr-cfg))))
-    ;; Return the client
-    (->HttpClient id url (dissoc cmr-cfg :url :id))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Functions
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(def cmr-services
+  "Set of CMR microservices"
+  #{:access-control
+    :bootstrap
+    :indexer
+    :ingest
+    :metadata-db
+    :legacy
+    :search})
 
 (def format->mime-type
   "CMR support format to MIME type map."
@@ -157,12 +118,8 @@
    :umm-json-legacy "application/vnd.nasa.cmr.legacy_umm_results+json"
    :xml "application/xml"})
 
-(defn format->cmr-extension
-  "Takes a CMR supported format and returns the appropriate extension
-  for use on the search endpoint
-
-  e.g. {:format :echo10} will yield \"/search/collections.echo10\"
-  after being passed through [[search]]"
+(defn format->cmr-url-extension
+  "CMR supported search extensions"
   [fmt]
   (case fmt
     :atom ".atom"
@@ -175,8 +132,66 @@
     :native ".native"
     :umm-json ".umm_json"
     :xml ".xml"
-    ;; default to empty, CMR will return default for the endpoint
     ""))
+
+(spec/def ::cmr-formats cmr-formats)
+(spec/def ::concept-type #{:collection :granule :service :tool :concept})
+(spec/def ::url string?)
+(spec/def ::endpoints map?)
+(spec/def ::cmr (spec/keys :req-un [::url]))
+
+(spec/def ::method #{:get :post :put :delete :option :head})
+(spec/def ::body any?)
+(spec/def ::headers map?)
+(spec/def ::request (spec/keys :req-un [::url ::method]
+                               :opt-un [::headers ::body]))
+(spec/def ::opts map?)
+(spec/def ::command (spec/keys :req-un [::request]
+                               :opt-un [::opts]))
+
+(defprotocol CmrClient
+  (-invoke [client query] "Send a query to CMR")
+  (-token [client] "Return the authorization-token associated with this client"))
+
+(defn- redact-headers
+  "Redacts query headers for use in logging.
+  Can replace sensitive headers such as auth tokens with 'redacted'"
+  [query headers]
+  (loop [updated-query query 
+         header (first headers)]
+    (if-not header
+      updated-query
+      (recur
+       (if (get-in query [:headers (first headers)])
+         (update-in query [:headers header] (constantly "[redacted]"))
+         query)
+       (rest headers)))))
+
+(defrecord HttpClient [url opts]
+
+  CmrClient
+
+  (-invoke [this query]
+    (log/info (format "Sending request to CMR [%s]" (get this :url))
+              (redact-headers query [:authorization
+                                     :echo-token]))
+    (http/request query))
+
+  (-token [this]
+    (get-in this [:opts :token])))
+
+(defn create-client
+  "Constructs a CMR client."
+  [cmr-cfg]
+  (let [{:keys [url]} cmr-cfg]
+    (when-not (spec/valid? ::cmr cmr-cfg)
+      (throw (ex-info "Invalid CMR configuration"
+                      (spec/explain-data ::cmr cmr-cfg))))
+    (->HttpClient url (dissoc cmr-cfg :url))))
+
+;; ============================================================================
+;; Functions
+;; ============================================================================
 
 (defn invoke
   "Invoke CMR endpoints with a request map and return quit the response.
@@ -192,8 +207,10 @@
   :anonymous? to true in the options.
 
   ## Options
-  :anonymous? optional boolean - when true, no authorization-token will be added to the header
-  :token optional string  - when set, will be used unless :anonymous? is true "
+  |option| type | description|
+  |------|------|------------|
+  |`:anonymous?`| optional boolean| When true, no authorization-token will be added to the header |
+  |`:token`| optional string | Authorization token to be used|"
   [client command]
   (when-not (spec/valid? ::command command)
     (throw (ex-info "Invalid CMR command"
@@ -225,3 +242,9 @@
                       true (assoc :url (str root-url (get-in command [:request :url])))
                       token (assoc-in [:headers :authorization] token))]
     (-invoke client out-request)))
+
+(comment
+  (def c (create-client {:url "http://localhost"
+                         :endpoints {:search "http://localhost:3003"}}))
+  (require '[eval.cmr.commands.search :refer [search]])
+  (invoke c (search :collection "PROV")))

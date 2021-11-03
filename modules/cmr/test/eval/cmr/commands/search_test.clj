@@ -1,10 +1,14 @@
-(ns eval.cmr.search-test
+(ns eval.cmr.commands.search-test
   (:require
+   [clojure.spec.alpha :as spec]
    [clojure.test :refer [deftest testing is are]]
-   [eval.cmr.search :as search]
+   [eval.cmr.commands.search :as search]
+   [eval.cmr.core :as cmr]
    [jsonista.core :as json]))
 
 (deftest search-test
+  (is (spec/valid? ::cmr/command (search/search :collection {:provider "BAR"})))
+
   (testing "correct url for concept-type"
     (are [concept-type url]
         (= url (get-in (search/search concept-type {:provider "FOO"}) [:request :url]))
@@ -38,3 +42,6 @@
            (update command :request dissoc :body)))
     (is (= {"scroll_id" "56789"}
            (json/read-value (get-in command [:request :body]))))))
+
+(deftest search-after-test
+  (is (spec/valid? ::cmr/command (search/search-after :collection {} "[sa-key, 123, 456]"))))

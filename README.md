@@ -25,12 +25,13 @@ APIs and tools.
 This tool is designed to interact with external APIs, with simplified commands and clients to invoke those commands. The approach to the commands is to be low-level and involve only basic query and response communication with no higher logic applied. All commands should be stateless.
 
 ```clojure
-user=> (require '[eval.cmr.core :as cmr])
-user=> (require '[eval.cmr.search :as cmr-search])
-user=> (def my-client (cmr/create-client {:id :foo :url "http://instance"}))
-user=> (def command (cmr-search/search :collection {:provider "FOO"} {:format :umm-json})))
-user=> (cmr/decode-cmr-response-body
-        (cmr/invoke my-client command))
+(require '[eval.cmr.core :as cmr])
+(require '[eval.cmr.commands.search :refer [search]])
+(let [client (cmr/create-client {:url "http://cmr-instance"})
+      command (search :collection 
+                      {:provider "PROVIDER_ID"}
+                      {:format :umm-json}))]
+  (cmr/decode-cmr-response-body (cmr/invoke client command)))
 ```
 
 The services portion of the code will build on those basic commands and provide user-facing interactions and functionality.
@@ -50,7 +51,7 @@ while these two functions will perform equivalent actions, the service version i
 | Task                  | Command                   |
 |-----------------------|---------------------------|
 | Download dependencies | `clj -Spath`              |
-| Start the REPL        | `clj -M:env/dev`          |
+| Start the REPL        | `clj -M:dev`          |
 | Run unit tests        | `clj -M:test/unit`        |
 | Run feature tests     | `clj -M:test/features`    |
 | Run the project       | `clj -M -m eval.system`   |

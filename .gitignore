@@ -15,8 +15,11 @@ pom.xml.asc
 ## Linting and dev files
 .rebel_readline_history
 .eastwood
-.lsp
-.clj-kondo
+.clj-kondo/cache/
+.clj-kondo/.cache/
+.lsp/sqlite.*.db
+.lsp/.cache/
+.lsp/cache/
 .cider-repl-history
 .cpcache/
 
@@ -24,6 +27,9 @@ pom.xml.asc
 .lein-plugins/
 .lein-*
 .nrepl-*
+
+## Calva
+.calva*
 
 ## Files
 *.jar

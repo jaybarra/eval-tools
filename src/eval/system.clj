@@ -10,8 +10,6 @@
    [taoensso.timbre :as log])
   (:gen-class))
 
-(set! *warn-on-reflection* true)
-
 ;; Let Aero know how to read integrant references
 (defmethod aero/reader 'ig/ref [_ _ value] (ig/ref value))
 

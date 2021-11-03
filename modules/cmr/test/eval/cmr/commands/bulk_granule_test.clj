@@ -1,7 +1,7 @@
-(ns eval.cmr.bulk.granule-test
+(ns eval.cmr.commands.bulk-granule-test
   (:require
    [clojure.test :refer [deftest testing is]]
-   [eval.cmr.bulk.granule :as bulk-granule]))
+   [eval.cmr.commands.bulk-granule :as bulk-granule]))
 
 (deftest post-job-test
   (let [command (bulk-granule/post-job "foo" {})]
@@ -29,3 +29,5 @@
                         :url "/ingest/granule-bulk-update/status/3"
                         :query-params {"show_granules" true}}}
              command)))))
+;; => Syntax error compiling at (granule_test.clj:20:1).
+;;    Unable to resolve symbol: deftest in this context

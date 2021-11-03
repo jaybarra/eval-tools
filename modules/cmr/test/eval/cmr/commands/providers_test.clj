@@ -1,10 +1,13 @@
-(ns eval.cmr.providers-test
+(ns eval.cmr.commands.providers-test
   (:require
+   [clojure.spec.alpha :as spec]
    [clojure.test :refer [deftest testing is]]
-   [eval.cmr.providers :as providers]
+   [eval.cmr.commands.providers :as providers]
+   [eval.cmr.core :as cmr]
    [jsonista.core :as json]))
 
 (deftest get-providers-test
+  (is (spec/valid? ::cmr/command (providers/get-providers)))
   (is (= {:request
           {:method :get
            :url "/metadata-db/providers"}}
@@ -16,6 +19,7 @@
               :cmr-only true
               :small false}
         command (providers/create-provider prov {:anonymous? false})]
+    (is (spec/valid? ::cmr/command command))
     (is (= {:request
             {:method :post
              :url "/metadata-db/providers"

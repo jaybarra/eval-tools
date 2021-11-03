@@ -2,7 +2,7 @@
   (:require
    [clojure.spec.alpha :as spec]
    [clojure.test :refer [deftest is]]
-   [eval.cmr.bulk.granule :as bg]
+   [eval.cmr.commands.bulk-granule :as bg]
    [eval.cmr.core :as cmr]
    [eval.services.cmr.bulk.granule :as bulk-granule]
    [jsonista.core :as json]))

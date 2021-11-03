@@ -1,31 +1,7 @@
-(ns eval.cmr.jobs-test
+(ns eval.cmr.commands.jobs-test
   (:require
    [clojure.test :refer [deftest testing is]]
-   [eval.cmr.jobs :as jobs]))
-
-(deftest reindex-all-collections-test
-  (is (= {:request
-          {:method :post
-           :url "/ingest/jobs/reindex-all-collections"}}
-         (jobs/reindex-all-collections)))
-  (testing "with forcing updates to version"
-    (is (= {:request
-            {:method :post
-             :url "/ingest/jobs/reindex-all-collections"
-             :query-params {:force_version "true"}}}
-           (jobs/reindex-all-collections true)))))
-
-(deftest reindex-collection-permitted-groups-test
-  (is (= {:request
-          {:method :post
-           :url "/ingest/jobs/reindex-collection-permitted-groups"}}
-         (jobs/reindex-collection-permitted-groups))))
-
-(deftest reindex-autocomplete-suggestions-test
-  (is (= {:request
-          {:method :post
-           :url "/ingest/jobs/reindex-autocomplete-suggestions"}}
-         (jobs/reindex-autocomplete-suggestions))))
+   [eval.cmr.commands.jobs :as jobs]))
 
 (deftest cleanup-expired-collections-test
   (is (= {:request

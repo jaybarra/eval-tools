@@ -1,6 +1,6 @@
 (ns eval.services.cmr.bulk.granule
   (:require
-   [eval.cmr.bulk.granule :as bulk-granule]
+   [eval.cmr.commands.bulk-granule :as bulk-granule]
    [eval.cmr.core :as cmr]
    [taoensso.timbre :as log])
   (:import

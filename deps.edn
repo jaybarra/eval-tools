@@ -3,7 +3,6 @@
         clj-http/clj-http {:mvn/version "3.12.3"}
         com.taoensso/timbre {:mvn/version "5.1.2"}
         environ/environ {:mvn/version "1.2.0"}
-        eval/cmr-core {:local/root "modules/cmr"}
         integrant/integrant {:mvn/version "0.8.0"}
         metosin/muuntaja {:mvn/version "0.6.8"}
         metosin/reitit {:mvn/version "0.5.15"}
@@ -13,13 +12,16 @@
         pro.juxt.crux/crux-core {:mvn/version "1.18.1"}
         pro.juxt.crux/crux-rocksdb {:mvn/version "1.18.1"}
         ring/ring-core {:mvn/version "1.9.4"}
-        ring/ring-jetty-adapter {:mvn/version "1.9.4"}}
+        ring/ring-jetty-adapter {:mvn/version "1.9.4"}
+
+        ;; Local modules
+        eval/cmr-core {:local/root "modules/cmr"}}
  :aliases
  {:build
   {:deps {io.github.clojure/tools.build {:git/tag "v0.6.2" :git/sha "226fb52"}}
    :ns-default build}
 
-  :env/dev
+  :dev
   {:extra-paths ["dev"]
    :extra-deps {integrant/repl {:mvn/version "0.3.2"}
                 nrepl/nrepl {:mvn/version "0.8.3"}
@@ -29,7 +31,7 @@
 
   :test/unit
   {:extra-paths ["test/unit"]
-   :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.902"}
+   :extra-deps {lambdaisland/kaocha {:mvn/version "1.60.945"}
                 lambdaisland/kaocha-cloverage {:mvn/version "1.0.75"}
                 org.clojure/test.check {:mvn/version "1.1.0"}
                 ring/ring-mock {:mvn/version "0.4.0"}}
@@ -37,7 +39,7 @@
 
   :test/features
   {:extra-paths ["test/features"]
-   :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.902"}
+   :extra-deps {lambdaisland/kaocha {:mvn/version "1.60.945"}
                 lambdaisland/kaocha-cloverage {:mvn/version "1.0.75"}
                 lambdaisland/kaocha-cucumber {:mvn/version "0.0-53"}
                 org.clojure/test.check {:mvn/version "1.1.0"}

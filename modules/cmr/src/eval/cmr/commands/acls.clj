@@ -1,14 +1,16 @@
-(ns eval.cmr.acls
-  "Namespace for interacting with the access-control service. Defines
-  commands and queries for use with the [[cmr/invoke]] function.
+(ns eval.cmr.commands.acls
+  "Namespace for interacting with the ACLs, groups, and permissions. 
+  Defines commands and queries for use with the [[eval.cmr.core/invoke]] function.
 
   ## Example usage
+  ```clojure
   (require '[eval.cmr.core :as cmr])
-  (require '[eval.cmr.acls :as acl)
+  (require '[eval.cmr.commands.acls :as acl)
   (def client (cmr/create-client
                {:id :prod
                 :url \"https://cmr.earthdata.nasa.gov\"})
-  (cmr/invoke client (acl/get-acls))"
+  (cmr/invoke client (acl/get-acls))
+   ```"
   (:require
    [clojure.spec.alpha :as spec]))
 
@@ -16,10 +18,10 @@
                              :opt-un [::description
                                       ::members
                                       ::provider_id]))
-
-(spec/def ::permissions #{"create" "read" "update" "order"})
 (spec/def ::group_id string?)
-(spec/def ::group-permission (spec/keys :req-un [::group_id ::permissions]))
+(spec/def ::permissions #{"create" "read" "update" "order"})
+(spec/def ::group-permission (spec/keys :req-un [::group_id
+                                                 ::permissions]))
 (spec/def ::group_permissions (spec/* ::group-permission))
 (spec/def ::catalog_item_identity map?)
 (spec/def ::acl (spec/keys :req-un [::group_permissions

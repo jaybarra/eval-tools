@@ -1,17 +1,22 @@
 {:db/document-store {:type :crux}
+ :db/elastic-store {:port 9210
+                    :host "localhost"}
 
  :log/system {:level :debug}
 
  :app/cmr {:instances
            {:prod {:url "https://cmr.earthdata.nasa.gov"
-                   :token #env "CMR_ECHO_TOKEN_PROD"}
+                   :token #env "EDL_TOKEN_PROD"}
             :uat {:url "https://cmr.uat.earthdata.nasa.gov"
-                  :token #env "CMR_ECHO_TOKEN_UAT"}
+                  :token #env "EDL_TOKEN_SIT"}
             :sit {:url "https://cmr.sit.earthdata.nasa.gov"
-                  :token #env "CMR_ECHO_TOKEN_SIT"}
+                  :token #env "EDL_TOKEN_SIT"}
             :local {:url "http://localhost"
                     :token "mock-echo-system-token"
                     :endpoints {:access-control "http://localhost:3011"
-                                :search "http://localhost:3003"
+                                :bootstrap "http://localhost:3006"
+                                :indexer "http://localhost:3001"
                                 :ingest "http://localhost:3002"
-                                :metadata-db "http://localhost:3001"}}}}}
+                                :legacy "http://localhost:3012"
+                                :metadata-db "http://localhost:3001"
+                                :search "http://localhost:3003"}}}}}

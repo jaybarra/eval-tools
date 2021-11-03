@@ -1,4 +1,4 @@
-(ns eval.cmr.providers
+(ns eval.cmr.commands.providers
   (:require
    [clojure.spec.alpha :as spec]
    [eval.cmr.core :as cmr]))

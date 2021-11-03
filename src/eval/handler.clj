@@ -43,7 +43,6 @@
   [message ex request]
   {:status 500
    :body {:message message
-          ;; :exception (.getClass ex)
           :data (ex-data ex)
           :uri (:uri request)}})
 

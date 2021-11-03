@@ -1,9 +1,13 @@
-(ns eval.cmr.acls-test
+(ns eval.cmr.commands.acls-test
   (:require
+   [clojure.spec.alpha :as spec]
    [clojure.test :refer [deftest testing is]]
-   [eval.cmr.acls :as acls]))
+   [eval.cmr.commands.acls :as acls]
+   [eval.cmr.core :as cmr]))
 
 (deftest get-groups-test
+  (is (spec/valid? ::cmr/command (acls/get-groups)))
+
   (is (= {:request {:url "/access-control/groups"
                     :method :get}}
          (acls/get-groups)))
@@ -23,6 +27,8 @@
                             {:anonymous true})))))
 
 (deftest get-group-test
+  (is (spec/valid? ::cmr/command (acls/get-group "foo")))
+
   (is (= {:request {:url "/access-control/groups/foo-id"
                     :method :get}}
          (acls/get-group "foo-id")))
@@ -48,6 +54,8 @@
                  {:name "admins"
                   :description "super duper users"
                   :members ["user1" "user2"]})]
+    (is (spec/valid? ::cmr/command command))
+
     (is (= {:request {:method :post
                       :url "/access-control/groups"
                       :headers {"Content-Type" "application/json"}}}
@@ -70,6 +78,8 @@
              (update command :request dissoc :body))))))
 
 (deftest delete-group-test
+  (is (spec/valid? ::cmr/command (acls/delete-group "foo")))
+
   (is (= {:request {:url "/access-control/groups/foo-id"
                     :method :delete}}
          (acls/delete-group "foo-id")))
