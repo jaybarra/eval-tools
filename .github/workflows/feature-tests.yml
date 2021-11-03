@@ -22,7 +22,7 @@ jobs:
       - name: Install clojure tools
         uses: DeLaGuardo/setup-clojure@3.5
         with:
-          cli: 1.10.3.986
+          cli: 1.10.3.1013
 
       - name: Run Feature Tests
         run: clojure -M:test/features
