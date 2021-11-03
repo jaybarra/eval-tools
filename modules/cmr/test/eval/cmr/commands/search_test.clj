@@ -19,6 +19,9 @@
       :variable "/search/variables")))
 
 (deftest scroll-test
+  (is (spec/valid? ::cmr/command (search/scroll :collection 
+                                                {:provider "foo"}  
+                                                "scroll-key")))
   (testing "scroll-id header is set"
     (is (= "1234"
            (get-in (search/scroll :collection
@@ -28,6 +31,7 @@
 
 (deftest clear-scroll-session-test
   (let [command (search/clear-scroll-session "12345")]
+    (is (spec/valid? ::cmr/command command))
     (is (= {:request {:method :post
                       :url "/search/clear-scroll"
                       :headers {:content-type "application/json"}}}

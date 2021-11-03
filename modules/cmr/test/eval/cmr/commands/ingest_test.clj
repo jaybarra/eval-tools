@@ -1,9 +1,11 @@
 (ns eval.cmr.commands.ingest-test
   (:require
    [clojure.java.io :as io]
+   [clojure.spec.alpha :as spec]
    [clojure.test :refer [deftest testing is]]
    [clojure.xml :as xml]
-   [eval.cmr.commands.ingest :as ingest]))
+   [eval.cmr.commands.ingest :as ingest]
+   [eval.cmr.core :as cmr]))
 
 (def collection-metadata-xml
   "<Collection>
@@ -29,6 +31,7 @@
                  "FOO"
                  {:granule-ur "gr1"}
                  {:format :umm-json})]
+    (is (spec/valid? ::cmr/command command))
     (is (= {:request
             {:method :post
              :headers {"Content-Type" "application/vnd.nasa.cmr.umm+json"}
@@ -57,6 +60,7 @@
                    "FOO"
                    collection-metadata-xml
                    {:format :xml})]
+      (is (spec/valid? ::cmr/command command))
       (is (= {:request
               {:method :put
                :url "/ingest/providers/FOO/collections"
@@ -78,12 +82,14 @@
              (update req :request dissoc :body))))))
 
 (deftest delete-concept-test
+  (is (spec/valid? ::cmr/command (ingest/delete-concept :collection "foo" "abc")))
   (is (= {:request
           {:method :delete
            :url "/ingest/providers/FOO/collections/1234"}}
          (ingest/delete-concept :collection "FOO" "1234"))))
 
 (deftest create-association-test
+  (is (spec/valid? ::cmr/command (ingest/create-association "c123" 2 "v456")))
   (is (= {:request
           {:method :put
            :url "/ingest/collections/c123/1/variables/v123"}}
