@@ -1,2 +1,4 @@
 {:linters {:unused-referred-var
-           {:exclude {clojure.test [is deftest testing are]}}}}
+           {:exclude {clojure.test [is deftest testing are]}}
+           :deprecated-var
+           {:exclude {eval.cmr.commands.search/scroll {:namespaces [".*-test$"]}}}}}
