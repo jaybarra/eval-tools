@@ -6,19 +6,19 @@
    [jsonista.core :as json]))
 
 (deftest search-test
-  (testing "search against the correct endpoint"
+  (testing "search against the correct endpoin"
     (let [client (reify cmr/CmrClient
-                   (-invoke [_ query]
-                     (is (= "/search/collections" (:url query)))
-                     (is (= "test-echo-token" (get-in query [:headers :authorization]))))
+                   (-invoke [_ command]
+                     (is (= "/search/collections" (get-in command [:request :url])))
+                     (is (= "test-echo-token" (get-in command [:request :headers :authorization]))))
                    (-token [_] "test-echo-token"))]
-      (search/search client  :collection {:provider "FOO-PROV"})))
+      (search/search client :collection {:provider "FOO-PROV"})))
 
   (testing "options are passed to the client properly"
     (let [client (reify cmr/CmrClient
-                   (-invoke [_ query]
-                     (is (= "/search/collections.umm_json" (:url query)))
-                     (is (nil? (get-in query [:headers :authorization]))))
+                   (-invoke [_ command]
+                     (is (= "/search/collections.umm_json" (get-in command [:request :url])))
+                     (is (nil? (get-in command [:request :headers :authorization]))))
                    (-token [_] "test-echo-token"))]
       (search/search
        client
@@ -52,8 +52,8 @@
   (testing "existing scroll-id is used in header"
     (let [client
           (reify cmr/CmrClient
-            (-invoke [_ query]
-              (is (= "existing-foo-scroll" (get-in query [:headers :CMR-Scroll-Id])))
+            (-invoke [_ command]
+              (is (= "existing-foo-scroll" (get-in command [:request :headers :CMR-Scroll-Id])))
               {:status 200
                :headers
                {:CMR-Hits "0"
@@ -70,11 +70,11 @@
 (deftest clear-scroll-session-test
   (let [client
         (reify cmr/CmrClient
-          (-invoke [_client query]
-            (is (= :post (get-in query [:method])))
+          (-invoke [_client command]
+            (is (= :post (get-in command [:request :method])))
             (is (= {:scroll_id "clear-foo-scroll"}
-                   (json/read-value (:body query) json/keyword-keys-object-mapper)))
-            (is (= "/search/clear-scroll" (get-in query [:url])))
+                   (json/read-value (get-in command [:request :body]) json/keyword-keys-object-mapper)))
+            (is (= "/search/clear-scroll" (get-in command [:request :url])))
             {:status 200})
           (-token [_] "test-token"))]
     (is (some? (search/clear-scroll-session! client "clear-foo-scroll")))))

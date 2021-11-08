@@ -145,8 +145,11 @@
                                           ::legacy
                                           ::metadata-db
                                           ::search]))
-(spec/def ::cmr-cfg (spec/keys :opt-un [::url ::endpoints]))
-
+(spec/def ::cmr-cfg (spec/or :url-only (spec/keys :req-un [::url]
+                                                  :opt-un [::endpoints])
+                             :endpoints-only (spec/keys :req-un [::endpoints]
+                                                        :opt-un [::url])
+                             :blend (spec/keys :req-un [::url ::endpoints])))
 (spec/def ::method #{:get :post :put :delete :option :head})
 (spec/def ::body any?)
 (spec/def ::headers map?)
@@ -199,7 +202,8 @@
       (let [response (<! response-ch)]
         (>! result-ch (handle-cmr-response response))))
     ;; return the result chan containing the parsed response
-    result-ch))
+    ;; TODO remove the blocking take
+    (<!! result-ch)))
 
 (defrecord HttpClient [cfg]
 
@@ -275,11 +279,11 @@
 
         token (and (not anonymous?)
                    (or token (-token client)))
-        
+
         out-request (if token
                       (assoc-in command [:request :headers :authorization] token)
                       command)]
-    (<!! (-invoke client out-request))))
+    (-invoke client out-request)))
 
 (comment
   (def client (create-client {:url "https://cmr.earthdata.nasa.gov"}))

@@ -6,8 +6,8 @@
 
 (deftest upload-collection-test
   (let [client (reify cmr/CmrClient
-                 (-invoke [_ query]
-                   (is (= "/ingest/providers/FOO/collections" (:url query)))
-                   (is (= {} (:body query))))
+                 (-invoke [_ command]
+                   (is (= "/ingest/providers/FOO/collections" (get-in command [:request :url])))
+                   (is (= {} (get-in command [:request :body]))))
                  (-token [_] "test-echo-token"))]
     (ingest/upload-collection client "FOO" {})))
