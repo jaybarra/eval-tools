@@ -6,8 +6,7 @@
    [environ.core :refer [env]]
    [eval.cmr.core :as cmr]
    [integrant.core :as ig]
-   [taoensso.timbre :as log]
-   [muuntaja.core :as m])
+   [taoensso.timbre :as log])
   (:gen-class))
 
 ;; Let Aero know how to read integrant references
