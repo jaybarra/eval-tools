@@ -4,6 +4,7 @@
   This namespace provides basic interaction with a CMR instance through the [[eval.cmr.core/invoke]] function."
   (:require
    [clj-http.client :as http]
+   [clojure.core.async :refer [>! <! <!! go chan promise-chan]]
    [clojure.spec.alpha :as spec]
    [clojure.string :as str]
    [muuntaja.core :as muuntaja]
@@ -137,8 +138,14 @@
 (spec/def ::cmr-formats cmr-formats)
 (spec/def ::concept-type #{:collection :granule :service :tool :concept})
 (spec/def ::url string?)
-(spec/def ::endpoints map?)
-(spec/def ::cmr (spec/keys :req-un [::url]))
+(spec/def ::endpoints (spec/keys :opt-un [::access-control
+                                          ::bootstrap
+                                          ::indexer
+                                          ::ingest
+                                          ::legacy
+                                          ::metadata-db
+                                          ::search]))
+(spec/def ::cmr-cfg (spec/keys :opt-un [::url ::endpoints]))
 
 (spec/def ::method #{:get :post :put :delete :option :head})
 (spec/def ::body any?)
@@ -157,37 +164,73 @@
   "Redacts query headers for use in logging.
   Can replace sensitive headers such as auth tokens with 'redacted'"
   [query headers]
-  (loop [updated-query query 
-         header (first headers)]
-    (if-not header
-      updated-query
+  (loop [updated-query query
+         headers headers]
+    (if-let [header (first headers)]
       (recur
        (if (get-in query [:headers (first headers)])
          (update-in query [:headers header] (constantly "[redacted]"))
          query)
-       (rest headers)))))
+       (rest headers))
+      updated-query)))
 
-(defrecord HttpClient [url opts]
+(defn ^:private handle-cmr-response
+  "Do any formatting by content-type here."
+  [resp]
+  (try
+    ;; TODO add parsing by content-type
+    resp
+    (catch Throwable t
+      {:eval.cmr.core/category :eval.anomalies/fault
+       ::throwable t})))
+
+(defn ^:private send-request
+  "Send a query to CMR and and recieve a response in a promise-chan."
+  [query]
+  (let [response-ch (chan 1)
+        result-ch (promise-chan)]
+    (log/info (format "Sending request to CMR [%s]" (get-in query [:request :url]))
+              (redact-headers query [:authorization
+                                     :echo-token]))
+    ;; Send the request and write the response to an internal chan
+    (go (>! response-ch (http/request query)))
+    ;; Wait for the response to come back on a separate thread
+    (go
+      (let [response (<! response-ch)]
+        (>! result-ch (handle-cmr-response response))))
+    ;; return the result chan containing the parsed response
+    result-ch))
+
+(defrecord HttpClient [cfg]
 
   CmrClient
 
-  (-invoke [this query]
-    (log/info (format "Sending request to CMR [%s]" (get this :url))
-              (redact-headers query [:authorization
-                                     :echo-token]))
-    (http/request query))
+  (-invoke [_ query]
+    (send-request query))
 
   (-token [this]
-    (get-in this [:opts :token])))
+    (get-in this [:cfg :token])))
 
 (defn create-client
   "Constructs a CMR client."
   [cmr-cfg]
-  (let [{:keys [url]} cmr-cfg]
-    (when-not (spec/valid? ::cmr cmr-cfg)
-      (throw (ex-info "Invalid CMR configuration"
-                      (spec/explain-data ::cmr cmr-cfg))))
-    (->HttpClient url (dissoc cmr-cfg :url))))
+  (when-not (spec/valid? ::cmr-cfg cmr-cfg)
+    (throw (ex-info "Invalid CMR configuration"
+                    (spec/explain-data ::cmr-cfg cmr-cfg))))
+  (->HttpClient cmr-cfg))
+
+(defn ^:private replace-service-route
+  "Replaces the service route from the command URL with the new path."
+  [command new-route]
+  (update-in command
+             [:request :url]
+             #(as-> % s
+                (str/split s #"/")
+                (drop 2 s)
+                (str/join "/" s)
+                (str new-route
+                     (when-not (str/ends-with? new-route "/") "/")
+                     s))))
 
 ;; ============================================================================
 ;; Functions
@@ -216,8 +259,8 @@
     (throw (ex-info "Invalid CMR command"
                     (spec/explain-data ::command command))))
   (let [{:keys [anonymous? token]} (:opts command)
-        {root-url :url
-         {endpoints :endpoints} :opts} client
+        {{root-url :url
+          endpoints :endpoints} :cfg} client
         req-url (get-in command [:request :url])
 
         ;; check if overriding the root-url
@@ -227,24 +270,18 @@
 
         ;; if overriding the default endpoint also trim the request url
         command (if override-url
-                  (update-in command
-                             [:request :url]
-                             #(as-> % s
-                                (str/split s #"/")
-                                (drop 2 s)
-                                (str/join "/" s)
-                                (str "/" s)))
-                  command)
+                  (replace-service-route command override-url)
+                  (update-in command [:request :url] #(str root-url %)))
 
         token (and (not anonymous?)
                    (or token (-token client)))
-        out-request (cond-> (:request command)
-                      true (assoc :url (str root-url (get-in command [:request :url])))
-                      token (assoc-in [:headers :authorization] token))]
-    (-invoke client out-request)))
+        
+        out-request (if token
+                      (assoc-in command [:request :headers :authorization] token)
+                      command)]
+    (<!! (-invoke client out-request))))
 
 (comment
-  (def c (create-client {:url "http://localhost"
-                         :endpoints {:search "http://localhost:3003"}}))
+  (def client (create-client {:url "https://cmr.earthdata.nasa.gov"}))
   (require '[eval.cmr.commands.search :refer [search]])
-  (invoke c (search :collection "PROV")))
+  (invoke client (search :collection {:provider "NSIDC_ECS"} {:format :json})))

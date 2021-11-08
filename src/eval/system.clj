@@ -5,9 +5,9 @@
    [clojure.java.io :as io]
    [environ.core :refer [env]]
    [eval.cmr.core :as cmr]
-   [eval.db.document-store :as doc-store]
    [integrant.core :as ig]
-   [taoensso.timbre :as log])
+   [taoensso.timbre :as log]
+   [muuntaja.core :as m])
   (:gen-class))
 
 ;; Let Aero know how to read integrant references
@@ -27,17 +27,6 @@
   (let [cfg-file (env :eval-config-location "config.edn")
         cfg (aero/read-config (io/resource cfg-file))]
     (get-in cfg keys)))
-
-(defmethod ig/init-key :db/document-store
-  [_ opts]
-  (let [store (doc-store/create-document-store opts)]
-    (log/info "Document Store initialized")
-    store))
-
-(defmethod ig/halt-key! :db/document-store
-  [_ store]
-  (log/info "Shutting down Document Store")
-  (doc-store/stop-document-store store))
 
 (defmethod ig/init-key :app/cmr
   [_ {:keys [instances]}]

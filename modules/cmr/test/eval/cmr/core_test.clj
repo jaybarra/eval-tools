@@ -57,3 +57,5 @@
                        {:request
                         {:method :get
                          :url "/search/collections.umm_json"}})))))
+
+(slurp (io/resource "sciops.json"))
