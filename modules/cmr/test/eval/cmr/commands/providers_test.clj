@@ -3,8 +3,7 @@
    [clojure.spec.alpha :as spec]
    [clojure.test :refer [deftest testing is]]
    [eval.cmr.commands.providers :as providers]
-   [eval.cmr.core :as cmr]
-   [jsonista.core :as json]))
+   [eval.cmr.core :as cmr]))
 
 (deftest get-providers-test
   (is (spec/valid? ::cmr/command (providers/get-providers)))
@@ -23,11 +22,10 @@
     (is (= {:request
             {:method :post
              :url "/metadata-db/providers"
-             :headers {"Content-Type" "application/json"}}
+             :headers {:content-type "application/json"}
+             :body prov}
             :opts {:anonymous? false}}
-           (update command :request dissoc :body)))
-    (is (= prov (json/read-value (get-in command [:request :body])
-                                 json/keyword-keys-object-mapper))))
+           command)))
 
   (testing "invalid providers rejected"
     (is (thrown-with-msg? clojure.lang.ExceptionInfo

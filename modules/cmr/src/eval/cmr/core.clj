@@ -165,15 +165,15 @@
 
 (defn- redact-headers
   "Redacts query headers for use in logging.
-  Can replace sensitive headers such as auth tokens with 'redacted'"
-  [query headers]
+  Can replace sensitive headers such as auth tokens with '[redacted]'"
+  [query redacting-headers]
   (loop [updated-query query
-         headers headers]
+         headers redacting-headers]
     (if-let [header (first headers)]
       (recur
        (if (get-in query [:headers (first headers)])
-         (update-in query [:headers header] (constantly "[redacted]"))
-         query)
+         (assoc-in query [:headers header] "[redacted]")
+         updated-query)
        (rest headers))
       updated-query)))
 
@@ -181,22 +181,28 @@
   "Do any formatting by content-type here."
   [resp]
   (try
-    ;; TODO add parsing by content-type
-    resp
-    (catch Throwable t
+    (if-let [fault (:eval.cmr.core/category resp)]
+      fault
+      resp)
+    (catch Exception t
       {:eval.cmr.core/category :eval.anomalies/fault
-       ::throwable t})))
+       ::exception t})))
 
 (defn ^:private send-request
   "Send a query to CMR and and recieve a response in a promise-chan."
   [query]
   (let [response-ch (chan 1)
         result-ch (promise-chan)]
-    (log/info (format "Sending request to CMR [%s]" (get-in query [:request :url]))
+    (log/info "Sending request to CMR"
               (redact-headers query [:authorization
                                      :echo-token]))
     ;; Send the request and write the response to an internal chan
-    (go (>! response-ch (http/request query)))
+    (go (>! response-ch (try
+                          (http/request query)
+                          (catch Exception t
+                            (log/error t)
+                            {:eval.cmr.core/category :eval.anomalies.fault
+                             ::exception t}))))
     ;; Wait for the response to come back on a separate thread
     (go
       (let [response (<! response-ch)]
@@ -209,11 +215,15 @@
 
   CmrClient
 
-  (-invoke [_ query]
-    (send-request query))
+  (-invoke
+   [_ command]
+   ;; TODO add meta to requests
+   (log/info "Invoking CMR" (dissoc command :request))
+   (send-request (:request command)))
 
-  (-token [this]
-    (get-in this [:cfg :token])))
+  (-token
+   [this]
+   (get-in this [:cfg :token])))
 
 (defn create-client
   "Constructs a CMR client."
@@ -257,7 +267,7 @@
   |option| type | description|
   |------|------|------------|
   |`:anonymous?`| optional boolean| When true, no authorization-token will be added to the header |
-  |`:token`| optional string | Authorization token to be used|"
+  |`:token`| optional string | Authorization token to be used. Should be in the form of \"Bearer EDL-xxxxxx...\"<br>See https://urs.earthdata.nasa.gov for Earthdata Login token generation|"
   [client command]
   (when-not (spec/valid? ::command command)
     (throw (ex-info "Invalid CMR command"
@@ -280,10 +290,10 @@
         token (and (not anonymous?)
                    (or token (-token client)))
 
-        out-request (if token
+        command (if token
                       (assoc-in command [:request :headers :authorization] token)
                       command)]
-    (-invoke client out-request)))
+    (-invoke client command)))
 
 (comment
   (def client (create-client {:url "https://cmr.earthdata.nasa.gov"}))

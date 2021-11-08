@@ -10,7 +10,7 @@
    (cmr/invoke client (search-api/search concept-type query opts))))
 
 (defn query-hits
-  "Query CMR for count of available concepts that are available from
+  "Query CMR for count of concepts available that are available from
   a given query.
 
   Takes a query and sets a :page_size of 0 and returns

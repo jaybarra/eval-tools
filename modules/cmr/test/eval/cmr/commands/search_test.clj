@@ -3,8 +3,7 @@
    [clojure.spec.alpha :as spec]
    [clojure.test :refer [deftest testing is are]]
    [eval.cmr.commands.search :as search]
-   [eval.cmr.core :as cmr]
-   [jsonista.core :as json]))
+   [eval.cmr.core :as cmr]))
 
 (deftest search-test
   (is (spec/valid? ::cmr/command (search/search :collection {:provider "BAR"})))
@@ -34,18 +33,18 @@
     (is (spec/valid? ::cmr/command command))
     (is (= {:request {:method :post
                       :url "/search/clear-scroll"
-                      :headers {:content-type "application/json"}}}
-           (update command :request dissoc :body)))
-    (is (= {"scroll_id" "12345"}
-           (json/read-value (get-in command [:request :body])))))
+                      :headers {:content-type "application/json"}
+                      :body {:scroll_id "12345"}}
+            ::cmr/category :search}
+           command)))
 
   (let [command (search/clear-scroll-session 56789)]
     (is (= {:request {:method :post
                       :url "/search/clear-scroll"
-                      :headers {:content-type "application/json"}}}
-           (update command :request dissoc :body)))
-    (is (= {"scroll_id" "56789"}
-           (json/read-value (get-in command [:request :body]))))))
+                      :headers {:content-type "application/json"}
+                      :body {:scroll_id "56789"}}
+            ::cmr/category :search}
+           command))))
 
 (deftest search-after-test
   (is (spec/valid? ::cmr/command (search/search-after :collection {} "[sa-key, 123, 456]"))))

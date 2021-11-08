@@ -1,7 +1,6 @@
 (ns eval.cmr.commands.providers
   (:require
-   [clojure.spec.alpha :as spec]
-   [eval.cmr.core :as cmr]))
+   [clojure.spec.alpha :as spec]))
 
 (spec/def ::provider-id string?)
 (spec/def ::short-name string?)
@@ -26,8 +25,8 @@
   (let [command {:request
                  {:method :post
                   :url "/metadata-db/providers"
-                  :headers {"Content-Type" "application/json"}
-                  :body (cmr/encode->json provider)}}]
+                  :headers {:content-type "application/json"}
+                  :body provider}}]
     (if opts
       (assoc command :opts opts)
       command)))
