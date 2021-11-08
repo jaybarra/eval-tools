@@ -56,9 +56,6 @@
         [:formats "application/extended+xml"]
         extended-xml-formats))))
 
-(def encode->json "Encode EDN to JSON"
-  (partial muuntaja/encode m "application/json"))
-
 (defn decode-cmr-response-body
   "Decode the body of CMR responses if Content-Type is set, otherwise return the body raw"
   [response]
@@ -216,14 +213,14 @@
   CmrClient
 
   (-invoke
-   [_ command]
+    [_ command]
    ;; TODO add meta to requests
-   (log/info "Invoking CMR" (dissoc command :request))
-   (send-request (:request command)))
+    (log/info "Invoking CMR" (dissoc command :request))
+    (send-request (:request command)))
 
   (-token
-   [this]
-   (get-in this [:cfg :token])))
+    [this]
+    (get-in this [:cfg :token])))
 
 (defn create-client
   "Constructs a CMR client."
@@ -291,8 +288,8 @@
                    (or token (-token client)))
 
         command (if token
-                      (assoc-in command [:request :headers :authorization] token)
-                      command)]
+                  (assoc-in command [:request :headers :authorization] token)
+                  command)]
     (-invoke client command)))
 
 (comment
