@@ -1,7 +1,8 @@
 (ns eval.cmr.legacy.tokens
-  "Actions for interacting with the CMR legacy systems.")
+  "Actions for interacting with the CMR legacy systems."
+  {:deprecated true})
 
-(defn echo-token-soap-message
+(defn ^{:deprecated true} echo-token-soap-message
   "Return a soap message for getting an echo-token from legacy systems.
 
   supported options
@@ -33,7 +34,7 @@
      (format "<behalfOfProvider>%s</behalfOfProvider>" on-behalf-of)
      "")))
 
-(defn token-xml-request-body
+(defn ^:private token-xml-request-body
   [credentials]
   (format
    "<token>
@@ -47,7 +48,7 @@
    (get credentials :client-id "test-client")
    (get credentials :ip-address "127.0.0.1")))
 
-(defn get-token
+(defn ^{:deprecated true} get-token
   "Request a token from CMR legacy services
 
   Credentials map:
@@ -56,15 +57,17 @@
   * client-id - optional
   * ip-address - optional"
   [credentials]
-  {:method :post
-   :url "/legacy-services/rest/tokens"
-   :headers {"Content-Type" "application/xml"}
-   :body (token-xml-request-body credentials)})
+  {:request
+   {:method :post
+    :url "/legacy-services/rest/tokens"
+    :headers {"Content-Type" "application/xml"}
+    :body (token-xml-request-body credentials)}})
 
-(defn get-token-info
+(defn ^{:deprecated true} get-token-info
   "Retrieve information about a given token."
   [token-id]
-  {:method :post
-   :url "/legacy-services/rest/tokens/get_token_info"
-   :headers {"Content-Type" "application/json"}
-   :body {:id token-id}})
+  {:request
+   {:method :post
+    :url "/legacy-services/rest/tokens/get_token_info"
+    :headers {"Content-Type" "application/json"}
+    :body {:id token-id}}})
