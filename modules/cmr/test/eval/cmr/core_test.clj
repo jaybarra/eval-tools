@@ -39,19 +39,17 @@
                :body "<xml>value</xml>"})]
     (is (= "<xml>value</xml>" data))))
 
-(defrecord ^:private MockClient [id url opts]
+(defrecord ^:private MockClient [cfg]
   cmr/CmrClient
 
-  (-invoke [_ query]
+  (-invoke [_ command]
     (is (= "internal://localhost:32303/collections.umm_json"
-           (:url query)))
+           (get-in command [:request :url])))
     {:status 200})
   (-token [_] "foo"))
 
 (deftest endpoints-override-test
-  (let [client (->MockClient :foo
-                             "http://test"
-                             {:endpoints {:search "internal://localhost:32303"}})]
+  (let [client (->MockClient {:endpoints {:search "internal://localhost:32303"}})]
     (is (= {:status 200}
            (cmr/invoke client
                        {:request
