@@ -15,10 +15,10 @@
                     "/search/%s%s"
                     path
                     (cmr/format->cmr-url-extension (:format opts)))
-        command {:request {:method :get
-                           :url search-url
-                           :query-params query}
-                 ::cmr/category :search}]
+        command {::cmr/request {:method :get
+                                :url search-url
+                                :query-params query}
+                 ::cmr/category :read}]
     (if opts
       (assoc command :opts opts)
       command)))
@@ -29,21 +29,21 @@
   [concept-type query scroll-id & [opts]]
   (-> (search concept-type query opts)
       (assoc-in
-       [:request :headers "CMR-Scroll-Id"]
+       [::cmr/request :headers "CMR-Scroll-Id"]
        scroll-id)))
 
 (defn clear-scroll-session
   "Returns a query that will clear a specific scroll-id session."
   [scroll-id]
-  {:request
+  {::cmr/request
    {:method :post
     :url "/search/clear-scroll"
     :headers {:content-type "application/json"}
     :body {:scroll_id (str scroll-id)}}
-   ::cmr/category :search})
+   ::cmr/category :read})
 
 (defn search-after
   "Returns a query with a CMR-Search-After in the header for use in harvesting queries."
   [concept-type query sa-key & [opts]]
   (-> (search concept-type query opts)
-      (assoc-in [:request :headers "CMR-Search-After"] sa-key)))
+      (assoc-in [::cmr/request :headers "CMR-Search-After"] sa-key)))

@@ -29,29 +29,29 @@
   (let [command (ingest/validate-concept-metadata
                  :granule
                  "FOO"
+                 "my-native-id"
                  {:granule-ur "gr1"}
                  {:format :umm-json})]
     (is (spec/valid? ::cmr/command command))
-    (is (= {:request
-            {:method :post
-             :headers {"Content-Type" "application/vnd.nasa.cmr.umm+json"}
-             :url "/ingest/providers/FOO/validate/granule/null"}}
-           (update command :request dissoc :body)))
-    (is (= {:granule-ur "gr1"}
-           (get-in command [:request :body]))))
+    (is (= {:method :post
+            :headers {:content-type "application/vnd.nasa.cmr.umm+json"}
+            :url "/ingest/providers/FOO/validate/granule/my-native-id"
+            :body {:granule-ur "gr1"}}
+           (::cmr/request command))))
 
   (let [command (ingest/validate-concept-metadata
                  :collection
                  "FOO"
+                 "my-native-id"
                  collection-metadata-xml
                  {:format :xml})]
-    (is (= {:request
-            {:method :post
-             :headers {"Content-Type" "application/xml"}
-             :url "/ingest/providers/FOO/validate/collection/null"}}
-           (update command :request dissoc :body)))
+    (is (= {:method :post
+            :headers {:content-type "application/xml"}
+            :url "/ingest/providers/FOO/validate/collection/my-native-id"
+            :body collection-metadata-xml}
+           (::cmr/request command)))
     (is (= (parse-xml collection-metadata-xml)
-           (parse-xml (get-in command [:request :body]))))))
+           (parse-xml (get-in command [::cmr/request :body]))))))
 
 (deftest create-concept-test
   (testing "without giving a native-id"
@@ -61,36 +61,33 @@
                    collection-metadata-xml
                    {:format :xml})]
       (is (spec/valid? ::cmr/command command))
-      (is (= {:request
-              {:method :put
-               :url "/ingest/providers/FOO/collections"
-               :headers {"Content-Type" "application/xml"}}}
-             (update command :request dissoc :body)))
-      (is (string? (get-in command [:request :body])))))
+      (is (= {:method :put
+              :url "/ingest/providers/FOO/collections"
+              :headers {:content-type "application/xml"}}
+             (::cmr/request (update command ::cmr/request dissoc :body))))
+      (is (string? (get-in command [::cmr/request :body])))))
 
   (testing "without a native-id"
-    (let [req (ingest/create-concept
+    (let [command (ingest/create-concept
                :collection
                "FOO"
                collection-metadata-xml
                {:format :json
                 :native-id "foo123"})]
-      (is (= {:request
-              {:method :put
-               :url "/ingest/providers/FOO/collections/foo123"
-               :headers {"Content-Type" "application/json"}}}
-             (update req :request dissoc :body))))))
+      (is (= {:method :put
+              :url "/ingest/providers/FOO/collections/foo123"
+              :headers {:content-type "application/json"}
+              :body collection-metadata-xml}
+             (::cmr/request command))))))
 
 (deftest delete-concept-test
   (is (spec/valid? ::cmr/command (ingest/delete-concept :collection "foo" "abc")))
-  (is (= {:request
-          {:method :delete
-           :url "/ingest/providers/FOO/collections/1234"}}
-         (ingest/delete-concept :collection "FOO" "1234"))))
+  (is (= {:method :delete
+          :url "/ingest/providers/FOO/collections/1234"}
+         (::cmr/request (ingest/delete-concept :collection "FOO" "1234")))))
 
 (deftest create-association-test
   (is (spec/valid? ::cmr/command (ingest/create-association "c123" 2 "v456")))
-  (is (= {:request
-          {:method :put
-           :url "/ingest/collections/c123/1/variables/v123"}}
-         (ingest/create-association "c123" 1 "v123"))))
+  (is (= {:method :put
+          :url "/ingest/collections/c123/1/variables/v123"}
+         (::cmr/request (ingest/create-association "c123" 1 "v123")))))

@@ -12,7 +12,8 @@
   (cmr/invoke client (acl/get-acls))
    ```"
   (:require
-   [clojure.spec.alpha :as spec]))
+   [clojure.spec.alpha :as spec]
+   [eval.cmr.core :as cmr]))
 
 (spec/def ::group (spec/keys :req-un [::name]
                              :opt-un [::description
@@ -32,17 +33,19 @@
   (let [request {:method :get
                  :url "/access-control/groups"}
         request (if query (assoc request :query-params query) request)
-        command {:request request}]
+        command {::cmr/request request
+                 ::cmr/category :read}]
     (if opts
       (assoc command :opts opts)
       command)))
 
 (defn create-group
   [group & [opts]]
-  (let [command {:request {:method :post
-                           :url "/access-control/groups"
-                           :headers {"Content-Type" "application/json"}
-                           :body group}}]
+  (let [command {::cmr/request {:method :post
+                                :url "/access-control/groups"
+                                :headers {"Content-Type" "application/json"}
+                                :body group}
+                 ::cmr/category :create}]
     (if opts
       (assoc command :opts opts)
       command)))
@@ -58,7 +61,8 @@
         req (if-let [pretty (get opts :pretty)]
               (assoc-in base [:query-params :pretty] pretty)
               base)
-        command {:request req}
+        command {::cmr/request req
+                 ::cmr/category :read}
         command-opts (dissoc opts :pretty)]
     (if (seq (keys command-opts))
       (assoc command :opts command-opts)
@@ -67,8 +71,9 @@
 (defn delete-group
   "Constructs a query to delete a group by id."
   [group-id & [opts]]
-  (let [command {:request {:method :delete
-                           :url (str "/access-control/groups/" group-id)}}]
+  (let [command {::cmr/request {:method :delete
+                                :url (str "/access-control/groups/" group-id)}
+                 ::cmr/category :delete}]
     (if opts
       (assoc command :opts opts)
       command)))
@@ -80,7 +85,8 @@
                  :url (str "/access-control/groups/" group-id)
                  :headers {"Content-Type" "application/json"}
                  :body group}
-        command {:request request}]
+        command {::cmr/request request
+                 ::cmr/category :update}]
     (if opts
       (assoc command :opts opts)
       command)))
@@ -92,7 +98,8 @@
         request (if-let [pretty (get opts :pretty false)]
                   (assoc-in request [:query-params :pretty] pretty)
                   request)
-        command {:request request}
+        command {::cmr/request request
+                 ::cmr/category :read}
         command-opts (dissoc opts :pretty)]
     (if (seq (keys command-opts))
       (assoc command :opts command-opts)
@@ -101,10 +108,11 @@
 (defn remove-group-members
   [group-id users & [opts]]
   (let [command
-        {:request {:method :delete
-                   :url (str "/access-control/groups/" group-id "/members")
-                   :headers {"Content-Type" "application/json"}
-                   :body users}}]
+        {::cmr/request {:method :delete
+                        :url (str "/access-control/groups/" group-id "/members")
+                        :headers {"Content-Type" "application/json"}
+                        :body users}
+         ::cmr/category :read}]
     (if opts
       (assoc command :opts opts)
       command)))
@@ -117,7 +125,8 @@
         request (if query
                   (assoc request :query-params query)
                   request)
-        command {:request request}]
+        command {::cmr/request request
+                 ::cmr/category :read}]
     (if opts
       (assoc command :opts opts)
       command)))
@@ -126,11 +135,12 @@
   "Return a query for requesting ACLs from "
   [acl & [opts]]
   (let [command
-        {:request
+        {::cmr/request
          {:method :post
           :url "/access-control/acls"
           :headers {"Content-Type" "application/json"}
-          :body acl}}]
+          :body acl}
+         ::cmr/category :create}]
     (if opts
       (assoc command :opts opts)
       command)))
@@ -138,10 +148,11 @@
 (defn get-permissions
   [query & [opts]]
   (let [command
-        {:request
+        {::cmr/request
          {:method :get
           :url (str "/access-control/permissions")
-          :query-params query}}]
+          :query-params query}
+         ::cmr/category :read}]
     (if opts
       (assoc command :opts opts)
       command)))
@@ -154,7 +165,8 @@
         request (if providers
                   (assoc-in query [:query-params :provider] providers)
                   query)
-        command {:request request}]
+        command {::cmr/request request
+                 ::cmr/category :read}]
     (if opts
       (assoc command :opts opts)
       command)))
@@ -163,6 +175,7 @@
   [& [opts]]
   (let [req {:method :get
              :url "/access-control/health"}]
-    {:request (if-let [pretty (get opts :pretty)]
-                (assoc-in req [:query-params :pretty] pretty)
-                req)}))
+    {::cmr/request (if-let [pretty (get opts :pretty)]
+                     (assoc-in req [:query-params :pretty] pretty)
+                     req)
+     ::cmr/category :read}))

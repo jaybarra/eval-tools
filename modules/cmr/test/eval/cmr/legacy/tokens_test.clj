@@ -11,13 +11,13 @@
    [java.io ByteArrayInputStream]))
 
 (deftest get-token-test
-  (let [{{:keys [^String body]} :request :as command} (tokens/get-token {:username "foo" :password "bar"})]
+  (let [{{:keys [^String body]} ::cmr/request :as command} 
+        (tokens/get-token {:username "foo" :password "bar"})]
     (is (spec/valid? ::cmr/command command))
-    (is (= {:request
-            {:method :post
-             :url "/legacy-services/rest/tokens"
-             :headers {"Content-Type" "application/xml"}}}
-           (update-in command [:request] dissoc :body)))
+    (is (= {:method :post
+            :url "/legacy-services/rest/tokens"
+            :headers {"Content-Type" "application/xml"}}
+           (::cmr/request (update-in command [::cmr/request] dissoc :body))))
     (is (= (xml/parse (ByteArrayInputStream.
                        (.getBytes "<token>
                                      <username>foo</username>
@@ -28,14 +28,13 @@
            (xml/parse (ByteArrayInputStream. (.getBytes body)))))))
 
 (deftest get-token-info-test
-  (let [{{:keys [body]} :request :as command} (tokens/get-token-info "foo")]
+  (let [command (tokens/get-token-info "foo")]
     (is (spec/valid? ::cmr/command command))
-    (is (= {:request
-            {:method :post
-             :url "/legacy-services/rest/tokens/get_token_info"
-             :headers {"Content-Type" "application/json"}}}
-           (update-in command [:request] dissoc :body)))
-    (is (= {:id "foo"} body))))
+    (is (= {:method :post
+            :url "/legacy-services/rest/tokens/get_token_info"
+            :headers {"Content-Type" "application/json"}
+            :body {:id "foo"}}
+           (::cmr/request command)))))
 
 (deftest echo-token-soap-message-test
   (let [msg (tokens/echo-token-soap-message

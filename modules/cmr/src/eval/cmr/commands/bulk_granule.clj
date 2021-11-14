@@ -8,7 +8,8 @@
   * Submit jobs for processing
   * Check the status of jobs"
   (:require
-   [clojure.spec.alpha :as spec]))
+   [clojure.spec.alpha :as spec]
+   [eval.cmr.core :as cmr]))
 
 (spec/def ::instruction (spec/cat :granule-ur string? :value string?))
 (spec/def ::updates (spec/+ ::instruction))
@@ -28,11 +29,12 @@
   "Returns a command what will post a bulk-granule-update job to CMR."
   [provider job & [opts]]
   (let [url (format "/ingest/providers/%s/bulk-update/granules" provider)
-        command {:request
+        command {::cmr/request
                  {:method :post
                   :url url
                   :headers {"Content-Type" "application/json"}
-                  :body job}}]
+                  :body job}
+                 ::cmr/category :bulk-update}]
 
     (if opts
       (assoc command :opts opts)
@@ -41,8 +43,9 @@
 (defn trigger-update
   "Returns a command that will trigger an update to the status of bulk-granule-job statuses"
   [& [opts]]
-  (let [command {:request {:method :post
-                           :url "/ingest/granule-bulk-update/status"}}]
+  (let [command {::cmr/request {:method :post
+                                :url "/ingest/granule-bulk-update/status"}
+                 ::cmr/category :admin}]
     (if opts
       (assoc command :opts opts)
       command)))
@@ -57,7 +60,8 @@
               progress? (assoc-in [:query-params "show_progress"] true)
               granules? (assoc-in [:query-params "show_granules"] true)
               request? (assoc-in [:query-params "show_request"] true))
-        command {:request req}
+        command {::cmr/request req
+                 ::cmr/category :admin}
         command-opts (dissoc opts :show-progress :show-granules :show-request)]
     (if (seq (keys command-opts))
       (assoc command :opts command-opts)

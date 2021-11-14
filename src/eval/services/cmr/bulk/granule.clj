@@ -11,7 +11,7 @@
   [client provider job-def]
   (let [job (cmr/decode-cmr-response-body
              (cmr/invoke client (bulk-granule/post-job provider job-def)))]
-    (log/info (format "Bulk Granule Update Job created with ID [%s]" (:task-id job)))
+    (log/info (format "Bulk-Granule-Update job created with ID [%s]" (:task-id job)))
     job))
 
 (defn trigger-status-update!

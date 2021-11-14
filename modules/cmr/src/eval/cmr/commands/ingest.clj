@@ -6,22 +6,23 @@
 (defn- update-req-content-type
   "Set the appropriate Content-Type header based on the concept format."
   [req fmt]
-  (assoc-in req [:headers "Content-Type"] (cmr/format->mime-type fmt)))
+  (assoc-in req [:headers :content-type] (cmr/format->mime-type fmt)))
 
 (defn validate-concept-metadata
   "Returns a command to validate a given concept.
   Supported concept-types:
   + collection
   + granule"
-  [concept-type provider-id concept & [{fmt :format}]]
+  [concept-type provider-id native-id concept-data & [{fmt :format}]]
   (let [req {:method :post
              :url (format "/ingest/providers/%s/validate/%s/%s"
                           provider-id
                           (name concept-type)
-                          (:native-id concept))
-             :body concept}
+                          native-id)
+             :body concept-data}
         request (update-req-content-type req fmt)]
-    {:request request}))
+    {::cmr/request request
+     ::cmr/category :check}))
 
 (defn create-concept
   "Returns a command to create a given concept."
@@ -33,28 +34,33 @@
                           (if native-id (str "/" native-id) ""))
              :body concept}
         request (update-req-content-type req fmt)]
-    {:request request}))
+    {::cmr/request request
+     ::cmr/category :create}))
 
-(def update-concept
+(defn update-concept
   "Alias for [[create-concept]]"
-  create-concept)
+  [concept-type provider-id concept & [opts]]
+  (assoc (create-concept concept-type provider-id concept opts)
+         ::cmr/category :update))
 
 (defn delete-concept
   "Mark a concept as deleted in CMR"
   [concept-type provider-id concept-native-id]
-  {:request
+  {::cmr/request
    {:method :delete
     :url (format "/ingest/providers/%s/%s/%s"
                  provider-id
                  (str (name concept-type) "s")
-                 concept-native-id)}})
+                 concept-native-id)}
+   ::cmr/category :delete})
 
 (defn create-association
   "Create an association beteween collection and variable"
   [collection-id collection-revision variable-id]
-  {:request
+  {::cmr/request
    {:method :put
     :url (format "/ingest/collections/%s/%s/variables/%s"
                  collection-id
                  collection-revision
-                 variable-id)}})
+                 variable-id)}
+   ::cmr/category :create})

@@ -1,6 +1,8 @@
 (ns eval.cmr.legacy.tokens
   "Actions for interacting with the CMR legacy systems."
-  {:deprecated true})
+  {:deprecated true}
+  (:require
+   [eval.cmr.core :as cmr]))
 
 (defn ^{:deprecated true} echo-token-soap-message
   "Return a soap message for getting an echo-token from legacy systems.
@@ -57,17 +59,19 @@
   * client-id - optional
   * ip-address - optional"
   [credentials]
-  {:request
+  {::cmr/request
    {:method :post
     :url "/legacy-services/rest/tokens"
     :headers {"Content-Type" "application/xml"}
-    :body (token-xml-request-body credentials)}})
+    :body (token-xml-request-body credentials)}
+   ::cmr/category :legacy})
 
 (defn ^{:deprecated true} get-token-info
   "Retrieve information about a given token."
   [token-id]
-  {:request
+  {::cmr/request
    {:method :post
     :url "/legacy-services/rest/tokens/get_token_info"
     :headers {"Content-Type" "application/json"}
-    :body {:id token-id}}})
+    :body {:id token-id}}
+   ::cmr/category :legacy})

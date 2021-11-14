@@ -153,8 +153,8 @@
 (spec/def ::request (spec/keys :req-un [::url ::method]
                                :opt-un [::headers ::body]))
 (spec/def ::opts map?)
-(spec/def ::command (spec/keys :req-un [::request]
-                               :opt-un [::opts]))
+(spec/def ::category keyword?)
+(spec/def ::command (spec/keys :req [::category ::request]))
 
 (defprotocol CmrClient
   (-invoke [client query] "Send a query to CMR")
@@ -215,8 +215,8 @@
   (-invoke
     [_ command]
    ;; TODO add meta to requests
-    (log/info "Invoking CMR" (dissoc command :request))
-    (send-request (:request command)))
+    (log/info "Invoking CMR" (dissoc command ::request))
+    (send-request (::request command)))
 
   (-token
     [this]
@@ -234,7 +234,7 @@
   "Replaces the service route from the command URL with the new path."
   [command new-route]
   (update-in command
-             [:request :url]
+             [::request :url]
              #(as-> % s
                 (str/split s #"/")
                 (drop 2 s)
@@ -272,7 +272,7 @@
   (let [{:keys [anonymous? token]} (:opts command)
         {{root-url :url
           endpoints :endpoints} :cfg} client
-        req-url (get-in command [:request :url])
+        req-url (get-in command [::request :url])
 
         ;; check if overriding the root-url
         override-url (when endpoints
@@ -282,13 +282,13 @@
         ;; if overriding the default endpoint also trim the request url
         command (if override-url
                   (replace-service-route command override-url)
-                  (update-in command [:request :url] #(str root-url %)))
+                  (update-in command [::request :url] #(str root-url %)))
 
         token (and (not anonymous?)
                    (or token (-token client)))
 
         command (if token
-                  (assoc-in command [:request :headers :authorization] token)
+                  (assoc-in command [::request :headers :authorization] token)
                   command)]
     (-invoke client command)))
 

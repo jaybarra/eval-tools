@@ -7,10 +7,9 @@
 
 (deftest get-providers-test
   (is (spec/valid? ::cmr/command (providers/get-providers)))
-  (is (= {:request
-          {:method :get
-           :url "/metadata-db/providers"}}
-         (providers/get-providers))))
+  (is (= {:method :get
+          :url "/ingest/providers"}
+         (::cmr/request (providers/get-providers)))))
 
 (deftest create-provider-test
   (let [prov {:provider-id "FOO"
@@ -19,13 +18,13 @@
               :small false}
         command (providers/create-provider prov {:anonymous? false})]
     (is (spec/valid? ::cmr/command command))
-    (is (= {:request
-            {:method :post
-             :url "/metadata-db/providers"
-             :headers {:content-type "application/json"}
-             :body prov}
-            :opts {:anonymous? false}}
-           command)))
+    (is (= {:method :post
+            :url "/ingest/providers"
+            :headers {:content-type "application/json"}
+            :body prov}
+           (::cmr/request command)))
+    (is (= {:anonymous? false}
+           (:opts command))))
 
   (testing "invalid providers rejected"
     (is (thrown-with-msg? clojure.lang.ExceptionInfo

@@ -11,12 +11,12 @@
                   :small false}
         client (reify cmr/CmrClient
                  (-invoke [_ command]
-                   (is (= {:request {:url "/metadata-db/providers"
-                                     :method :post
-                                     :headers {:content-type "application/json"
-                                               :authorization "token"}
-                                     :body prov-def}}
-                          command)))
+                   (is (= {:url "/ingest/providers"
+                           :method :post
+                           :headers {:content-type "application/json"
+                                     :authorization "token"}
+                           :body prov-def}
+                          (::cmr/request command))))
                  (-token [_] "token"))]
     (providers/create-provider
      client
@@ -25,9 +25,9 @@
 (deftest get-providers-test
   (let [client (reify cmr/CmrClient
                  (-invoke [_ command]
-                   (is (= {:request {:url "/metadata-db/providers"
-                                     :method :get
-                                     :headers {:authorization "token"}}}
-                          command)))
+                   (is (= {:url "/ingest/providers"
+                           :method :get
+                           :headers {:authorization "token"}}
+                          (::cmr/request command))))
                  (-token [_] "token"))]
     (providers/get-providers client)))

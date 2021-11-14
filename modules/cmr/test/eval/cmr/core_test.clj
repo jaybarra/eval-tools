@@ -24,8 +24,10 @@
                       (-token [_]
                         "test-token"))]
     (is (= {:status 200}
-           (cmr/invoke test-client {:request {:method :get
-                                              :url "/a/test"}})))
+           (cmr/invoke test-client {::cmr/request
+                                    {:method :get
+                                     :url "/a/test"}
+                                    ::cmr/category :test})))
     (testing "it rejects invalid commands"
       (is (thrown-with-msg? clojure.lang.ExceptionInfo
                             #"Invalid CMR command"
@@ -44,7 +46,7 @@
 
   (-invoke [_ command]
     (is (= "internal://localhost:32303/collections.umm_json"
-           (get-in command [:request :url])))
+           (get-in command [::cmr/request :url])))
     {:status 200})
   (-token [_] "foo"))
 
@@ -52,6 +54,7 @@
   (let [client (->MockClient {:endpoints {:search "internal://localhost:32303"}})]
     (is (= {:status 200}
            (cmr/invoke client
-                       {:request
+                       {::cmr/request
                         {:method :get
-                         :url "/search/collections.umm_json"}})))))
+                         :url "/search/collections.umm_json"}
+                        ::cmr/category :mock})))))

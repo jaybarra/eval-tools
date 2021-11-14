@@ -8,16 +8,16 @@
   (testing "search against the correct endpoin"
     (let [client (reify cmr/CmrClient
                    (-invoke [_ command]
-                     (is (= "/search/collections" (get-in command [:request :url])))
-                     (is (= "test-echo-token" (get-in command [:request :headers :authorization]))))
+                     (is (= "/search/collections" (get-in command [::cmr/request :url])))
+                     (is (= "test-echo-token" (get-in command [::cmr/request :headers :authorization]))))
                    (-token [_] "test-echo-token"))]
       (search/search client :collection {:provider "FOO-PROV"})))
 
   (testing "options are passed to the client properly"
     (let [client (reify cmr/CmrClient
                    (-invoke [_ command]
-                     (is (= "/search/collections.umm_json" (get-in command [:request :url])))
-                     (is (nil? (get-in command [:request :headers :authorization]))))
+                     (is (= "/search/collections.umm_json" (get-in command [::cmr/request :url])))
+                     (is (nil? (get-in command [::cmr/request :headers :authorization]))))
                    (-token [_] "test-echo-token"))]
       (search/search
        client
