@@ -1,8 +1,8 @@
 (ns user
   (:require
+   [eval.system :refer [config]]
    [integrant.repl :as ig-repl]
    [integrant.repl.state]
-   [eval.system :refer [config]]
    [taoensso.timbre :as log]))
 
 (ig-repl/set-prep! config)

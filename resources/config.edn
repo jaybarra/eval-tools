@@ -1,8 +1,4 @@
-{:db/elastic-store
- {:port 9210
-  :host "localhost"}
-
- :log/system {:level :debug}
+{:log/system {:level :debug}
 
  :app/cmr
  {:instances

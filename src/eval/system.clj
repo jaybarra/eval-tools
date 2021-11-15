@@ -27,6 +27,10 @@
         cfg (aero/read-config (io/resource cfg-file))]
     (get-in cfg keys)))
 
+(defmethod ig/init-key :log/system
+  [_ {:keys [level]}]
+  {:level level})
+
 (defmethod ig/init-key :app/cmr
   [_ {:keys [instances]}]
   (log/info "CMR application initialized")
@@ -34,8 +38,8 @@
   (when-let [banner (io/resource "banner.txt")]
     (log/info (slurp banner)))
 
-  (let [clients (apply merge (for [[k v] instances]
-                               {k (cmr/create-client (merge {:id k} v))}))]
+  (let [clients (apply merge (for [[inst-id cfg] instances]
+                               {inst-id (cmr/create-client cfg)}))]
     {:instances clients}))
 
 (defn -main
@@ -44,4 +48,4 @@
   (when (seq args)
     (doseq [arg args]
       (log/info arg)))
-  (ig/init (config)))
+  (:app/cmr (ig/init (config))))

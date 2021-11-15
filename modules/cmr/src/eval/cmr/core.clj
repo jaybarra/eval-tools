@@ -208,7 +208,7 @@
     ;; TODO remove the blocking take
     (<!! result-ch)))
 
-(defrecord HttpClient [cfg]
+(defrecord HttpClient [url token endpoints]
 
   CmrClient
 
@@ -220,7 +220,7 @@
 
   (-token
     [this]
-    (get-in this [:cfg :token])))
+    (get-in this [:token])))
 
 (defn create-client
   "Constructs a CMR client."
@@ -228,7 +228,8 @@
   (when-not (spec/valid? ::cmr-cfg cmr-cfg)
     (throw (ex-info "Invalid CMR configuration"
                     (spec/explain-data ::cmr-cfg cmr-cfg))))
-  (->HttpClient cmr-cfg))
+  (let [{:keys [url token endpoints]} cmr-cfg]
+    (->HttpClient url token endpoints)))
 
 (defn ^:private replace-service-route
   "Replaces the service route from the command URL with the new path."
@@ -270,8 +271,8 @@
     (throw (ex-info "Invalid CMR command"
                     (spec/explain-data ::command command))))
   (let [{:keys [anonymous? token]} (:opts command)
-        {{root-url :url
-          endpoints :endpoints} :cfg} client
+        {root-url :url
+         endpoints :endpoints}  client
         req-url (get-in command [::request :url])
 
         ;; check if overriding the root-url
