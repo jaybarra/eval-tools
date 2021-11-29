@@ -1,6 +1,9 @@
 name: Lint Code Base
 
-on: push
+on:
+  push:
+    branches: 
+      - dev/linting
 
 jobs:
   super-lint:
@@ -14,6 +17,6 @@ jobs:
       - name: Run super-linter
         uses: github/super-linter@v4
         env:
-          DEFAULT_BRANCH: core
+          DEFAULT_BRANCH: main
           FILTER_REGEX_EXCLUDE: .*(steps_definitions|features)/.*
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
