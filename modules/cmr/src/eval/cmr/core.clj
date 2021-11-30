@@ -205,7 +205,6 @@
       (let [response (<! response-ch)]
         (>! result-ch (handle-cmr-response response))))
     ;; return the result chan containing the parsed response
-    ;; TODO remove the blocking take
     (<!! result-ch)))
 
 (defrecord HttpClient [url token endpoints]
@@ -214,7 +213,6 @@
 
   (-invoke
     [_ command]
-   ;; TODO add meta to requests
     (log/info "Invoking CMR" (dissoc command ::request))
     (send-request (::request command)))
 
@@ -271,8 +269,8 @@
     (throw (ex-info "Invalid CMR command"
                     (spec/explain-data ::command command))))
   (let [{:keys [anonymous? token]} (:opts command)
-        {root-url :url
-         endpoints :endpoints}  client
+        {{root-url :url
+          endpoints :endpoints} :cfg}  client
         req-url (get-in command [::request :url])
 
         ;; check if overriding the root-url
