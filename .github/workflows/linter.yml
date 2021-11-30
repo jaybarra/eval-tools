@@ -2,8 +2,9 @@ name: Lint Code Base
 
 on:
   push:
-    branches: 
-      - dev/linting
+  pull_request:
+    branches:
+      - main
 
 jobs:
   super-lint:
