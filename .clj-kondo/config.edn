@@ -1,7 +1,13 @@
-{:linters {:unused-referred-var
-           {:exclude {clojure.test [is deftest testing are]}}
-           :deprecated-var
-           {:exclude {eval.cmr.commands.search/scroll {:namespaces [".*-test$"]}
-                      eval.cmr.legacy.tokens/echo-token-soap-message {:namespaces [".*-test$"]}
-                      eval.cmr.legacy.tokens/get-token {:namespaces [".*-test$"]}
-                      eval.cmr.legacy.tokens/get-token-info {:namespaces [".*-test$"]}}}}}
+{:linters
+ {:unused-referred-var
+  {:exclude {clojure.test [is deftest testing are]}}
+  :deprecated-var
+  {:exclude {eval.cmr.commands.search/scroll {:namespaces [".*-test$"]}
+             eval.cmr.legacy.tokens/echo-token-soap-message {:namespaces [".*-test$"]}
+             eval.cmr.legacy.tokens/get-token {:namespaces [".*-test$"]}
+             eval.cmr.legacy.tokens/get-token-info {:namespaces [".*-test$"]}}}
+  :unresolved-symbol
+  {:exclude [(lambdaisland.cucumber.dsl/Given)
+             (lambdaisland.cucumber.dsl/When)
+             (lambdaisland.cucumber.dsl/Then)]}
+  :unsorted-required-namespaces {:level :warning}}}

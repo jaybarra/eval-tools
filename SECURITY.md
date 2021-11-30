@@ -13,6 +13,6 @@ This project is in the alpha of Alpha, alpha squared if you will. Versioning has
 
 ## Reporting a Vulnerability
 
-Create an issue in the Github Project
+Create an issue in the GitHub Project
 
 Currently expect no support or timeline to resolutions can be confirmed.

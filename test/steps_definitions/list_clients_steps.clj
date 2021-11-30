@@ -2,7 +2,7 @@
   (:require
    [lambdaisland.cucumber.dsl :refer [Given When Then pending!]]))
 
-(Given "the input {string}" [state string]
+(Given "the input {string}" [state input]
        (pending!))
 
 (When "the tool is run" [state]

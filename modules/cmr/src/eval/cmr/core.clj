@@ -8,8 +8,8 @@
    [clojure.spec.alpha :as spec]
    [clojure.string :as str]
    [muuntaja.core :as muuntaja]
-   [muuntaja.format.json :as json-format]
    [muuntaja.format.core :as fmt-core]
+   [muuntaja.format.json :as json-format]
    [taoensso.timbre :as log]))
 
 ;; ============================================================================

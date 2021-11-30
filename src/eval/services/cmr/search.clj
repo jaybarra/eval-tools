@@ -1,7 +1,7 @@
 (ns eval.services.cmr.search
   (:require
-   [eval.cmr.core :as cmr]
-   [eval.cmr.commands.search :as search-api]))
+   [eval.cmr.commands.search :as search-api]
+   [eval.cmr.core :as cmr]))
 
 (defn search
   "Search concepts for concepts"

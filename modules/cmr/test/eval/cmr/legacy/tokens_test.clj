@@ -5,8 +5,8 @@
    [clojure.test :refer [deftest is]]
    [clojure.xml :as xml]
    [clojure.zip :as zip]
-   [eval.cmr.legacy.tokens :as tokens]
-   [eval.cmr.core :as cmr])
+   [eval.cmr.core :as cmr]
+   [eval.cmr.legacy.tokens :as tokens])
   (:import
    [java.io ByteArrayInputStream]))
 

@@ -36,17 +36,10 @@ The identifier should be a keyword. A corresponding configuration map should be 
 
 The configuration map must include the `:url`. `:echo-token` is optional and may be an enviroment value or a static string. If no value is set all calls to CMR will be anonymous and the `Echo-Token` header will not be set unless supplied to the client manually in the request.
 
-And may optionally include a `:endpoints` map to override the `:url` specified earlier. This endpoints map is useful when CMR is deployed locally in development mode or not hosted behind a reverse proxy or load-balancer. The endpoints should be a map consisting of the appropriate service name followed by the url of the service. See the above configuration for example
+And may optionally include a `:endpoints` map to override the `:url` specified earlier. This endpoints map is useful when CMR is deployed locally in development mode or not hosted behind a reverse proxy or load-balancer. The endpoints should be a map consisting of the appropriate service name followed by the URL of the service. See the above configuration for example
 
 #### Aero config tags
 To set properties from the environment, use the `#env` keyword followed by the environment variable.
-
-#### Supported Document Stores
-
-| Key     | Description                                               | Options                                                                     |
-|:--------|:----------------------------------------------------------|:----------------------------------------------------------------------------|
-| `:crux` | Bi-temporal graph document store<br> Single node instance | `:log-dir` - optional<br> `:doc-dir` - optional<br> `:index-dir` - optional |
-| `:noop` | Prints to console                                         |                                                                             |
 
 ### eval.services.cmr
 The difference between the `eval.cmr` and `eval.services.cmr` is the former is designed to handle commands sent to CMR only. Any logic or functionality beyond interaction with CMR belongs in a service. The services are higher level operations that can provide additional user features.

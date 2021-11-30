@@ -1,7 +1,7 @@
 (ns eval.utils.core
   (:require
-   [clojure.spec.alpha :as s]
-   [clojure.math.numeric-tower :as math]))
+   [clojure.math.numeric-tower :as math]
+   [clojure.spec.alpha :as s]))
 
 (s/def ::positive-num (comp not neg?))
 
