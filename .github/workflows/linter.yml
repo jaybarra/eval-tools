@@ -1,14 +1,14 @@
-name: Lint Code Base
+---
+name: Code Linting
 
 on:
   push:
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   super-lint:
-    name: Lint code base
+    name: Lint Codebase
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -19,4 +19,5 @@ jobs:
         uses: github/super-linter@v4
         env:
           DEFAULT_BRANCH: main
+          VALIDATE_ALL_CODEBASE: false
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
