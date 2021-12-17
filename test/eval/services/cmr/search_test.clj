@@ -5,7 +5,7 @@
    [eval.services.cmr.search :as search]))
 
 (deftest search-test
-  (testing "search against the correct endpoin"
+  (testing "search against the correct endpoint"
     (let [client (reify cmr/CmrClient
                    (-invoke [_ command]
                      (is (= "/search/collections" (get-in command [::cmr/request :url])))

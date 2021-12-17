@@ -1,15 +1,7 @@
 #kaocha/v1
 {:tests [{:id :unit
-          :test-paths ["test/unit"]}
+          :test-paths ["test"]}]
 
-         {:id :features
-          :type :kaocha.type/cucumber
-          :test-paths ["test/features"]
-          :cucumber/glue-paths ["test/steps_definitions"]}]
-
- :kaocha/plugins #profile {:default [:kaocha.plugin/cloverage]
-                           :cucumber []}
-
+ :kaocha/plugins [:kaocha.plugin/cloverage]
  :kaocha/reporter #profile {:default kaocha.report/dots
-                            :cucumber kaocha.report/documentation
                             :ci kaocha.report/documentation}}
