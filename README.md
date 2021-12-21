@@ -74,3 +74,11 @@ while these two functions will perform equivalent actions, the service version i
 clj -T:build clean
 clj -T:build jar
 ```
+
+## Developent
+
+Using Polylith
+
+```bash
+clojure -M:poly info
+```
