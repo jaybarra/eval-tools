@@ -1,0 +1,80 @@
+<html>
+ <head>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" href="../../../coverage.css"/>  <title> eval/services/cmr/search.clj </title>
+ </head>
+ <body>
+<span class="covered" title="1 out of 1 forms covered">
+                001&nbsp;&nbsp;(ns&nbsp;eval.services.cmr.search
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                002&nbsp;&nbsp;&nbsp;&nbsp;(:require
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                003&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[eval.cmr.commands.search&nbsp;:as&nbsp;search-api]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                004&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[eval.cmr.core&nbsp;:as&nbsp;cmr]))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                005&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                006&nbsp;&nbsp;(defn&nbsp;search
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                007&nbsp;&nbsp;&nbsp;&nbsp;&quot;Search&nbsp;concepts&nbsp;for&nbsp;concepts&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                008&nbsp;&nbsp;&nbsp;&nbsp;[client&nbsp;concept-type&nbsp;query&nbsp;&amp;&nbsp;[opts]]
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                009&nbsp;&nbsp;&nbsp;&nbsp;(cmr&#x2F;decode-cmr-response-body
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                010&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cmr&#x2F;invoke&nbsp;client&nbsp;(search-api&#x2F;search&nbsp;concept-type&nbsp;query&nbsp;opts))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                011&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                012&nbsp;&nbsp;(defn&nbsp;query-hits
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                013&nbsp;&nbsp;&nbsp;&nbsp;&quot;Query&nbsp;CMR&nbsp;for&nbsp;count&nbsp;of&nbsp;concepts&nbsp;available&nbsp;that&nbsp;are&nbsp;available&nbsp;from
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                014&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;given&nbsp;query.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                015&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                016&nbsp;&nbsp;&nbsp;&nbsp;Takes&nbsp;a&nbsp;query&nbsp;and&nbsp;sets&nbsp;a&nbsp;:page_size&nbsp;of&nbsp;0&nbsp;and&nbsp;returns
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                017&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;CMR-Hits&nbsp;header&nbsp;string&nbsp;as&nbsp;an&nbsp;integer&nbsp;value.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                018&nbsp;&nbsp;&nbsp;&nbsp;[client&nbsp;concept-type&nbsp;query&nbsp;&amp;&nbsp;[opts]]
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                019&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[query&nbsp;(-&gt;&nbsp;query
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                020&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(as-&gt;&nbsp;q&nbsp;(search-api&#x2F;search&nbsp;concept-type&nbsp;q&nbsp;opts))
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                021&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assoc&nbsp;:page_size&nbsp;0))]
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                022&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(-&gt;&nbsp;(cmr&#x2F;invoke&nbsp;client&nbsp;query)
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                023&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(get-in&nbsp;[:headers&nbsp;:CMR-Hits])
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                024&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Integer&#x2F;parseInt)))
+                </span><br/>
+ </body>
+</html>

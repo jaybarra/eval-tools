@@ -13,8 +13,8 @@ jobs:
       matrix:
         java: ["8", "16"]
         work-dir:
-          - modules/cmr
-          - "."
+          - bases/cli-app
+          - bases/cli-app/modules/cmr
 
     steps:
       - name: Checkout Code
