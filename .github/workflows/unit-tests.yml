@@ -25,5 +25,8 @@ jobs:
         with:
           cli: 1.10.3.1053
 
+      - name: Poly Info
+        run: clojure -M:poly info
+
       - name: Run Tests
         run: clojure -M:poly test
