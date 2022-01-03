@@ -2,8 +2,8 @@
   (:require
    [clojure.spec.alpha :as spec]
    [clojure.test :refer [deftest testing is]]
-   [eval.cmr.commands.providers :as providers]
-   [eval.cmr.client :as cmr]))
+   [eval.cmr.client :as cmr]
+   [eval.cmr.commands.providers :as providers]))
 
 (deftest get-providers-test
   (is (spec/valid? ::cmr/command (providers/get-providers)))

@@ -52,9 +52,10 @@
   [group-id & [options]]
   (let [request {:method :get
                  :query-params {:pretty true}
-                 :url (str "/access-control/groups/" group-id)}]
-    {::cmr/request request
-     ::cmr/category :read}))
+                 :url (str "/access-control/groups/" group-id)}
+        command {::cmr/request request
+                 ::cmr/category :read}]
+    (merge command (when options {:opts options}))))
 
 (defn delete-group
   "Constructs a query to delete a group by id."
@@ -113,12 +114,13 @@
 (defn create-acl
   "Return a query for requesting ACLs from "
   [acl & [options]]
-  {::cmr/request
-   {:method :post
-    :url "/access-control/acls"
-    :headers {"Content-Type" "application/json"}
-    :body acl}
-   ::cmr/category :create})
+  (let [request {:method :post
+                 :url "/access-control/acls"
+                 :headers {"Content-Type" "application/json"}
+                 :body acl}
+        command {::cmr/request request
+                 ::cmr/category :create}]
+    (merge command (when options {:opts options}))))
 
 (defn get-permissions
   [query & [options]]

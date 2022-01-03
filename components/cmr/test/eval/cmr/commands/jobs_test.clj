@@ -2,8 +2,8 @@
   (:require
    [clojure.spec.alpha :as spec]
    [clojure.test :refer [deftest testing is]]
-   [eval.cmr.commands.jobs :as jobs]
-   [eval.cmr.client :as cmr]))
+   [eval.cmr.client :as cmr]
+   [eval.cmr.commands.jobs :as jobs]))
 
 (deftest cleanup-expired-collections-test
   (is (spec/valid? ::cmr/command (jobs/cleanup-expired-collections)))

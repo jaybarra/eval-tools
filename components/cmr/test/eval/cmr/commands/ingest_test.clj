@@ -4,8 +4,8 @@
    [clojure.spec.alpha :as spec]
    [clojure.test :refer [deftest testing is]]
    [clojure.xml :as xml]
-   [eval.cmr.commands.ingest :as ingest]
-   [eval.cmr.client :as cmr]))
+   [eval.cmr.client :as cmr]
+   [eval.cmr.commands.ingest :as ingest]))
 
 (def collection-metadata-xml
   "<Collection>

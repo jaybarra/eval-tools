@@ -2,8 +2,8 @@
   (:require
    [clojure.spec.alpha :as spec]
    [clojure.test :refer [deftest testing is]]
-   [eval.cmr.commands.index :as index]
-   [eval.cmr.client :as cmr]))
+   [eval.cmr.client :as cmr]
+   [eval.cmr.commands.index :as index]))
 
 (deftest reindex-provider-collections-test
   (is (spec/valid? ::cmr/command (index/reindex-provider-collections))))

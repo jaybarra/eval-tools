@@ -2,8 +2,8 @@
   (:require
    [clojure.spec.alpha :as spec]
    [clojure.test :refer [deftest testing is]]
-   [eval.cmr.commands.acls :as acls]
-   [eval.cmr.client :as cmr]))
+   [eval.cmr.client :as cmr]
+   [eval.cmr.commands.acls :as acls]))
 
 (deftest get-groups-test
   (let [command (acls/get-groups)]
