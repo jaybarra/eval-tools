@@ -1,8 +1,23 @@
-{:aliases {:dev {:extra-paths ["development/src"
-                               "development/resources"]}
-           :test {:extra-paths []}
-           :poly {:extra-deps {polylith/clj-poly
-                               {:git/url "https://github.com/polyfy/polylith.git"
-                                :sha "88c1f4cca32d8a30a2ef298b1d96880c6417faf9"
-                                :deps/root "projects/poly"}}
-                  :main-opts  ["-m" "polylith.clj.core.poly-cli.core"]}}}
+{:aliases
+ {:dev {:extra-paths ["development/src"
+                      "development/resources"]
+        :extra-deps {clj-http/clj-http {:mvn/version "3.12.3"}
+                     com.taoensso/timbre {:mvn/version "5.1.2"}
+                     metosin/muuntaja {:mvn/version "0.6.8"}
+                     org.clojure/clojure {:mvn/version "1.10.3"}
+                     org.clojure/tools.deps.alpha {:mvn/version "0.12.1104"}
+
+                              ;; Local dependencies
+                     eval/cmr {:local/root "components/cmr"}
+                     eval/hello {:local/root "components/hello"}
+                     eval/cmr-cli {:local/root "bases/cmr-cli"}}}
+
+  :test {:extra-paths ["components/cmr/test"
+                       "components/hello/test"
+                       "bases/cmr-cli/test"]}
+
+  :poly {:extra-deps {polylith/clj-poly
+                      {:git/url "https://github.com/polyfy/polylith.git"
+                       :sha "82bfbcb83f3524cd91d07a6486efce7692e6be32"
+                       :deps/root "projects/poly"}}
+         :main-opts  ["-m" "polylith.clj.core.poly-cli.core"]}}}

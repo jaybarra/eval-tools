@@ -1,6 +1,6 @@
 # API Guide
 
-## eval.cmr.core
+## eval.cmr.client
 
 The central CMR interaction namespace.
 
@@ -9,7 +9,7 @@ The central CMR interaction namespace.
 ### Get a list of ACLs
 ```clojure
 (go)                                            ;; start the service and load in the configuration
-(require '[eval.cmr.core :as cmr])              ;; required for sending commands to CMR
+(require '[eval.cmr.client :as cmr])              ;; required for sending commands to CMR
 (require '[eval.cmr.acls :as acls])             ;; required for generating ACL commands
 (require '[eval.services.cmr.core :as cmr-svc]) ;; used for extracting clients instead of making it manually
 
