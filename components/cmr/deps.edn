@@ -1,0 +1,4 @@
+{:paths ["src" "resources"]
+ :deps {clj-http/clj-http {:mvn/version "3.12.3"}
+        metosin/muuntaja {:mvn/version "0.6.8"}}
+ :aliases {:test {:extra-paths ["test"]}}}

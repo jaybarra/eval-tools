@@ -1,7 +1,0 @@
-#kaocha/v1
-{:tests [{:id :unit
-          :test-paths ["test"]}]
-
- :kaocha/plugins [:kaocha.plugin/cloverage]
- :kaocha/reporter #profile {:default kaocha.report/dots
-                            :ci kaocha.report/documentation}}

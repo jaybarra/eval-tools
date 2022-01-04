@@ -1,50 +1,28 @@
-{:paths ["src" "resources"]
- :deps {aero/aero {:mvn/version "1.1.6"}
-        clj-http/clj-http {:mvn/version "3.12.3"}
-        com.taoensso/timbre {:mvn/version "5.1.2"}
-        environ/environ {:mvn/version "1.2.0"}
-        integrant/integrant {:mvn/version "0.8.0"}
-        metosin/muuntaja {:mvn/version "0.6.8"}
-        metosin/reitit {:mvn/version "0.5.15"}
-        org.clojure/clojure {:mvn/version "1.10.3"}
-        org.clojure/core.async {:mvn/version "1.5.648"}
-        org.clojure/math.numeric-tower {:mvn/version "0.0.5"}
-        pro.juxt.crux/crux-core {:mvn/version "1.18.1"}
-        pro.juxt.crux/crux-rocksdb {:mvn/version "1.18.1"}
-        ring/ring-core {:mvn/version "1.9.4"}
-        ring/ring-jetty-adapter {:mvn/version "1.9.4"}
+{:aliases
+ {:dev {:extra-paths ["development/src"
+                      "development/resources"]
+        :extra-deps {clj-http/clj-http {:mvn/version "3.12.3"}
+                     com.taoensso/timbre {:mvn/version "5.1.2"}
+                     metosin/muuntaja {:mvn/version "0.6.8"}
+                     org.clojure/clojure {:mvn/version "1.10.3"}
+                     org.clojure/tools.deps.alpha {:mvn/version "0.12.1104"}
 
-        ;; Local modules
-        eval/cmr-core {:local/root "modules/cmr"}}
- :aliases
- {:build
-  {:deps {io.github.clojure/tools.build {:git/tag "v0.7.2" :git/sha "e6ff67c"}}
-   :ns-default build}
+                              ;; Local dependencies
+                     eval/cmr {:local/root "components/cmr"}
+                     
+                     eval/cmr-cli {:local/root "bases/cmr-cli"}}}
   
-  :run
-  {:main-opts ["-m" "eval.system"]}
+  :+default {:extra-deps {eval/hello {:local/root "components/hello"}}
+             :extra-paths ["components/hello/test"]}
 
-  :dev
-  {:extra-paths ["dev"]
-   :extra-deps {integrant/repl {:mvn/version "0.3.2"}
-                nrepl/nrepl {:mvn/version "0.9.0"}
-                org.clojure/tools.namespace {:mvn/version "1.2.0"}
-                ring/ring-devel {:mvn/version "1.9.4"}
-                ring/ring-mock {:mvn/version "0.4.0"}}}
+  :+hello {:extra-deps {eval/hello {:local/root "components/hello++"}}
+           :extra-paths ["components/hello++/test"]}
+  
+  :test {:extra-paths ["components/cmr/test"
+                       "bases/cmr-cli/test"]}
 
-  :test
-  {:extra-paths ["test"]
-   :extra-deps {lambdaisland/kaocha {:mvn/version "1.60.972"}
-                lambdaisland/kaocha-cloverage {:mvn/version "1.0.75"}
-                org.clojure/test.check {:mvn/version "1.1.1"}
-                ring/ring-mock {:mvn/version "0.4.0"}}
-   :main-opts ["-m" "kaocha.runner" "--focus" :unit]}
-  
-  ;; formatting
-  :format/check
-  {:extra-deps {cljfmt/cljfmt {:mvn/version "0.8.0"}}
-   :main-opts ["-m" "cljfmt.main" "check"]}
-  
-  :format/fix
-  {:extra-deps {cljfmt/cljfmt {:mvn/version "0.8.0"}}
-   :main-opts ["-m" "cljfmt.main" "fix"]}}}
+  :poly {:extra-deps {polylith/clj-poly
+                      {:git/url "https://github.com/polyfy/polylith.git"
+                       :sha "82bfbcb83f3524cd91d07a6486efce7692e6be32"
+                       :deps/root "projects/poly"}}
+         :main-opts  ["-m" "polylith.clj.core.poly-cli.core"]}}}

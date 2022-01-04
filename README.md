@@ -25,7 +25,7 @@ APIs and tools.
 This tool is designed to interact with external APIs, with simplified commands and clients to invoke those commands. The approach to the commands is to be low-level and involve only basic query and response communication with no higher logic applied. All commands should be stateless.
 
 ```clojure
-(require '[eval.cmr.core :as cmr])
+(require '[eval.cmr.client :as cmr])
 (require '[eval.cmr.commands.search :refer [search]])
 (let [client (cmr/create-client {:url "http://cmr-instance"})
       command (search :collection 
@@ -73,4 +73,12 @@ while these two functions will perform equivalent actions, the service version i
 ```bash
 clj -T:build clean
 clj -T:build jar
+```
+
+## Developent
+
+Using Polylith
+
+```bash
+clojure -M:poly info
 ```
