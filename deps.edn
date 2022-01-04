@@ -9,11 +9,16 @@
 
                               ;; Local dependencies
                      eval/cmr {:local/root "components/cmr"}
-                     eval/hello {:local/root "components/hello"}
+                     
                      eval/cmr-cli {:local/root "bases/cmr-cli"}}}
+  
+  :+default {:extra-deps {eval/hello {:local/root "components/hello"}}
+             :extra-paths ["components/hello/test"]}
 
+  :+hello {:extra-deps {eval/hello {:local/root "components/hello++"}}
+           :extra-paths ["components/hello++/test"]}
+  
   :test {:extra-paths ["components/cmr/test"
-                       "components/hello/test"
                        "bases/cmr-cli/test"]}
 
   :poly {:extra-deps {polylith/clj-poly
