@@ -1,17 +1,12 @@
 # Eval Tools
 
 <p align="center">
-  <a href="https://github.com/jaybarra/eval-tools/actions/workflows/unit-tests.yml">
-    <img alt="Unit Test Status"
+  <a href="https://github.com/jaybarra/eval-tools/actions/workflows/test.yml">
+    <img alt="Test Status"
          src="https://github.com/jaybarra/eval-tools/workflows/Run%20Unit%20Tests/badge.svg"/>
   </a>
 
-  <a href="https://codecov.io/gh/jaybarra/eval-tools">
-    <img alt="Code Coverage Report"
-         src="https://codecov.io/gh/jaybarra/eval-tools/branch/core/graph/badge.svg?token=IUCQG02UCE"/>
-  </a>
-
-  <a href="https://github.com/jaybarra/eval-tools/actions/workflows/linter.yml">
+  <a href="https://github.com/jaybarra/eval-tools/actions/workflows/lint.yml">
     <img alt="Linter Report"
          src="https://github.com/jaybarra/eval-tools/workflows/Lint%20Code%20Base/badge.svg"/>
   </a>

@@ -7,14 +7,14 @@
                      org.clojure/clojure {:mvn/version "1.10.3"}
                      org.clojure/tools.deps.alpha {:mvn/version "0.12.1104"}
 
-                              ;; Local dependencies
+                     ;; Local dependencies
                      eval/cmr {:local/root "components/cmr"}
-                     
                      eval/cmr-cli {:local/root "bases/cmr-cli"}}}
   
   :+default {:extra-deps {eval/hello {:local/root "components/hello"}}
              :extra-paths ["components/hello/test"]}
 
+  ;; hello++ also implements the hello interface and can be selected by profile
   :+hello {:extra-deps {eval/hello {:local/root "components/hello++"}}
            :extra-paths ["components/hello++/test"]}
   
