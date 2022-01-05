@@ -28,13 +28,20 @@ jobs:
       - name: Cache
         uses: actions/cache@v2
         with:
-          path: |
-            ~/.m2/repository
-            ~/.cpcache
           key: ${{ runner.os }}-${{ hashFiles('**/deps.edn') }}
+          path: |
+            ~/.cpcache
+            ~/.m2/repository
+            ~/.polylith
 
-      - name: Poly Info
+      - name: Create polylith config if not present
+        run: mkdir -p ~/.polylith && echo "{}" > ~/.polylith/config.edn
+
+      - name: Print Workspace Info
         run: clojure -M:poly info
 
-      - name: Run Tests
-        run: clojure -M:poly test :dev
+      - name: Check Workspace
+        run: clojure -M:poly check
+
+      - name: Test Workspace
+        run: clojure -M:poly test :all
