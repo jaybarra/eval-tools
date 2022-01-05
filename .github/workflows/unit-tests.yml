@@ -23,7 +23,15 @@ jobs:
       - name: Install clojure tools
         uses: DeLaGuardo/setup-clojure@3.7
         with:
-          cli: 1.10.3.1053
+          cli: '1.10.3.1053'
+
+      - name: Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.m2/repository
+            ~/.cpcache
+          key: ${{ runner.os }}-${{ hashFiles('**/deps.edn') }}
 
       - name: Poly Info
         run: clojure -M:poly info
