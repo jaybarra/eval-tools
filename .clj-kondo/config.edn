@@ -10,4 +10,6 @@
   {:exclude [(lambdaisland.cucumber.dsl/Given)
              (lambdaisland.cucumber.dsl/When)
              (lambdaisland.cucumber.dsl/Then)]}
-  :unsorted-required-namespaces {:level :warning}}}
+  :unsorted-required-namespaces {:level :warning}}
+ :hooks
+ {:analyze-call {slingshot.slingshot/try+ clj-kondo.slingshot.try-plus/try+}}}

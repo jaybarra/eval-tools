@@ -9,7 +9,11 @@
 
                      ;; Local dependencies
                      eval/cmr {:local/root "components/cmr"}
-                     eval/cmr-cli {:local/root "bases/cmr-cli"}}}
+                     eval/elastic {:local/root "components/elastic"}
+                     eval/gdelt {:local/root "components/gdelt"}
+
+                     eval/cmr-cli {:local/root "bases/cmr-cli"}
+                     eval/es-driver {:local/root "bases/es-driver"}}}
   
   :+default {:extra-deps {eval/hello {:local/root "components/hello"}}
              :extra-paths ["components/hello/test"]}
@@ -19,6 +23,8 @@
            :extra-paths ["components/hello++/test"]}
   
   :test {:extra-paths ["components/cmr/test"
+                       "components/elastic/test"
+                       "components/gdelt/test"
                        "bases/cmr-cli/test"]}
 
   :poly {:extra-deps {polylith/clj-poly
