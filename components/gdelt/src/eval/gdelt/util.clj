@@ -12,7 +12,7 @@
       (io/copy is (io/file (.getName ze)))
       (recur (.getNextEntry is)))))
 
-(defn gdelt-zip->tsv!
+(defn gdelt-zip->tsv
   "Takes a ZipInputStream and returns lines from the TSV as a vector."
   [^ZipInputStream is]
   (when (.getNextEntry is)

@@ -1,4 +1,4 @@
 {:paths ["src" "resources"]
- :deps {}
+ :deps {org.clojure/math.numeric-tower {:mvn/version "0.0.5"}}
  :aliases {:test {:extra-paths ["test"]
                   :extra-deps {}}}}

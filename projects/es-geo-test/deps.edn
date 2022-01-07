@@ -1,6 +1,7 @@
-{:paths []
- 
- :deps {eval/hello {:local/root "../../components/hello++"}
+{:deps {eval/elastic {:local/root "../../components/elastic"}
+        eval/gdelt {:local/root "../../components/gdelt"}
+        eval/es-driver {:local/root "../../bases/es-driver"}
+
         org.clojure/clojure {:mvn/version "1.10.3"}
         org.clojure/tools.deps.alpha {:mvn/version "0.12.1109"}}
 
