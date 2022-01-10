@@ -8,6 +8,7 @@
                      eval/cmr {:local/root "components/cmr"}
                      eval/elastic {:local/root "components/elastic"}
                      eval/gdelt {:local/root "components/gdelt"}
+                     eval/test-helpers {:local/root "components/test-helpers"}
 
                      ;; Bases
                      eval/cmr-cli {:local/root "bases/cmr-cli"}
@@ -23,6 +24,7 @@
   :test {:extra-paths ["components/cmr/test"
                        "components/elastic/test"
                        "components/gdelt/test"
+                       "components/test-helpers/test"
                        "bases/cmr-cli/test"
                        "bases/es-driver/test"]}
 
