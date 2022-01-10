@@ -122,7 +122,7 @@
 
 (defn get-events
   [datetime]
-  (when-not (spec/valid? :gdelt/datetime datetime)
+  (when-not (spec/valid? ::datetime datetime)
     (throw (ex-info "Invalid datetime" (spec/explain-data ::datetime datetime))))
   (log/debug "Getting GDelt V2 events for [" datetime "]")
   (-> (client/get (format "http://data.gdeltproject.org/gdeltv2/%s.export.CSV.zip"

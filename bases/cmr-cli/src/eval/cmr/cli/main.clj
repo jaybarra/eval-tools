@@ -1,10 +1,10 @@
-(ns eval.system
+(ns eval.cmr.cli.main
   "Main entrypoint to the Eval Tools system."
   (:require
    [aero.core :as aero]
    [clojure.java.io :as io]
    [environ.core :refer [env]]
-   [eval.cmr.interface :as cmr]
+   [eval.cmr.interface.client :as cmr]
    [integrant.core :as ig]
    [taoensso.timbre :as log])
   (:gen-class))
@@ -39,6 +39,7 @@
 (defn -main
   "Main entrypoint when running from uberjar"
   [& args]
+  (println "A CMR Client For the Discerning User")
   (when (seq args)
     (doseq [arg args]
       (log/info arg)))

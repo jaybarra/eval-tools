@@ -6,16 +6,12 @@
         integrant/integrant {:mvn/version "0.8.0"}}
  
  :aliases
- {:build
-  {:deps {io.github.clojure/tools.build {:git/tag "v0.7.5" :git/sha "2526f58"}}
-   :ns-default build}
-
-  :run
-  {:main-opts ["-m" "eval.cmr-cli.main"]}
-
-  :dev
+ {:dev
   {:extra-deps {integrant/repl {:mvn/version "0.3.2"}
                 org.clojure/tools.namespace {:mvn/version "1.2.0"}}
 
    :test
-   {:extra-paths ["test"]}}}}
+   {:extra-paths ["test"]}}
+
+  :build {:extra-deps {io.github.clojure/tools.build {:git/tag "v0.7.5" :git/sha "34727f7"}}
+          :ns-default build}}}

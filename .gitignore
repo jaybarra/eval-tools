@@ -5,10 +5,10 @@
 data/
 
 ## Created things
-/target/
-/classes/
-/checkouts/
-/lib/
+target/
+classes/
+checkouts/
+lib/
 pom.xml
 pom.xml.asc
 
