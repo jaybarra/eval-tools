@@ -1,8 +1,8 @@
 (ns eval.utils.conversions-test
   (:require
    [clojure.test :refer [deftest is are]]
-   [eval.utils.conversions :as conversions]
-   [eval.utils.core :refer [within?]]))
+   [eval.test-helpers.interface :refer [within?]]
+   [eval.utils.conversions :as conversions]))
 
 (deftest kg->lb-test
   (are [mass expected] (is (within? 0.001

@@ -1,20 +1,11 @@
-(ns eval.utils.core-test
+(ns eval.test-helpers.interface-test
   (:require
-   [clojure.spec.alpha :as s]
    [clojure.test :refer [deftest testing is are]]
-   [eval.utils.core :as utils]))
-
-(deftest spec-validate-test
-  (testing "throwing"
-    (let [pos-spec (s/def ::pos-num pos?)]
-      (is (thrown-with-msg?
-           clojure.lang.ExceptionInfo
-           #"Validation failed"
-           (utils/spec-validate pos-spec -1))))))
+   [eval.test-helpers.interface :as test-helpers]))
 
 (deftest within?-test
   (testing "within checks values within a delta distance correctly"
-    (are [delta a b expected] (= expected (utils/within? delta a b))
+    (are [delta a b expected] (= expected (test-helpers/within? delta a b))
       ;; base check
       1.0 4 5 true
       1.0 10 20 false
