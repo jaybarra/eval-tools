@@ -1,4 +1,4 @@
-(ns eval.cmr-cli.api
+(ns eval.cmr.cli.api
   (:require
    [clojure.string :as str]
    [eval.cmr.interface :as cmr]
