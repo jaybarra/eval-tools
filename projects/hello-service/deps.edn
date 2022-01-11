@@ -1,8 +1,0 @@
-{:paths []
- 
- :deps {eval/hello {:local/root "../../components/hello++"}
-        org.clojure/clojure {:mvn/version "1.10.3"}
-        org.clojure/tools.deps.alpha {:mvn/version "0.12.1109"}}
-
- :aliases {:test {:extra-paths []
-                  :extra-deps  {}}}}

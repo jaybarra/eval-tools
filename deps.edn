@@ -15,13 +15,6 @@
                      eval/cmr-cli {:local/root "bases/cmr-cli"}
                      eval/es-driver {:local/root "bases/es-driver"}}}
   
-  :+default {:extra-deps {eval/hello {:local/root "components/hello"}}
-             :extra-paths ["components/hello/test"]}
-
-  ;; hello++ also implements the hello interface and can be selected by profile
-  :+hello {:extra-deps {eval/hello {:local/root "components/hello++"}}
-           :extra-paths ["components/hello++/test"]}
-  
   :test {:extra-paths ["components/cmr/test"
                        "components/elastic/test"
                        "components/gdelt/test"
