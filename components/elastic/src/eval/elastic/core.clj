@@ -1,7 +1,7 @@
 (ns eval.elastic.core
   (:require
-   [clojure.string :as str]
    [clj-http.client :as client]
+   [clojure.string :as str]
    [jsonista.core :as json]
    [slingshot.slingshot :refer [try+ throw+]]
    [taoensso.timbre :as log]))
