@@ -11,40 +11,71 @@
 (def gdelt-datetime-formatter-no-sec (DateTimeFormatter/ofPattern "yyyyMMddhh"))
 (def gdelt-datetime-formatter-date-only (DateTimeFormatter/ofPattern "yyyyMMdd"))
 
-(defn most-recent-quarter
-  "Returns the most recent quarter hour. 00 15 30 45"
+(def gdelt-v2-earliest-entry (LocalDateTime/parse
+                              "20150218230000"
+                              gdelt-datetime-formatter))
+
+(defn- most-recent-quarter
+  "Returns a LocalDateTime with the most recent quarter hour. 00 15 30 45"
   [^LocalDateTime ldt]
-  (* 15 (quot (.getMinute ldt) 15)))
+  (let [quarter (* 15 (quot (.getMinute ldt) 15))]
+    (-> ldt
+        (.withMinute quarter)
+        (.withSecond 0)
+        (.withNano 0))))
 
 (def gdelt-index-mapping {:mappings
                           {:properties
-                           {:global-event-id {:type "integer"}
+                           {:global-event-id {:type "long"}
+                            :day {:type "integer"}
+                            :year {:type "integer"}
+                            :quad-class {:type "integer"}
+                            :goldstein-scale {:type "float"}
+                            :num-mentions {:type "integer"}
+                            :num-sources {:type "integer"}
+                            :avg-tone {:type "float"}
                             :dateadded {:type "date"
                                         :format "yyyyMMddHHmmss"}
-                            :actor1-geo {:properties {:location {:type "geo_point"}}}
-                            :actor2-geo {:properties {:location {:type "geo_point"}}}
-                            :action-geo {:properties {:location {:type "geo_point"}}}}}})
+                            :actor1-geo {:properties {:type {:type "integer"}
+                                                      :location {:type "geo_point"}}}
+                            :actor2-geo {:properties {:type {:type "integer"}
+                                                      :location {:type "geo_point"}}}
+                            :action-geo {:properties {:type {:type "integer"}
+                                                      :location {:type "geo_point"}}}}}})
 
 (defn- dates-between
   "Returns an array of dates between the start and end in 15 minute intervals.
-  If end is not specified, the most recent quarter hour will be used."
+  If end is not specified, the most recent quarter hour will be used.
+  The datetimes are formatted in yyyyMMddHHmmss to correspond with GDelt URL entries"
   [start & [end]]
   ;; TODO: validate input formats
-  ;; TODO: validate end is not after (Instant/now)
-  ;; TODO: validate start is not before start of GDELT dataset (2015 sometime)
-  (let [end (or (and end (.parse gdelt-datetime-formatter end)) ;; TODO: check timezone malarky
-                (LocalDateTime/ofInstant (Instant/now) ZoneOffset/UTC))
-        start-dt (LocalDateTime/parse start gdelt-datetime-formatter)]
+  (let [start-dt (if (string? start)
+                   (LocalDateTime/parse start gdelt-datetime-formatter)
+                   start)
+        end-dt (or (and end 
+                        (if (string? end)
+                          (.parse gdelt-datetime-formatter end)
+                          end))
+                (LocalDateTime/ofInstant (Instant/now) ZoneOffset/UTC))]
+    (when (.isAfter start-dt end-dt)
+      (throw (ex-info "Invalid date"
+                      {:message "Start cannot be after the end"
+                       :start start-dt
+                       :end end-dt})))
+    (when (.isBefore start-dt gdelt-v2-earliest-entry)
+      (throw (ex-info "Invalid date" {:message "Start cannot be before earliest GDelt entry"
+                                      :start start
+                                      :earliest gdelt-v2-earliest-entry})))
     (loop [current start-dt
            datetimes []]
-      (if (.isAfter current end)
+      (if (.isAfter current end-dt)
         datetimes
         (recur (.plusMinutes current 15)
                (conj datetimes (.format gdelt-datetime-formatter current)))))))
 
 (comment
-  (dates-between "20200101000000")
-  (dates-between "20200101000000" "20200201000000")
+  (dates-between "20220101000000")
+  (dates-between (most-recent-quarter (LocalDateTime/ofInstant (Instant/now) ZoneOffset/UTC)))
   )
 
 (defn create-index
@@ -54,17 +85,30 @@
         index-mapping (or index-mapping gdelt-index-mapping)]
     (es/create-index conn label index-mapping)))
 
-(defn harvest-since
+(defn harvest-between
   "Pulls gdelt values for the dates given and indexes them."
-  [conn start-datetime]
-  (let [dates (dates-between start-datetime)]
+  [conn start-dt end-dt]
+  (let [start-dt (if (string? start-dt)
+                   (LocalDateTime/parse start-dt gdelt-datetime-formatter)
+                   start-dt)
+        start-dt (most-recent-quarter start-dt)
+        end-dt (most-recent-quarter end-dt)
+        dates (dates-between start-dt end-dt)]
     (doseq [date dates]
       (let [label (str "gdelt-v2-events-" (str/join (take 8 date)))]
         (es/create-index conn label gdelt-index-mapping)
         (es/bulk-index conn
                        label
                        (gdeltv2/get-events date)
-                       :global-event-id)))))
+                       {:id-field :global-event-id})))))
+
+(defn harvest-since
+  "Pulls GDelt V2 events and indexes them."
+  [conn start-dt]
+  (harvest-between
+   conn
+   start-dt
+   (LocalDateTime/ofInstant (Instant/now) ZoneOffset/UTC)))
 
 (defn harvest-latest
   "Pulls the latest gdeltv2 events manifest and indexes them in elasticsearch.
@@ -75,7 +119,7 @@
         date (.format
               gdelt-datetime-formatter-no-sec
               now)
-        minute (most-recent-quarter now)
+        minute (.getMinute (most-recent-quarter now))
         datetime (str date minute "00")
         index-label (str "gdelt-v2-events-" datetime)
         index gdelt-index-mapping]

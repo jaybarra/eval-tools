@@ -7,8 +7,8 @@
   (core/create-index-template conn label template))
 
 (defn create-index
-  [conn label index]
-  (core/create-index conn label index))
+  [conn label index & [opts]]
+  (core/create-index conn label index opts))
 
 (defn close-index
   [conn index]
@@ -23,7 +23,7 @@
   (core/index-document conn index doc id))
 
 (defn bulk-index
-  [conn index docs & opts]
+  [conn index docs & [opts]]
   (core/bulk-index conn index docs opts))
 
 (comment

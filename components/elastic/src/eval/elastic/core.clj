@@ -13,13 +13,15 @@
                      :body (json/write-value-as-string template)})))
 
 (defn create-index
-  [conn label index]
+  [conn label index _opts]
   (let [url (format "%s/%s" (:url conn) label)
         req (merge {:headers {:content-type "application/json"}}
-                   (when index {:body (json/write-value-as-string index)}))]
+                   (when index {:body (json/write-value-as-string index)}))
+        exists? (not= 404 (:status (client/get url {:throw-exceptions false})))]
     (try+
-     (client/put url req) 
-     (log/info "Created index [" label "]")
+     (when-not exists?
+       (client/put url req)
+       (log/info "Created index [" label "]"))
      {:index label}
      (catch [:status 400] {:keys [body]}
        (let [msg (json/read-value body json/keyword-keys-object-mapper)
@@ -44,7 +46,7 @@
      (client/delete url)
      {:index index}
      (catch [:status 404] _
-       (log/warn "Index not found [" index "]"))
+       (log/warn "Index not found and may have already been deleted [" index "]"))
      (catch Object _
        (log/error "Unexpected error deleting index" index)
        (throw+)))))
@@ -63,7 +65,7 @@
                 (log/error "Could not add document to missing index [" index "]")
                 (throw+))
               (catch Object {:keys [body]}
-                (log/error "An unexpected error occurred" body)
+                (log/error (format "An unexpected error occurred indexing document to index [ %s ]" index) body)
                 (throw+)))]
     (log/info (format "Indexed document [ %s ] [ %s ]"
                       index
@@ -71,15 +73,15 @@
     {:index index
      :doc doc}))
 
-
 (defn bulk-index
-  [conn index docs & [[id-field]]]
-  (let [url (format "%s/_bulk" (:url conn))
+  [conn index docs opts]
+  (let [{:keys [id-field]} opts
+        url (format "%s/_bulk" (:url conn))
         payload (for [doc docs]
                   (str
                    (json/write-value-as-string
-                    (merge {:index {:_index index}}
-                           (when id-field {:id (get doc id-field)})))
+                    {:index (merge {:_index index}
+                                   (when-let [id (get doc id-field)] {:_id id}))})
                    "\n"
                    (json/write-value-as-string doc)))
         payload (str (str/join "\n" payload) "\n")
@@ -87,9 +89,11 @@
                  :body payload}]
     (try+
      (client/post url request)
-     (log/info (format "Bulk indexed documents [ %s ]"
+     (log/info (format "Bulk indexed [ %d ] documents into index [ %s ]"
+                       (count docs)
                        index))
      {:index index}
      (catch Object {:keys [body]}
-       (log/error "An unexpected error occurred" body)
+       (log/error (format "An unexpected error occurred during bulk indexing to index [ %s ]" index)
+                  body)
        (throw+)))))
