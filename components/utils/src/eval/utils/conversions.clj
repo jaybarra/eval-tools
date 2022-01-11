@@ -1,4 +1,5 @@
-(ns eval.utils.conversions)
+(ns eval.utils.conversions
+  "Namespace containing unit conversions")
 
 ;; ===================================================================
 ;; Mass conversions

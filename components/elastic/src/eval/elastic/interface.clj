@@ -18,9 +18,13 @@
   [conn index]
   (core/delete-index conn index))
 
-(defn create-document
+(defn index-document
   [conn index doc & [id]]
-  (core/create-document conn index doc id))
+  (core/index-document conn index doc id))
+
+(defn bulk-index
+  [conn index docs & opts]
+  (core/bulk-index conn index docs opts))
 
 (comment
   (create-index {:url "http://localhost:9210"}

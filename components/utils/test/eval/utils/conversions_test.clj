@@ -1,13 +1,14 @@
 (ns eval.utils.conversions-test
   (:require
-   [clojure.test :refer [deftest is are]]
+   [clojure.test :refer [deftest testing is are]]
    [eval.test-helpers.interface :refer [within?]]
    [eval.utils.conversions :as conversions]))
 
 (deftest kg->lb-test
-  (are [mass expected] (is (within? 0.001
-                                    expected
-                                    (conversions/kg->lb mass)))
+  (are [mass expected]
+       (is (within? 0.001
+                    expected
+                    (conversions/kg->lb mass)))
     0 0
     1.0 2.2046
     -1.0 -2.2046
@@ -15,9 +16,10 @@
     100.0 220.4622))
 
 (deftest lb->kg-test
-  (are [mass expected] (is (within? 0.001
-                                    expected
-                                    (conversions/lb->kg mass)))
+  (are [mass expected]
+       (is (within? 0.001
+                    expected
+                    (conversions/lb->kg mass)))
     0 0
     2.2046 1.0
     -2.2046 -1.0

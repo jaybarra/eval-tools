@@ -1,5 +1,6 @@
 (ns eval.elastic.core
   (:require
+   [clojure.string :as str]
    [clj-http.client :as client]
    [jsonista.core :as json]
    [slingshot.slingshot :refer [try+ throw+]]
@@ -48,7 +49,7 @@
        (log/error "Unexpected error deleting index" index)
        (throw+)))))
 
-(defn create-document
+(defn index-document
   [conn index doc id]
   (let [url (format "%s/%s/_doc" (:url conn) (name index))
         url (if id (str url "/" id) url)
@@ -69,3 +70,26 @@
                       (get-in resp [:headers "Location"])))
     {:index index
      :doc doc}))
+
+
+(defn bulk-index
+  [conn index docs & [[id-field]]]
+  (let [url (format "%s/_bulk" (:url conn))
+        payload (for [doc docs]
+                  (str
+                   (json/write-value-as-string
+                    (merge {:index {:_index index}}
+                           (when id-field {:id (get doc id-field)})))
+                   "\n"
+                   (json/write-value-as-string doc)))
+        payload (str (str/join "\n" payload) "\n")
+        request {:headers {:content-type "application/json"}
+                 :body payload}]
+    (try+
+     (client/post url request)
+     (log/info (format "Bulk indexed documents [ %s ]"
+                       index))
+     {:index index}
+     (catch Object {:keys [body]}
+       (log/error "An unexpected error occurred" body)
+       (throw+)))))
