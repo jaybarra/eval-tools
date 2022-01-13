@@ -1,0 +1,5 @@
+{:paths ["src" "resources"]
+ :deps {org.clojure/clojure {:mvn/version "1.10.3"}
+        org.elasticsearch/elasticsearch {:mvn/version "7.16.2"}}
+ :aliases {:test {:extra-paths ["test"]
+                  :extra-deps {}}}}

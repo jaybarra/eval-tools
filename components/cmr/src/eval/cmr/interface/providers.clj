@@ -1,4 +1,4 @@
-(ns eval.cmr.commands.interface.providers
+(ns eval.cmr.interface.providers
   (:require
    [eval.cmr.commands.providers :as providers]))
 

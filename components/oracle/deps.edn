@@ -1,0 +1,8 @@
+{:paths ["src" "resources"]
+ ;; NOTE: The source of the JAR may cause some issue
+ :deps {com.github.seancorfield/next.jdbc {:mvn/version "1.2.761"}
+        com.oracle/ojdbc7 {:mvn/version "12.1.0.2"}
+        com.oracle/ons {:mvn/version "12.1.0.2"}
+        com.oracle/ucp {:mvn/version "12.1.0.2"}}
+ :aliases {:test {:extra-paths ["test"]
+                  :extra-deps {}}}}

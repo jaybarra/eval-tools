@@ -269,8 +269,8 @@
     (throw (ex-info "Invalid CMR command"
                     (spec/explain-data ::command command))))
   (let [{:keys [anonymous? token]} (:opts command)
-        {{root-url :url
-          endpoints :endpoints} :cfg}  client
+        {root-url :url
+         endpoints :endpoints}   client
         req-url (get-in command [::request :url])
 
         ;; check if overriding the root-url

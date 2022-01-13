@@ -1,4 +1,4 @@
-(ns eval.cmr.commands.interface.search
+(ns eval.cmr.interface.search
   (:require
    [eval.cmr.commands.search :as search]))
 

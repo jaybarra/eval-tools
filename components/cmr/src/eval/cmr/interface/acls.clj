@@ -1,4 +1,4 @@
-(ns eval.cmr.commands.interface.acls
+(ns eval.cmr.interface.acls
   "Namespace for interacting with the ACLs, groups, and permissions. 
   Defines commands and queries for use with the [[eval.cmr.interface/invoke]] function.
 

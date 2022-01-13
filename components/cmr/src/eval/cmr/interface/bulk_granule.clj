@@ -1,4 +1,4 @@
-(ns eval.cmr.commands.interface.bulk-granule
+(ns eval.cmr.interface.bulk-granule
   "CMR Bulk Granule API interaction tools.
 
   For CMR interaction, the environment variables should be configured

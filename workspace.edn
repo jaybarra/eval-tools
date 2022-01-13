@@ -8,4 +8,4 @@
                 :release "v[0-9]*"}
  :projects {"development" {:alias "dev"}
             "cmr-client" {:alias "cmr"}
-            "es-geo-test" {:alias "geo"}}}
+            "es-geo" {:alias "geo"}}}

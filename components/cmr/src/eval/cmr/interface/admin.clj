@@ -1,4 +1,4 @@
-(ns eval.cmr.commands.interface.admin
+(ns eval.cmr.interface.admin
   (:require
    [eval.cmr.commands.index :as index]
    [eval.cmr.commands.jobs :as jobs]))

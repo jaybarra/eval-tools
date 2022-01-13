@@ -5,8 +5,8 @@
    [clojure.java.io :as io]
    [environ.core :refer [env]]
    [eval.cmr.interface.client :as cmr]
-   [integrant.core :as ig]
-   [taoensso.timbre :as log])
+   [eval.cmr.interface.search :as search]
+   [integrant.core :as ig])
   (:gen-class))
 
 ;; Let Aero know how to read integrant references
@@ -29,18 +29,32 @@
 
 (defmethod ig/init-key :app/cmr
   [_ {:keys [instances]}]
-  (when-let [banner (io/resource "banner.txt")]
-    (log/info (slurp banner)))
-  
   (let [clients (apply merge (for [[inst-id cfg] instances]
                                {inst-id (cmr/create-client cfg)}))]
     {:instances clients}))
 
+(defn exec-command
+  [context args]
+  (println args)
+  (let [command (first args)
+        client-id (keyword (second args))
+        client (get-in context [:instances client-id])
+        args (drop 2 args)]
+    (when-not client
+      (throw (ex-info "Invalid command"
+                      {:error "No such client [" client-id "]"
+                       :args args})))
+    (case command
+      "search" (cmr/invoke client (search/search (rest args)))
+
+      ;; default
+      (println "unrecognized command [" command "]"))))
+
 (defn -main
   "Main entrypoint when running from uberjar"
   [& args]
-  (println "A CMR Client For the Discerning User")
-  (when (seq args)
-    (doseq [arg args]
-      (log/info arg)))
-  (:app/cmr (ig/init (config))))
+  (let [app (:app/cmr (ig/init (config)))]
+    (exec-command app args)))
+
+(comment
+  (-main "search" "sit" "c" "" "fmt:json"))

@@ -1,9 +1,9 @@
 (ns user
   (:require
-   [eval.hello.interface :as hello]))
+   [clojure.java.io :as io]))
 
-(comment
-  ;; Load the repl with the +default profile to get one version of hello
-  ;; load the repl with the +hello profile to get a different
-
-  (hello/greet "Bear"))
+(defn banner
+  "Print the banner."
+  []
+  (when-let [banner (io/resource "banner.txt")]
+    (println (slurp banner))))

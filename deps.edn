@@ -1,23 +1,29 @@
 {:aliases
  {:dev {:extra-paths ["development/src"
                       "development/resources"]
-        :extra-deps {org.clojure/clojure {:mvn/version "1.10.3"}
+        :extra-deps {com.github.seancorfield/next.jdbc {:mvn/version "1.2.761"}
+                     org.clojure/clojure {:mvn/version "1.10.3"}
                      org.clojure/tools.deps.alpha {:mvn/version "0.12.1109"}
 
                      ;; Components
                      eval/cmr {:local/root "components/cmr"}
+                     eval/cmr-providers {:local/root "components/cmr-providers"}
                      eval/elastic {:local/root "components/elastic"}
+
                      eval/gdelt {:local/root "components/gdelt"}
+                     eval/database {:local/root "components/oracle"}
                      eval/test-helpers {:local/root "components/test-helpers"}
                      eval/utils {:local/root "components/utils"}
 
                      ;; Bases
                      eval/cmr-cli {:local/root "bases/cmr-cli"}
                      eval/es-driver {:local/root "bases/es-driver"}}}
-  
+
   :test {:extra-paths ["components/cmr/test"
+                       "components/cmr-providers/test"
                        "components/elastic/test"
                        "components/gdelt/test"
+                       "components/oracle/test"
                        "components/test-helpers/test"
                        "components/utils/test"
                        "bases/cmr-cli/test"

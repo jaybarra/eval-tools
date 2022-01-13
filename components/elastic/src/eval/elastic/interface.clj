@@ -25,13 +25,3 @@
 (defn bulk-index
   [conn index docs & [opts]]
   (core/bulk-index conn index docs opts))
-
-(comment
-  (create-index {:url "http://localhost:9210"}
-                "my-index"
-                {:mappings
-                 {:properties
-                  {:sometext
-                   {:type "keyword"}}}})
-  (delete-index {:url "http://localhost:9210"} "my-index")
-  )
