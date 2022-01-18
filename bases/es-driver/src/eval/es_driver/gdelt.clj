@@ -27,12 +27,17 @@
 (def gdelt-index-mapping {:mappings
                           {:properties
                            {:global-event-id {:type "long"}
-                            :day {:type "integer"}
-                            :year {:type "integer"}
+                            :day {:type "date"
+                                  :format "yyyyMMdd"}
+                            :month-year {:type "date"
+                                         :format "yyyyMM"}
+                            :year {:type "date"
+                                   :format "yyyy"}
                             :quad-class {:type "integer"}
                             :goldstein-scale {:type "float"}
                             :num-mentions {:type "integer"}
                             :num-sources {:type "integer"}
+                            :num-articles {:type "integer"}
                             :avg-tone {:type "float"}
                             :dateadded {:type "date"
                                         :format "yyyyMMddHHmmss"}
