@@ -14,8 +14,7 @@
    ```clojure
    (get-events \"2020\" \"01\" \"03\" \"00\" \"15\")
    (get-events \"20200103001500\")
-   ```
-   "
+   ```"
   ([yyyy MM dd hh mm & [_ss]]
    (gdeltv2/get-events (str yyyy MM dd hh mm "00")))
   ([datetime]

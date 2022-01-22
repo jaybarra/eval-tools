@@ -1,36 +1,46 @@
 {:aliases
  {:dev {:extra-paths ["development/src"
                       "development/resources"]
-        :extra-deps {com.github.seancorfield/next.jdbc {:mvn/version "1.2.761"}
-                     org.clojure/clojure {:mvn/version "1.10.3"}
+        :extra-deps {org.clojure/clojure {:mvn/version "1.10.3"}
                      org.clojure/tools.deps.alpha {:mvn/version "0.12.1109"}
+                     org.slf4j/slf4j-nop {:mvn/version "2.0.0-alpha6"}
 
                      ;; Components
                      eval/cmr {:local/root "components/cmr"}
-                     eval/cmr-providers {:local/root "components/cmr-providers"}
                      eval/elastic {:local/root "components/elastic"}
-
                      eval/gdelt {:local/root "components/gdelt"}
                      eval/database {:local/root "components/oracle"}
+                     eval/kibana {:local/root "components/kibana"}
+                     eval/stac {:local/root "components/stac"}
                      eval/test-helpers {:local/root "components/test-helpers"}
+                     eval/user-input {:local/root "components/user-input"}
                      eval/utils {:local/root "components/utils"}
 
                      ;; Bases
                      eval/cmr-cli {:local/root "bases/cmr-cli"}
+                     eval/cmr-dash {:local/root "bases/cmr-dash"}
                      eval/es-driver {:local/root "bases/es-driver"}}}
 
   :test {:extra-paths ["components/cmr/test"
-                       "components/cmr-providers/test"
                        "components/elastic/test"
                        "components/gdelt/test"
+                       "components/kibana/test"
                        "components/oracle/test"
+                       "components/stac/test"
                        "components/test-helpers/test"
+                       "components/user-input/test"
                        "components/utils/test"
                        "bases/cmr-cli/test"
+                       "bases/cmr-dash/test"
                        "bases/es-driver/test"]}
+  
+  :runner {:extra-deps {io.github.cognitect-labs/test-runner
+                        {:git/url "https://github.com/cognitect-labs/test-runner"
+                         :sha "cc75980b43011773162b485f46f939dc5fba91e4"}}
+           :exec-fn cognitect.test-runner.api/test}
 
   :poly {:extra-deps {polylith/clj-poly
                       {:git/url "https://github.com/polyfy/polylith.git"
-                       :sha "5f74c8b8675dbb091258165d327af3958716a247"
+                       :sha "19aaaa78094a433862d999c82b3536714ab96973"
                        :deps/root "projects/poly"}}
          :main-opts  ["-m" "polylith.clj.core.poly-cli.core"]}}}

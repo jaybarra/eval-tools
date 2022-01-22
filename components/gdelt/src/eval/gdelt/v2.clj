@@ -139,7 +139,3 @@
   (let [latest (slurp "http://data.gdeltproject.org/gdeltv2/lastupdate.txt")
         manifest (parse-manifest-line (first (str/split latest #"\n")))]
     (get-events (:id manifest))))
-
-(defn events
-  [manifest]
-  (tsv->events (manifest->data manifest)))

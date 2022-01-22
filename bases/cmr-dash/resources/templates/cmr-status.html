@@ -1,0 +1,46 @@
+<!doctype html>
+<html class="no-js" lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>CMR Dashboard</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta property="og:title" content="">
+  <meta property="og:type" content="">
+  <meta property="og:url" content="">
+  <meta property="og:image" content="">
+
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="apple-touch-icon" href="icon.png">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+  <meta name="theme-color" content="#fafafa">
+</head>
+
+<body>
+  <div class="card">
+    <div class="card-content">
+      <div class="media">
+        <div class="media-left">
+          <div class="notification is-primary">
+            ok
+          </div>
+        </div>
+        <div class="media-content">
+          <p class="title is-4">{{instance}}</p>
+          <p class="subtitle is-6">{{status}}</p>
+        </div>
+      </div>
+
+      <div class="content">
+        specifics about CMR {{instance}} status here
+        <br>
+        <time datetime="{{date}}">{{timestamp}}</time>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

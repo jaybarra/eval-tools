@@ -1,5 +1,6 @@
 (ns eval.test-helpers.core
   (:require
+   [clojure.java.shell :as shell :refer [sh]]
    [clojure.math.numeric-tower :as math]))
 
 (defn within?
@@ -14,3 +15,16 @@
   [^Double delta a b]
   (<= (- (double (math/abs (- (double a) (double b)))) 1e-7)
       (double delta)))
+
+(defn docker-compose-up
+  [dir opts]
+  (shell/with-sh-dir dir
+    (sh "docker" "compose" "up" "-d"))
+
+  (when-let [health-fn (:wait-fn opts)]
+    (health-fn)))
+
+(defn docker-compose-down
+  [dir]
+  (shell/with-sh-dir dir
+    (sh "docker" "compose" "down")))
