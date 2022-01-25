@@ -18,6 +18,6 @@
   [catalog]
   (core/prev-page catalog))
 
-(defn validate-is-stac?
+(defn validate
   [catalog]
-  (core/validate-is-stac? catalog))
+  (core/validate catalog))

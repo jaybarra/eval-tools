@@ -19,12 +19,13 @@
 (defn docker-compose-up
   [dir opts]
   (shell/with-sh-dir dir
-    (sh "docker" "compose" "up" "-d"))
-
+    (sh "docker" "compose" "up" (when (:detach? opts) "-d")))
+  
   (when-let [health-fn (:wait-fn opts)]
     (health-fn)))
 
 (defn docker-compose-down
+  "Run `docker compose down` in the specified directory."
   [dir]
   (shell/with-sh-dir dir
     (sh "docker" "compose" "down")))

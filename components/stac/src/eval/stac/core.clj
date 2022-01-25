@@ -5,14 +5,16 @@
    [jsonista.core :as json]
    [scjsv.core :as v]))
 
-(def validate (v/validator (slurp (io/resource "stac_catalog_schema_1.0.0.json"))))
+(def validate-1_0_0 (v/validator (slurp (io/resource "stac_catalog_schema_1.0.0.json"))))
 
-(defn validate-is-stac?
+(defn validate
   [catalog]
-  (let [validations (validate catalog)
+  (let [validations (validate-1_0_0 catalog)
         errors  (filter #(= "error" (:level %)) validations)]
     (when (seq errors)
-     (throw (ex-info "Catalog does not match STAC schema." {:errors errors})))
+     (throw (ex-info "Catalog does not match STAC schema."
+                     {:errors errors
+                      :catalog catalog})))
     catalog))
 
 (defn get-catalog
@@ -21,7 +23,7 @@
     (-> response
         :body
         (json/read-value json/keyword-keys-object-mapper)
-        validate-is-stac?)))
+        validate)))
 
 (defn children
   [catalog]
@@ -42,9 +44,10 @@
 
 (comment
   ;; scroll through a providers holdings
+  (get-catalog "https://cmr.earthdata.nasa.gov/stac/GES_DISC")
   (let [catalog (atom (get-catalog "https://cmr.earthdata.nasa.gov/stac/GES_DISC"))]
     (while (not (nil? @catalog))
       #_(doseq [child (children @catalog)]
-        (spit "ges_disc_stac.txt" (str (:href child) "\n") :append true))
+          (spit "ges_disc_stac.txt" (str (:href child) "\n") :append true))
       (swap! catalog next-page)))
   )

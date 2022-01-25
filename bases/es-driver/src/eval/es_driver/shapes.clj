@@ -94,7 +94,6 @@
                   [-14.765625
                    34.88593094075317]]]}}))
 
-
 (defn index-cartesian-with-hole
   [conn]
   (es/index-document

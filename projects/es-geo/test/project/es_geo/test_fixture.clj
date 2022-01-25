@@ -7,16 +7,16 @@
    [java.net ConnectException]
    [org.apache.http NoHttpResponseException]))
 
-(defn wait-for-docker
+(defn wait-for-elasticsearch
   []
   (letfn [(check-es
            []
            (try
              (http/get "http://localhost:9200/_cat/health" {:throw-exceptions? false})
              (catch NoHttpResponseException _
-               (log/info "No response from Elasticsearch"))
+               (log/info "Waiting for Elasticsearch"))
              (catch ConnectException _
-               (log/info "No response from Elasticsearch"))))]
+               (log/info "Waiting for Elasticsearch"))))]
     (let [interval 5000
           attempts 12]
       (loop [attempts attempts
@@ -32,11 +32,15 @@
                      (check-es))))))))
 
 (defn setup [project-name]
-  (println (str "--- test setup for " project-name " ---"))
-  (test-helpers/docker-compose-up
-   "./projects/es-geo/resources"
-   {:wait-fn wait-for-docker}))
+  (println (str "--- test setup for " project-name " ---")))
 
 (defn teardown [project-name]
-  (println (str "--- test teardown for " project-name " ---"))
-  (test-helpers/docker-compose-down "./projects/es-geo/resources"))
+  (println (str "--- test teardown for " project-name " ---")))
+
+(comment
+  (test-helpers/docker-compose-up "./projects/es-geo/resources"
+                                  {:detach? true
+                                   :wait-fn wait-for-elasticsearch})
+  
+  (test-helpers/docker-compose-down "./projects/es-geo/resources")
+  )

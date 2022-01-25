@@ -110,16 +110,6 @@
   [lines]
   (map tsv->event lines))
 
-(defn manifest->data
-  [manifest]
-  (-> manifest
-      :url
-      (client/get {:as :byte-array})
-      :body
-      io/input-stream
-      ZipInputStream.
-      util/gdelt-zip->tsv))
-
 (defn get-events
   [datetime]
   (when-not (spec/valid? ::datetime datetime)

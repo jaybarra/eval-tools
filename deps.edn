@@ -33,11 +33,6 @@
                        "bases/cmr-cli/test"
                        "bases/cmr-dash/test"
                        "bases/es-driver/test"]}
-  
-  :runner {:extra-deps {io.github.cognitect-labs/test-runner
-                        {:git/url "https://github.com/cognitect-labs/test-runner"
-                         :sha "cc75980b43011773162b485f46f939dc5fba91e4"}}
-           :exec-fn cognitect.test-runner.api/test}
 
   :poly {:extra-deps {polylith/clj-poly
                       {:git/url "https://github.com/polyfy/polylith.git"
