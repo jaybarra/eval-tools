@@ -34,7 +34,6 @@ Fixes #
 
 * [ ] My code is formatted according to the [Clojure Style Guide](https://guide.clojure.style/)
 * [ ] My test plan is documented
-* [ ] New tests have been created and pass
-* [ ] All existing tests pass
+* [ ] New tests have been created that prove the code works as described
 * [ ] Documentation has been updated or created
 * [ ] I have spell checked my code

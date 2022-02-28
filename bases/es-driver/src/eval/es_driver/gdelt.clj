@@ -91,24 +91,34 @@
     (es/create-index conn label index-mapping)))
 
 (defn harvest-between
-  "Pulls gdelt values for the dates given and indexes them."
-  [conn start-dt end-dt]
+  "Pulls GDelt V2 events for the dates given and indexes them into an index.
+  The index is prefixed with an identifier followed by a date in `yyyyMMdd` format.
+   
+  e.g. `gdelt-v2-events-20220115`
+   
+  |Options  | Description     | Default            |
+  |---------|-----------------|--------------------|
+  |`:prefix`| prefix override | `gdelt-v2-events-` |"
+  [conn start-dt end-dt & [options]]
   (let [start-dt (if (string? start-dt)
                    (LocalDateTime/parse start-dt gdelt-datetime-formatter)
                    start-dt)
         start-dt (most-recent-quarter start-dt)
         end-dt (most-recent-quarter end-dt)
-        dates (dates-between start-dt end-dt)]
+        dates (dates-between start-dt end-dt)
+        prefix (get options :prefix "gdelt-v2-events-")]
     (doseq [date dates]
-      (let [label (str "gdelt-v2-events-" (str/join (take 8 date)))]
-        (es/create-index conn label gdelt-index-mapping)
+      (let [index (str prefix (str/join (take 8 date)))]
+        (es/create-index conn index gdelt-index-mapping)
         (es/bulk-index conn
-                       label
+                       index
                        (gdeltv2/get-events date)
                        {:id-field :global-event-id})))))
 
 (defn harvest-since
-  "Pulls GDelt V2 events and indexes them."
+  "Pulls all GDelt V2 events from a start date and time through to the present and indexes them.
+  
+  See also [[harvest-between]]"
   [conn start-dt]
   (harvest-between
    conn
@@ -116,19 +126,8 @@
    (LocalDateTime/ofInstant (Instant/now) ZoneOffset/UTC)))
 
 (defn harvest-latest
-  "Pulls the latest gdeltv2 events manifest and indexes them in elasticsearch.
-   The index is 'gdelt-v2-events-yyyyMMdd' with the corresponding date substituted."
+  "Pulls the latest GDelt V2 events and indexes them.
+  
+  See also [[harvest-since]]"
   [conn]
-  (let [events (gdeltv2/get-latest-events)
-        now (LocalDateTime/ofInstant (Instant/now) ZoneOffset/UTC)
-        date (.format
-              gdelt-datetime-formatter-no-sec
-              now)
-        minute (.getMinute (most-recent-quarter now))
-        datetime (str date minute "00")
-        index-label (str "gdelt-v2-events-" datetime)
-        index gdelt-index-mapping]
-    (es/create-index conn index-label index)
-    (doseq [event events]
-      ;; TODO convert to bulk-index
-      (es/index-document conn index-label event (:global-event-id event)))))
+  (harvest-since conn (LocalDateTime/ofInstant (Instant/now) ZoneOffset/UTC)))

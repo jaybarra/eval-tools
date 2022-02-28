@@ -1,0 +1,14 @@
+{:providers [:level-0 :level-1 :level-2 :level-3 :short-name :long-name :url :uuid]
+ :platforms [:basis :category :sub-category :short-name :long-name :uuid]
+ :instruments [:category :class :type :subtype :short-name :long-name :uuid]
+ :projects [:bucket :short-name :long-name :uuid]
+ :temporal-keywords [:temporal-resolution-range :uuid]
+ :spatial-keywords [:category :type :subregion-1 :subregion-2 :subregion-3 :uuid]
+ :science-keywords [:category :topic :term :variable-level-1 :variable-level-2 :variable-level-3
+                    :detailed-variable :uuid]
+ :measurement-name [:context-medium :object :quantity :uuid]
+ :concepts [:short-name :long-name :uuid]
+ :iso-topic-categories [:iso-topic-category :uuid]
+ :related-urls [:url-content-type :type :subtype :uuid]
+ :granule-data-format [:short-name :long-name :uuid]
+ :mime-type [:mime-type :uuid]}

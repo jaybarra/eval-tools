@@ -1,19 +1,26 @@
 (ns eval.cmr-cli.core
-  "Main entrypoint to the Eval Tools system."
+  "Main entrypoint to the Eval Tools[CMR Client]"
   (:gen-class)
   (:require
    [aero.core :as aero]
    [clojure.java.io :as io]
    [environ.core :refer [env]]
    [eval.cmr.interface.client :as cmr]
-   [eval.user-input.interface :as input]
-   [integrant.core :as ig]))
+   [eval.cmr.interface.ingest :as cmr-ingest]
+   [eval.cmr.interface.search :as cmr-search]
+   [eval.user-input.interface :as user-input]
+   [fipp.edn :refer [pprint] :rename {pprint fipp}]
+   [integrant.core :as ig]
+   [jsonista.core :as json]
+   [taoensso.timbre :as log]))
 
 ;; Let Aero know how to read integrant references
 (defmethod aero/reader 'ig/ref [_ _ value] (ig/ref value))
 
 ;; default handler for integrant
 (defmethod ig/init-key :default [_ _cfg])
+
+(def result-stack (atom []))
 
 (defn config
   "Read the config file and return a value or map.
@@ -33,11 +40,51 @@
                                {inst-id (cmr/create-client cfg)}))]
     {:instances clients}))
 
+(defn print-help
+  []
+  (println "search | community-usage-metrics"))
+
 (defn -main
-  "Main entrypoint for the 'cmrc' command."
+  "Main entrypoint for the 'cmr-cli' command.
+   
+  |Supported Options|                               |
+  |-----------------|-------------------------------|
+  | `search`        | sends a search request to CMR |"
   [& args]
-  (let [app (:app/cmr (ig/init (config)))]
-    #_(exec-command app (input/parse-args args))))
+  (let [app (:app/cmr (ig/init (config)))
+        input (user-input/parse-params args)
+        cmr (get-in app [:instances (keyword (:cmr input))])]
+    (when-let [command (case (:cmd input)
+                         :search (cmr-search/search (:concept-type input)
+                                                    (:query input)
+                                                    {:format (:format input)})
+                         :community-usage-metrics (cmr-search/fetch-community-usage-metrics)
+                         :ingest (cmr-ingest/create-concept (:concept-type input)
+                                                            (:provider input)
+                                                            (:concept input)
+                                                            input)
+
+                         (print-help))]
+      (try
+        (when-let [result (-> (cmr/invoke cmr command)
+                              :body
+                              (json/read-value json/keyword-keys-object-mapper))]
+          (fipp result)
+          (swap! result-stack conj result))
+        (while (< 10 (count @result-stack)))
+        (swap! result-stack drop 1)
+        (catch Exception exception
+          (log/error exception
+                     "An error occurred while running the command"))))))
 
 (comment
-  (-main "search" "sit" "c" "" "fmt:json"))
+  (-main "search" "cmr:sit" "concept-type:collection" "format:json")
+  (-main "community-usage-metrics" "cmr:prod")
+  (fipp @result-stack)
+  (-main "ingest" 
+         "cmr:sit" 
+         "concept-type:c" 
+         "prov:prov1"
+         "nid:sample-native-id"
+         "./file/path/collection.iso"
+         ":no-exit"))

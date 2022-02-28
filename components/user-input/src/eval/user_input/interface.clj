@@ -2,6 +2,6 @@
   (:require
    [eval.user-input.core :as core]))
 
-(defn parse-args
+(defn parse-params
   [args]
-  (core/parse-args args))
+  (core/parse-params args #{}))

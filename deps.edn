@@ -1,18 +1,26 @@
-{:aliases
+{:mvn/repos {"osgeo" {:url "https://repo.osgeo.org/repository/release/"}
+             "osgeo-snapshot" {:url "https://repo.osgeo.org/repository/snapshot/"}}
+ :aliases
  {:dev {:extra-paths ["development/src"
                       "development/resources"]
-        :extra-deps {org.clojure/clojure {:mvn/version "1.10.3"}
-                     org.clojure/tools.deps.alpha {:mvn/version "0.12.1109"}
+        :extra-deps {metosin/malli {:mvn/version "0.8.3"}
+                     org.clojure/clojure {:mvn/version "1.10.3"}
+                     org.clojure/tools.deps.alpha {:mvn/version "0.12.1153"}
                      org.slf4j/slf4j-nop {:mvn/version "2.0.0-alpha6"}
+                     zprint/zprint {:mvn/version "1.2.2"}
 
                      ;; Components
                      eval/cmr {:local/root "components/cmr"}
                      eval/elastic {:local/root "components/elastic"}
                      eval/gdelt {:local/root "components/gdelt"}
-                     eval/database {:local/root "components/oracle"}
+                     eval/geojson {:local/root "components/geojson"}
                      eval/kibana {:local/root "components/kibana"}
+                     eval/kms {:local/root "components/kms"}
+                     eval/cache {:local/root "components/redis"}
+                     eval/shell {:local/root "components/shell"}
                      eval/stac {:local/root "components/stac"}
                      eval/test-helpers {:local/root "components/test-helpers"}
+                     eval/time-tracker {:local/root "components/time-tracker"}
                      eval/user-input {:local/root "components/user-input"}
                      eval/utils {:local/root "components/utils"}
 
@@ -21,21 +29,33 @@
                      eval/cmr-dash {:local/root "bases/cmr-dash"}
                      eval/es-driver {:local/root "bases/es-driver"}}}
 
-  :test {:extra-paths ["components/cmr/test"
+  :test {:extra-paths [;; Components
+                       "components/cmr/test"
                        "components/elastic/test"
                        "components/gdelt/test"
+                       "components/geojson/test"
                        "components/kibana/test"
-                       "components/oracle/test"
+                       "components/kms/test"
+                       "components/redis/test"
+                       "components/shell/test"
                        "components/stac/test"
                        "components/test-helpers/test"
+                       "components/time-tracker/test"
                        "components/user-input/test"
                        "components/utils/test"
+
+                       ;; Bases
                        "bases/cmr-cli/test"
                        "bases/cmr-dash/test"
                        "bases/es-driver/test"]}
 
+  :eastwood {:main-opts ["-m"
+                         "eastwood.lint"
+                         {}]
+             :extra-deps {jonase/eastwood {:mvn/version "1.2.2"}}}
+
   :poly {:extra-deps {polylith/clj-poly
                       {:git/url "https://github.com/polyfy/polylith.git"
-                       :sha "19aaaa78094a433862d999c82b3536714ab96973"
+                       :sha "4189a30782f1ed21aa1fb55e50355bd862e4b339"
                        :deps/root "projects/poly"}}
          :main-opts  ["-m" "polylith.clj.core.poly-cli.core"]}}}

@@ -14,14 +14,15 @@
   
 (def ^:private datetime-fmt (DateTimeFormatter/ofPattern "yyyyMMddHHmmss"))
 (def ^:private datetime-rx #"\d{10}(00|15|30|45)00")
+
 (defn valid-datetime? [dt formatter]
   (try
     (if-let [_ (LocalDateTime/from (.parse formatter dt))]
       true
       false)
-    (catch Exception e
-      (log/error (format "Datetime [ %s ] is not valid" dt) (.getMessage e))
+    (catch Exception _
       false)))
+
 (spec/def ::datetime (spec/and string?
                                #(valid-datetime? % datetime-fmt)
                                #(re-matches datetime-rx %)))

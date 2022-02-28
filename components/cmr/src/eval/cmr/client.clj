@@ -197,7 +197,6 @@
     (go (>! response-ch (try
                           (http/request query)
                           (catch Exception t
-                            (log/error t)
                             {:eval.cmr.client/category :eval.anomalies.fault
                              ::exception t}))))
     ;; Wait for the response to come back on a separate thread

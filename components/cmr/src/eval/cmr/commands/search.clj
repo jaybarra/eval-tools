@@ -47,3 +47,11 @@
   [concept-type query sa-key & [opts]]
   (-> (search concept-type query opts)
       (assoc-in [::cmr/request :headers "CMR-Search-After"] sa-key)))
+
+(defn fetch-community-usage-metrics
+  "Returns a query for the community usage metrics"
+  []
+  {::cmr/request
+   {:method :get
+    :url "/search/community-usage-metrics"}
+   ::cmr/category :read})

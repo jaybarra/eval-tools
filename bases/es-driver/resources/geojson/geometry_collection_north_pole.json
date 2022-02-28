@@ -1,0 +1,38 @@
+{
+  "type": "Feature",
+  "properties": {
+    "name": "single feature with geometry collection split over the AM crossing that represents a circle from 85N"
+  },
+  "geometry": {
+    "type": "GeometryCollection",
+    "geometries": [
+      {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -180,
+              85
+            ],
+            [
+              180,
+              85
+            ],
+            [
+              180,
+              90
+            ],
+            [
+              -180,
+              90
+            ],
+            [
+              -180,
+              85
+            ]
+          ]
+        ]
+      }
+    ]
+  }
+}

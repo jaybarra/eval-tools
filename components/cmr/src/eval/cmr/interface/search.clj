@@ -14,3 +14,8 @@
                        query
                        sa-key
                        options))
+
+(defn fetch-community-usage-metrics
+  "Returns a query with to fetch the current community usage metrics."
+  []
+  (search/fetch-community-usage-metrics))

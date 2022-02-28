@@ -3,6 +3,7 @@
 
 ## Local data
 data/
+secrets.edn
 
 ## Created things
 target/
@@ -15,8 +16,8 @@ pom.xml.asc
 ## Linting and dev files
 .rebel_readline_history
 .eastwood
-.clj-kondo/cache/
-.clj-kondo/.cache/
+.clj-kondo
+!.clj-kondo/config.edn
 .lsp/sqlite.*.db
 .lsp/.cache/
 .lsp/cache/

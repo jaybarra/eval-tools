@@ -65,7 +65,7 @@
                 (log/error "Could not add document to missing index [" index "]")
                 (throw+))
               (catch Object {:keys [body]}
-                (log/error (format "An unexpected error occurred indexing document to index [ %s ]" index) body)
+                (log/error (format "An unexpected error occurred indexing document to index [ %s ]" index) body doc)
                 (throw+)))]
     (log/info (format "Indexed document [ %s ] [ %s ]"
                       index
@@ -74,14 +74,19 @@
      :doc doc}))
 
 (defn bulk-index
+  "Bulk indexing capability for Elasticsearch.
+  
+  This function is restricted to indexing operations."
   [conn index docs opts]
   (let [{:keys [id-field]} opts
         url (format "%s/_bulk" (:url conn))
+        ;; TODO this can be rewritten with `interleave`
         payload (for [doc docs]
                   (str
                    (json/write-value-as-string
                     {:index (merge {:_index index}
-                                   (when-let [id (get doc id-field)] {:_id id}))})
+                                   (when-let [id (get doc id-field)] 
+                                     {:_id id}))})
                    "\n"
                    (json/write-value-as-string doc)))
         payload (str (str/join "\n" payload) "\n")

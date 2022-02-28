@@ -6,7 +6,7 @@ services:
     volumes:
       - ./kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
     ports:
-      - 5601:5601
+      - 5602:5601
     networks:
       - elastic
   es01:
@@ -14,9 +14,10 @@ services:
     container_name: es01
     environment:
       - node.name=es01
-      - cluster.name=es-docker-cluster
-      - discovery.seed_hosts=es02,es03
-      - cluster.initial_master_nodes=es01,es02,es03
+      - node.roles=master
+      - cluster.name=es-mini-cluster
+      - discovery.seed_hosts=es01,es02
+      - cluster.initial_master_nodes=es01,es02
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
@@ -26,7 +27,7 @@ services:
     volumes:
       - data01:/usr/share/elasticsearch/data
     ports:
-      - 9200:9200
+      - 9209:9200
     networks:
       - elastic
   es02:
@@ -34,9 +35,10 @@ services:
     container_name: es02
     environment:
       - node.name=es02
-      - cluster.name=es-docker-cluster
-      - discovery.seed_hosts=es01,es03
-      - cluster.initial_master_nodes=es01,es02,es03
+      - node.roles=master
+      - cluster.name=es-mini-cluster
+      - discovery.seed_hosts=es01,es03,es04
+      - cluster.initial_master_nodes=es01,es02
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
@@ -52,9 +54,10 @@ services:
     container_name: es03
     environment:
       - node.name=es03
-      - cluster.name=es-docker-cluster
+      - node.roles=data
+      - cluster.name=es-mini-cluster
       - discovery.seed_hosts=es01,es02
-      - cluster.initial_master_nodes=es01,es02,es03
+      - cluster.initial_master_nodes=es01,es02
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
@@ -65,6 +68,25 @@ services:
       - data03:/usr/share/elasticsearch/data
     networks:
       - elastic
+  es04:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.3
+    container_name: es04
+    environment:
+      - node.name=es04
+      - node.roles=data
+      - cluster.name=es-mini-cluster
+      - discovery.seed_hosts=es01,es02
+      - cluster.initial_master_nodes=es01,es02
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data04:/usr/share/elasticsearch/data
+    networks:
+      - elastic
 
 volumes:
   data01:
@@ -72,6 +94,8 @@ volumes:
   data02:
     driver: local
   data03:
+    driver: local
+  data04:
     driver: local
 
 networks:
