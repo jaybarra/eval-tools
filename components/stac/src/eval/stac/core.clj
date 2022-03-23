@@ -10,7 +10,7 @@
 (defn validate
   [catalog]
   (let [validations (validate-1_0_0 catalog)
-        errors  (filter #(= "error" (:level %)) validations)]
+        errors (filter #(= "error" (:level %)) validations)]
     (when (seq errors)
      (throw (ex-info "Catalog does not match STAC schema."
                      {:errors errors

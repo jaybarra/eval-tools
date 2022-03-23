@@ -11,9 +11,11 @@
 (def gdelt-datetime-formatter-no-sec (DateTimeFormatter/ofPattern "yyyyMMddhh"))
 (def gdelt-datetime-formatter-date-only (DateTimeFormatter/ofPattern "yyyyMMdd"))
 
-(def gdelt-v2-earliest-entry (LocalDateTime/parse
-                              "20150218230000"
-                              gdelt-datetime-formatter))
+(def gdelt-v2-earliest-entry
+  "GDelt data begins at 2015-02-18T23:00:00Z"
+  (LocalDateTime/parse
+   "20150218230000"
+   gdelt-datetime-formatter))
 
 (defn- most-recent-quarter
   "Returns a LocalDateTime with the most recent quarter hour. 00 15 30 45"
@@ -57,11 +59,11 @@
   (let [start-dt (if (string? start)
                    (LocalDateTime/parse start gdelt-datetime-formatter)
                    start)
-        end-dt (or (and end 
+        end-dt (or (and end
                         (if (string? end)
                           (.parse gdelt-datetime-formatter end)
                           end))
-                (LocalDateTime/ofInstant (Instant/now) ZoneOffset/UTC))]
+                   (LocalDateTime/ofInstant (Instant/now) ZoneOffset/UTC))]
     (when (.isAfter start-dt end-dt)
       (throw (ex-info "Invalid date"
                       {:message "Start cannot be after the end"
@@ -80,8 +82,7 @@
 
 (comment
   (dates-between "20220101000000")
-  (dates-between (most-recent-quarter (LocalDateTime/ofInstant (Instant/now) ZoneOffset/UTC)))
-  )
+  (dates-between (most-recent-quarter (LocalDateTime/ofInstant (Instant/now) ZoneOffset/UTC))))
 
 (defn create-index
   [conn datetime & [index-mapping]]
@@ -117,7 +118,6 @@
 
 (defn harvest-since
   "Pulls all GDelt V2 events from a start date and time through to the present and indexes them.
-  
   See also [[harvest-between]]"
   [conn start-dt]
   (harvest-between
@@ -127,7 +127,6 @@
 
 (defn harvest-latest
   "Pulls the latest GDelt V2 events and indexes them.
-  
   See also [[harvest-since]]"
   [conn]
   (harvest-since conn (LocalDateTime/ofInstant (Instant/now) ZoneOffset/UTC)))

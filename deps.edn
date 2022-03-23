@@ -7,16 +7,17 @@
                      org.clojure/clojure {:mvn/version "1.10.3"}
                      org.clojure/tools.deps.alpha {:mvn/version "0.12.1153"}
                      org.slf4j/slf4j-nop {:mvn/version "2.0.0-alpha6"}
-                     zprint/zprint {:mvn/version "1.2.2"}
 
                      ;; Components
                      eval/cmr {:local/root "components/cmr"}
+                     eval/chess {:local/root "components/chess"}                     
                      eval/elastic {:local/root "components/elastic"}
                      eval/gdelt {:local/root "components/gdelt"}
                      eval/geojson {:local/root "components/geojson"}
                      eval/kibana {:local/root "components/kibana"}
                      eval/kms {:local/root "components/kms"}
                      eval/cache {:local/root "components/redis"}
+                     eval/path-finder {:local/root "components/path-finder"}
                      eval/shell {:local/root "components/shell"}
                      eval/stac {:local/root "components/stac"}
                      eval/test-helpers {:local/root "components/test-helpers"}
@@ -27,15 +28,18 @@
                      ;; Bases
                      eval/cmr-cli {:local/root "bases/cmr-cli"}
                      eval/cmr-dash {:local/root "bases/cmr-dash"}
+                     eval/cmr-player {:local/root "bases/cmr-player"}
                      eval/es-driver {:local/root "bases/es-driver"}}}
 
   :test {:extra-paths [;; Components
                        "components/cmr/test"
+                       "components/chess/test"
                        "components/elastic/test"
                        "components/gdelt/test"
                        "components/geojson/test"
                        "components/kibana/test"
                        "components/kms/test"
+                       "components/path-finder/test"
                        "components/redis/test"
                        "components/shell/test"
                        "components/stac/test"
@@ -47,6 +51,7 @@
                        ;; Bases
                        "bases/cmr-cli/test"
                        "bases/cmr-dash/test"
+                       "bases/cmr-uploader/test"
                        "bases/es-driver/test"]}
 
   :eastwood {:main-opts ["-m"

@@ -1,0 +1,386 @@
+<?xml version="1.0"?>
+<Collection>
+  <ShortName>uploader_test_coll</ShortName>
+  <VersionId>1</VersionId>
+  <InsertTime>2014-04-03T00:00:00.000Z</InsertTime>
+  <LastUpdate>2020-03-04T07:19:53.396Z</LastUpdate>
+  <LongName>Not provided</LongName>
+  <DataSetId>uploader_test_coll</DataSetId>
+  <Description>a basic collection</Description>
+  <DOI>
+    <DOI>10.5067/HLS/HLSS30.015</DOI>
+    <Authority>https://doi.org</Authority>
+  </DOI>
+  <CollectionDataType>OTHER</CollectionDataType>
+  <RevisionDate>2020-12-31T19:34:00.000Z</RevisionDate>
+  <ProcessingCenter>NASA/GSFC/EOS/ESDIS</ProcessingCenter>
+  <ProcessingLevelId>3</ProcessingLevelId>
+  <ProcessingLevelDescription>Level of processing.</ProcessingLevelDescription>
+  <ArchiveCenter>LP DAAC</ArchiveCenter>
+  <VersionDescription>HLS Version 1.5</VersionDescription>
+  <CitationForExternalPublication>The DOI landing page provides citations in APA and Chicago styles.</CitationForExternalPublication>
+  <CollectionState>ACTIVE</CollectionState>
+  <DataFormat>Cloud Optimized GeoTiff (COG)</DataFormat>
+  <Temporal>
+    <EndsAtPresentFlag>true</EndsAtPresentFlag>
+    <RangeDateTime>
+      <BeginningDateTime>2014-04-03T00:00:00.000Z</BeginningDateTime>
+    </RangeDateTime>
+  </Temporal>
+  <Contacts>
+    <Contact>
+      <Role>ARCHIVER</Role>
+      <HoursOfService>M-F, 8 a.m. to 4 p.m. Central Time</HoursOfService>
+      <OrganizationName>LP DAAC</OrganizationName>
+      <OrganizationAddresses>
+        <Address>
+          <StreetAddress>somestreet</StreetAddress>
+          <City>Sioux Falls</City>
+          <StateProvince>Not provided</StateProvince>
+          <PostalCode>57198</PostalCode>
+          <Country>USA</Country>
+        </Address>
+      </OrganizationAddresses>
+      <OrganizationPhones>
+        <Phone>
+          <Number>605-594-6116</Number>
+          <Type>Telephone</Type>
+        </Phone>
+        <Phone>
+          <Number>866-573-3222</Number>
+          <Type>U.S. toll free</Type>
+        </Phone>
+      </OrganizationPhones>
+      <OrganizationEmails>
+        <Email>lpdaac@usgs.gov</Email>
+      </OrganizationEmails>
+    </Contact>
+    <Contact>
+      <Role>PROCESSOR</Role>
+      <OrganizationName>NASA/GSFC/EOS/ESDIS</OrganizationName>
+      <OrganizationAddresses>
+        <Address>
+          <StreetAddress>Not provided</StreetAddress>
+          <City>Not provided</City>
+          <StateProvince>Not provided</StateProvince>
+          <PostalCode>Not provided</PostalCode>
+          <Country>USA</Country>
+        </Address>
+      </OrganizationAddresses>
+    </Contact>
+  </Contacts>
+  <ScienceKeywords>
+    <ScienceKeyword>
+      <CategoryKeyword>EARTH SCIENCE</CategoryKeyword>
+      <TopicKeyword>LAND SURFACE</TopicKeyword>
+      <TermKeyword>SURFACE RADIATIVE PROPERTIES</TermKeyword>
+      <VariableLevel1Keyword>
+        <Value>REFLECTANCE</Value>
+      </VariableLevel1Keyword>
+    </ScienceKeyword>
+  </ScienceKeywords>
+  <Platforms>
+    <Platform>
+      <ShortName>SENTINEL-2A</ShortName>
+      <LongName>Not provided</LongName>
+      <Type>Earth Observation Satellites</Type>
+      <Instruments>
+        <Instrument>
+          <ShortName>Sentinel-2 MSI</ShortName>
+          <LongName>Sentinel-2 Multispectral Imager</LongName>
+        </Instrument>
+      </Instruments>
+    </Platform>
+    <Platform>
+      <ShortName>SENTINEL-2B</ShortName>
+      <LongName>Not provided</LongName>
+      <Type>Earth Observation Satellites</Type>
+      <Instruments>
+        <Instrument>
+          <ShortName>Sentinel-2 MSI</ShortName>
+          <LongName>Sentinel-2 Multispectral Imager</LongName>
+        </Instrument>
+      </Instruments>
+    </Platform>
+  </Platforms>
+  <AdditionalAttributes>
+    <AdditionalAttribute>
+      <Name>CLOUD_COVERAGE</Name>
+      <DataType>INT</DataType>
+      <Description>Percent of cloud coverage</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>MGRS_TILE_ID</Name>
+      <DataType>STRING</DataType>
+      <Description>Tile identifier of MGRS grid</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>SPATIAL_COVERAGE</Name>
+      <DataType>INT</DataType>
+      <Description>Percentage of spatial coverage</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>SPATIAL_RESOLUTION</Name>
+      <DataType>INT</DataType>
+      <Description>Spatial Resolution </Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>HORIZONTAL_CS_CODE</Name>
+      <DataType>STRING</DataType>
+      <Description>EPSG code</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>HORIZONTAL_CS_NAME</Name>
+      <DataType>STRING</DataType>
+      <Description>Coordinate system and UTM identifier </Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>ULX</Name>
+      <DataType>FLOAT</DataType>
+      <Description>Longitude</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>ULY</Name>
+      <DataType>FLOAT</DataType>
+      <Description>Latitude</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>SPATIAL_RESAMPLING_ALG</Name>
+      <DataType>STRING</DataType>
+      <Description>Spatial Re-sampling Algorithm</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>ADD_OFFSET</Name>
+      <DataType>FLOAT</DataType>
+      <Description>additional offset</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>REF_SCALE_FACTOR</Name>
+      <DataType>FLOAT</DataType>
+      <Description>Scale factor for reflectance bands</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>FILLVALUE</Name>
+      <DataType>INT</DataType>
+      <Description>Fill Value</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>PRODUCT_URI</Name>
+      <DataType>STRING</DataType>
+      <Description>Product Unique Resource Identifier</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>HLS_PROCESSING_TIME</Name>
+      <DataType>STRING</DataType>
+      <Description>HLS Processing Date and Time</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>SENSING_TIME</Name>
+      <DataType>STRING</DataType>
+      <Description>Image Sensing Date and Time</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>QA_FILLVALUE</Name>
+      <DataType>INT</DataType>
+      <Description>Quality Assurance Data  Fill Value</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>NCOLS</Name>
+      <DataType>INT</DataType>
+      <Description>Number of Columns</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>NROWS</Name>
+      <DataType>INT</DataType>
+      <Description>Number of rows</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>MEAN_SUN_AZIMUTH_ANGLE</Name>
+      <DataType>FLOAT</DataType>
+      <Description>Mean sun azimuth angle band 1</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>MEAN_SUN_ZENITH_ANGLE</Name>
+      <DataType>FLOAT</DataType>
+      <Description>Mean sun zenith angle band 1</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>MEAN_VIEW_AZIMUTH_ANGLE</Name>
+      <DataType>FLOAT</DataType>
+      <Description>Mean view azimuth angle band 1</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>MEAN_VIEW_ZENITH_ANGLE</Name>
+      <DataType>FLOAT</DataType>
+      <Description>Mean view zenith angle band 1</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>NBAR_SOLAR_ZENITH</Name>
+      <DataType>FLOAT</DataType>
+      <Description>NBAR solar zenith</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>MSI_BAND_01_BANDPASS_ADJUSTMENT_SLOPE_AND_OFFSET</Name>
+      <DataType>FLOAT</DataType>
+      <Description>MSI band 1 bandpass adjustment slope and offset</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>MSI_BAND_02_BANDPASS_ADJUSTMENT_SLOPE_AND_OFFSET</Name>
+      <DataType>FLOAT</DataType>
+      <Description>MSI band 2 bandpass adjustment slope and offset</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>MSI_BAND_03_BANDPASS_ADJUSTMENT_SLOPE_AND_OFFSET</Name>
+      <DataType>FLOAT</DataType>
+      <Description>MSI band 03 bandpass adjustment slope and offset</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>MSI_BAND_04_BANDPASS_ADJUSTMENT_SLOPE_AND_OFFSET</Name>
+      <DataType>FLOAT</DataType>
+      <Description>MSI band 4 bandpass adjustment slope and offset</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>MSI_BAND_11_BANDPASS_ADJUSTMENT_SLOPE_AND_OFFSET</Name>
+      <DataType>FLOAT</DataType>
+      <Description>MSI band 11 bandpass adjustment slope and offset</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>MSI_BAND_12_BANDPASS_ADJUSTMENT_SLOPE_AND_OFFSET</Name>
+      <DataType>FLOAT</DataType>
+      <Description>MSI band 12 bandpass adjustment slope and offset</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>MSI_BAND_8A_BANDPASS_ADJUSTMENT_SLOPE_AND_OFFSET</Name>
+      <DataType>FLOAT</DataType>
+      <Description>MSI band 8a bandpass adjustment slope and offset</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>AROP_AVE_XSHIFT(METERS)</Name>
+      <DataType>FLOAT</DataType>
+      <Description>arop ave xshift in meters</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>AROP_AVE_YSHIFT(METERS)</Name>
+      <DataType>FLOAT</DataType>
+      <Description>arop ave yshift in meters</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>AROP_NCP</Name>
+      <DataType>INT</DataType>
+      <Description>arop ncp</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>AROP_RMSE(METERS)</Name>
+      <DataType>FLOAT</DataType>
+      <Description>arop root mean square error</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>AROP_S2_REFIMG</Name>
+      <DataType>STRING</DataType>
+      <Description>arop s2 remimg</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>ACCODE</Name>
+      <DataType>STRING</DataType>
+      <Description>LaSRC Version</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>PROCESSING_BASELINE</Name>
+      <DataType>STRING</DataType>
+      <Description>Processing baseline</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>IDENTIFIER_PRODUCT_DOI</Name>
+      <DataType>STRING</DataType>
+      <Description>Digital object identifier that uniquely identifies this data product</Description>
+    </AdditionalAttribute>
+    <AdditionalAttribute>
+      <Name>IDENTIFIER_PRODUCT_DOI_AUTHORITY</Name>
+      <DataType>STRING</DataType>
+      <Description>URL of the digital object identifier resolving authority</Description>
+    </AdditionalAttribute>
+  </AdditionalAttributes>
+  <TwoDCoordinateSystems>
+    <TwoDCoordinateSystem>
+      <TwoDCoordinateSystemName>Military Grid Reference System</TwoDCoordinateSystemName>
+      <Coordinate1>
+        <MinimumValue>161</MinimumValue>
+        <MaximumValue>161</MaximumValue>
+      </Coordinate1>
+      <Coordinate2>
+        <MinimumValue>132</MinimumValue>
+        <MaximumValue>132</MaximumValue>
+      </Coordinate2>
+    </TwoDCoordinateSystem>
+  </TwoDCoordinateSystems>
+  <SpatialInfo>
+    <SpatialCoverageType>HORIZONTAL</SpatialCoverageType>
+    <HorizontalCoordinateSystem>
+      <GeographicCoordinateSystem>
+        <GeographicCoordinateUnits>Meters</GeographicCoordinateUnits>
+        <LatitudeResolution>30</LatitudeResolution>
+        <LongitudeResolution>30</LongitudeResolution>
+      </GeographicCoordinateSystem>
+    </HorizontalCoordinateSystem>
+  </SpatialInfo>
+  <OnlineAccessURLs>
+    <OnlineAccessURL>
+      <URL>https://search.earthdata.nasa.gov/search?q=C1711924822-LPCLOUD</URL>
+      <URLDescription>Earthdata Search allows users to search, discover, visualize, refine, and access NASA Earth Observation data.</URLDescription>
+    </OnlineAccessURL>
+  </OnlineAccessURLs>
+  <OnlineResources>
+    <OnlineResource>
+      <URL>https://doi.org/10.5067/HLS/HLSS30.015</URL>
+      <Description>The LP DAAC product page provides information on Science Data Set layers and links for user guides, ATBDs, data access, tools, customer support, etc. </Description>
+      <Type>CollectionURL : DATA SET LANDING PAGE</Type>
+    </OnlineResource>
+    <OnlineResource>
+      <URL>https://lpdaac.usgs.gov/</URL>
+      <Description>The LP DAAC website provides detailed information on discovery, distribution, access, and support of land data products.</Description>
+      <Type>CollectionURL : PROJECT HOME PAGE</Type>
+    </OnlineResource>
+    <OnlineResource>
+      <URL>https://lpdaac.usgs.gov/documents/770/HLS_User_Guide_V15_provisional.pdf</URL>
+      <Description>The technical information in the User's Guide enables users to interpret and use the data products. </Description>
+      <Type>VIEW RELATED INFORMATION : USER'S GUIDE</Type>
+    </OnlineResource>
+    <OnlineResource>
+      <URL>https://lpdaac.usgs.gov/documents/769/HLS_ATBD_V15_provisional.pdf</URL>
+      <Description>The ATBD provides physical theory and mathematical procedures for the calculations used to produce the data products.</Description>
+      <Type>VIEW RELATED INFORMATION : ALGORITHM THEORETICAL BASIS DOCUMENT (ATBD)</Type>
+    </OnlineResource>
+    <OnlineResource>
+      <URL>https://lpdaac.usgs.gov/documents/768/HLS_Quick_Guide_v011.pdf</URL>
+      <Description>The HLS Quick Guide provides directions for accessing the data in Earthdat Search.</Description>
+      <Type>VIEW RELATED INFORMATION : HOW-TO</Type>
+    </OnlineResource>
+    <OnlineResource>
+      <URL>https://git.earthdata.nasa.gov/projects/LPDUR/repos/hls-tutorial/browse</URL>
+      <Description>Getting Started with Cloud-Native HLS Data in Python is a Jupyter Notebook tutorial.</Description>
+      <Type>VIEW RELATED INFORMATION : HOW-TO</Type>
+    </OnlineResource>
+  </OnlineResources>
+  <Spatial>
+    <SpatialCoverageType>HORIZONTAL</SpatialCoverageType>
+    <HorizontalSpatialDomain>
+      <ZoneIdentifier>UTM</ZoneIdentifier>
+      <Geometry>
+        <CoordinateSystem>CARTESIAN</CoordinateSystem>
+        <BoundingRectangle>
+          <WestBoundingCoordinate>-180</WestBoundingCoordinate>
+          <NorthBoundingCoordinate>90</NorthBoundingCoordinate>
+          <EastBoundingCoordinate>180</EastBoundingCoordinate>
+          <SouthBoundingCoordinate>-90</SouthBoundingCoordinate>
+        </BoundingRectangle>
+      </Geometry>
+    </HorizontalSpatialDomain>
+    <GranuleSpatialRepresentation>GEODETIC</GranuleSpatialRepresentation>
+  </Spatial>
+  <AssociatedBrowseImageUrls>
+    <ProviderBrowseUrl>
+      <URL>https://cmr.earthdata.nasa.gov/browse-scaler/browse_images/granules/G1947786851-LPCLOUD?h=512&amp;w=512</URL>
+      <Description>Browse image for Earthdata Search</Description>
+    </ProviderBrowseUrl>
+  </AssociatedBrowseImageUrls>
+</Collection>

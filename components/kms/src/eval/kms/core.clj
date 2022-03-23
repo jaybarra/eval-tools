@@ -10,7 +10,7 @@
    [clojure.zip :as zip]
    [eval.utils.interface :as util]))
 
-(def NUM_HEADER_LINES
+(def ^:private num-header-lines
   "Number of lines which contain header information in csv files (not the actual keyword values)."
   2)
 
@@ -91,7 +91,7 @@
         kms-subfield-names (map csk/->kebab-case-keyword (second all-lines))
         _ (validate-subfield-names keyword-scheme kms-subfield-names)
         keyword-entries (->> all-lines
-                             (drop NUM_HEADER_LINES)
+                             (drop num-header-lines)
                              (map #(zipmap (keyword-scheme keyword-scheme->field-names) %))
                              (map util/remove-blank-keys)
                              (filter (keyword-scheme->required-field keyword-scheme)))]

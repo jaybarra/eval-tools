@@ -191,12 +191,14 @@
   (let [response-ch (chan 1)
         result-ch (promise-chan)]
     (log/info "Sending request to CMR"
-              (redact-headers query [:authorization
-                                     :echo-token]))
+              (-> query
+                  (redact-headers [:authorization :echo-token])
+                  (dissoc :body)))
     ;; Send the request and write the response to an internal chan
     (go (>! response-ch (try
                           (http/request query)
                           (catch Exception t
+                            (log/error t)
                             {:eval.cmr.client/category :eval.anomalies.fault
                              ::exception t}))))
     ;; Wait for the response to come back on a separate thread

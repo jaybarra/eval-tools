@@ -6,7 +6,11 @@
 (defn- update-req-content-type
   "Set the appropriate Content-Type header based on the concept format."
   [req fmt]
-  (assoc-in req [:headers :content-type] (cmr/format->mime-type fmt)))
+  (update-in req
+             [:headers]
+             merge
+             (when-let [fmt-str (cmr/format->mime-type fmt)]
+               {:content-type fmt-str})))
 
 (defn validate-concept-metadata
   "Returns a command to validate a given concept.
@@ -26,13 +30,14 @@
 
 (defn create-concept
   "Returns a command to create a given concept."
-  [concept-type provider-id concept & [{fmt :format native-id :native-id}]]
+  [concept-type provider-id concept & [{fmt :format native-id :native-id :as opts}]]
   (let [req {:method :put
              :url (format "/ingest/providers/%s/%s%s"
                           provider-id
                           (str (name concept-type) "s")
                           (if native-id (str "/" native-id) ""))
              :body concept}
+        req (merge req (when-let [headers (:headers opts)] {:headers headers}))
         request (update-req-content-type req fmt)]
     {::cmr/request request
      ::cmr/category :create}))

@@ -1,0 +1,35 @@
+{:description "Ingests an ECHO10 collection and a granule to the CMR_ONLY provider"
+
+ :steps [{:action :say
+          :with {:message "Ingesting concepts"}}
+         
+         {:action :ingest
+          :with {:concept-type :collection
+                 :file "resources/collection.echo10"
+                 :provider "CMR_ONLY"
+                 :format :echo10
+                 :native-id "cc"}}
+
+         {:action :ingest
+          :with {:concept-type :granule
+                 :file "resources/granule.echo10"
+                 :provider "CMR_ONLY"
+                 :format :echo10                 
+                 :native-id "gc"}}
+
+         {:action :wait
+          :with {:duration "5s"
+                 :message "Waiting for indexing to complete"}}
+
+         {:action :say
+          :with {:message "Deleting concepts"}}
+         
+         {:action :delete
+          :with {:concept-type :granule
+                 :provider "CMR_ONLY"
+                 :native-id "gc"}}
+         
+         {:action :delete
+          :with {:concept-type :collection
+                 :provider "CMR_ONLY"
+                 :native-id "cc"}}]}

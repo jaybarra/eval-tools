@@ -11,7 +11,7 @@
    [java.util.zip ZipInputStream]
    [java.time LocalDateTime]
    [java.time.format DateTimeFormatter]))
-  
+
 (def ^:private datetime-fmt (DateTimeFormatter/ofPattern "yyyyMMddHHmmss"))
 (def ^:private datetime-rx #"\d{10}(00|15|30|45)00")
 
@@ -28,6 +28,7 @@
                                #(re-matches datetime-rx %)))
 
 (defn- parse-manifest-line
+  "Parses a gdelt manifest entry into a map."
   [line]
   (let [splits (str/split line #"\s+")
         url (nth splits 2)]
@@ -112,6 +113,8 @@
   (map tsv->event lines))
 
 (defn get-events
+  "Fetches GDelt events for the given timestamp. 
+  The timestamp must correspond to a valid gdelt publishing time."
   [datetime]
   (when-not (spec/valid? ::datetime datetime)
     (throw (ex-info "Invalid datetime" (spec/explain-data ::datetime datetime))))
@@ -126,7 +129,12 @@
       tsv->events))
 
 (defn get-latest-events
+  "Fetches the latest events from GDelt."
   []
-  (let [latest (slurp "http://data.gdeltproject.org/gdeltv2/lastupdate.txt")
-        manifest (parse-manifest-line (first (str/split latest #"\n")))]
-    (get-events (:id manifest))))
+  (-> (slurp "http://data.gdeltproject.org/gdeltv2/lastupdate.txt")
+      (str/split #"\n")
+      first
+      parse-manifest-line
+      :id
+      get-events))
+

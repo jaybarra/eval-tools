@@ -1,0 +1,14 @@
+{:paths ["src" "resources"]
+ :deps {eval/cmr {:local/root "../../components/cmr"}
+        eval/utils {:local/root "../../components/utils"}
+        eval/cmr-player {:local/root "../../bases/cmr-player"}
+
+        org.clojure/clojure {:mvn/version "1.10.3"}
+        org.clojure/tools.deps.alpha {:mvn/version "0.12.1109"}
+        org.slf4j/slf4j-nop {:mvn/version "2.0.0-alpha7"}}
+ 
+ :aliases {:run {:main-opts ["-m" "eval.cmr-player.core"]}
+
+           :build {:deps {io.github.seancorfield/build-clj
+                          {:git/tag "v0.6.7" :git/sha "22c2d09"}}
+                   :ns-default build}}}
