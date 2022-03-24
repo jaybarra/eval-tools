@@ -7,7 +7,7 @@ Runs a script of invocations
 Run from the project root with this
 
 ```bash
-clj -M:run data/script.edn -u https://cmr.sit.earthdata.nasa.gov -t $AUTH_TOKEN
+clj -M:run data/script.edn -u <cmr url> -t $AUTH_TOKEN
 ```
 
 ```bash
