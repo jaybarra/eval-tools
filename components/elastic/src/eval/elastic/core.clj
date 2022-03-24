@@ -102,3 +102,16 @@
        (log/error (format "An unexpected error occurred during bulk indexing to index [ %s ]" index)
                   body)
        (throw+)))))
+
+(defn delete-by-query
+  [conn index query _]
+  (let [url (format "%s/%s/_delete_by_query" (:url conn) index)
+        request {:headers {:content-type "application/json"}
+                 :body (json/write-value-as-string query)}]
+    (try+
+     (client/post url request)
+     (log/info (format "Ran _delete_by_query against [ %s ]" index))
+     (catch Object {:keys [body]}
+       (log/error (format "An unexpected error occurred during delete_by_query in [ %s ]" index)
+                  body)
+       (throw+)))))

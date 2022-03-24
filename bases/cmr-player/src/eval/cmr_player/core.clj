@@ -1,4 +1,5 @@
 (ns eval.cmr-player.core
+  (:gen-class)
   (:require
    [clojure.edn :as edn]
    [clojure.java.io :as io]
@@ -6,7 +7,7 @@
    [eval.cmr-player.runner :as runner]
    [eval.cmr.interface.client :as client])
   (:import
-   java.io.PushbackReader))
+   [java.io File PushbackReader]))
 
 (def cli-options
   [["-u" "--cmr-url URL" "CMR Instance URL"]
@@ -27,7 +28,10 @@
   (let [{:keys [options arguments]} (parse-opts args cli-options)
         {:keys [token cmr-url]} options
         script (load-script (first arguments))
+        script-relative-root (.getParent (File. (first arguments)))
         client (client/create-client (merge {:url cmr-url}
                                             (when token
-                                              {:token token})))]
-    (runner/play-script client script)))
+                                              {:token token})))
+        state {:client client
+               :script-relative-root script-relative-root}]
+    (runner/play-script state script)))

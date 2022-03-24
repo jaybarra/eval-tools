@@ -25,3 +25,7 @@
 (defn bulk-index
   [conn index docs & [opts]]
   (core/bulk-index conn index docs opts))
+
+(defn delete-by-query
+  [conn index query & [opts]]
+  (core/delete-by-query conn index query opts))

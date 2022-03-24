@@ -14,6 +14,6 @@
 (defn uber
   [opts]
   (-> opts
-      clean
       (assoc :lib lib :main main :version version :transitive true)
+      clean
       bb/uber))

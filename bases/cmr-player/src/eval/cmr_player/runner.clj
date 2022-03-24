@@ -2,7 +2,8 @@
   (:require
    [clojure.string :as str]
    [eval.cmr.interface.ingest :as ingest]
-   [eval.cmr.interface.client :as client]))
+   [eval.cmr.interface.client :as client]
+   [eval.elastic.interface :as es]))
 
 (defn process-cmr-response
   [step resp]
@@ -12,7 +13,7 @@
       (printf "An problem occurred: %s\n" body))))
 
 (defmulti run-step
-  (fn [_client step]
+  (fn [_state step]
     (:action step)))
 
 (defmethod run-step :default
@@ -43,8 +44,9 @@
     (when msg
       (println msg))))
 
-(defmethod run-step :ingest
-  [client step]
+(defmethod run-step :cmr/ingest
+  [{client :client
+    root :script-relative-root} step]
   (let [{{concept-type :concept-type
           concept-file :file
           provider :provider
@@ -53,13 +55,13 @@
         command (ingest/create-concept
                  concept-type
                  provider
-                 (slurp concept-file)
+                 (slurp (str root java.io.File/separator concept-file))
                  {:format data-format
                   :native-id native-id})]
     (process-cmr-response step (client/invoke client command))))
 
-(defmethod run-step :delete
-  [client step]
+(defmethod run-step :cmr/delete
+  [{client :client} step]
   (let [{{concept-type :concept-type
           concept-file :file
           provider :provider
@@ -71,7 +73,11 @@
                  native-id)]
     (process-cmr-response step (client/invoke client command))))
 
+(defmethod run-step :es/delete-by-query
+  [_ {{host :host index :index query :query} :with}]
+  (es/delete-by-query {:url host} index query))
+
 (defn play-script
-  [client script]
+  [state script]
   (doseq [step (:steps script)]
-    (run-step client step)))
+    (run-step state step)))
