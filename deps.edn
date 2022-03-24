@@ -51,7 +51,7 @@
                        ;; Bases
                        "bases/cmr-cli/test"
                        "bases/cmr-dash/test"
-                       "bases/cmr-uploader/test"
+                       "bases/cmr-player/test"
                        "bases/es-driver/test"]}
 
   :eastwood {:main-opts ["-m"

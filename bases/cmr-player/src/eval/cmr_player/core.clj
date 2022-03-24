@@ -4,7 +4,7 @@
    [clojure.java.io :as io]
    [clojure.tools.cli :refer [parse-opts]]
    [eval.cmr-player.runner :as runner]
-   [eval.cmr.client :as client])
+   [eval.cmr.interface.client :as client])
   (:import
    java.io.PushbackReader))
 

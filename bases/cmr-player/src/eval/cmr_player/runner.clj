@@ -1,8 +1,8 @@
 (ns eval.cmr-player.runner
   (:require
    [clojure.string :as str]
-   [eval.cmr.commands.ingest :as ingest]
-   [eval.cmr.client :as client]))
+   [eval.cmr.interface.ingest :as ingest]
+   [eval.cmr.interface.client :as client]))
 
 (defn process-cmr-response
   [step resp]
