@@ -5,9 +5,17 @@
    [clojure.java.io :as io]
    [clojure.tools.cli :refer [parse-opts]]
    [eval.cmr-player.runner :as runner]
-   [eval.cmr.interface.client :as client])
+   [eval.cmr.interface.client :as client]
+   ;; extra
+   [taoensso.timbre :as timbre]
+   [taoensso.timbre.appenders.core :as appenders])
   (:import
    [java.io File PushbackReader]))
+
+;; TODO move this to a component
+(timbre/merge-config!
+ {:appenders {:println {:enabled? false}
+              :spit (appenders/spit-appender {:fname "playback.log"})}})
 
 (def cli-options
   [["-u" "--cmr-url URL" "CMR Instance URL"]
@@ -19,9 +27,9 @@
     (with-open [r (io/reader f)]
       (edn/read (PushbackReader. r)))
     (catch java.io.IOException e
-      (printf "Couldn't open script '%s': %s\n" f (.getMessage e)))
+      (timbre/error (format "Couldn't open script '%s': %s\n" f (.getMessage e))))
     (catch RuntimeException e
-      (printf "Error parsing script file '%s': %s\n" f (.getMessage e)))))
+      (timbre/error (format "Error parsing script file '%s': %s\n" f (.getMessage e))))))
 
 (defn -main
   [& args]
@@ -34,4 +42,6 @@
                                               {:token token})))
         state {:client client
                :script-relative-root script-relative-root}]
-    (runner/play-script state script)))
+    (printf "Playing script %s%n" (first arguments))
+    (timbre/info "Beginning script playback:" (first arguments))
+    (time (runner/play-script state script))))

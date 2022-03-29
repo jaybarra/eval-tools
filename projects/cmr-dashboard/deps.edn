@@ -1,7 +1,7 @@
 {:deps {eval/cmr-dash {:local/root "../../bases/cmr-dash"}
-        org.clojure/clojure {:mvn/version "1.10.3"}
-        org.clojure/tools.deps.alpha {:mvn/version "0.12.1109"}
-        org.slf4j/slf4j-nop {:mvn/version "2.0.0-alpha6"}}
+        org.clojure/clojure {:mvn/version "1.11.0"}
+        org.clojure/tools.deps.alpha {:mvn/version "0.13.1168"}
+        org.slf4j/slf4j-nop {:mvn/version "2.0.0-alpha7"}}
 
  :aliases {:test {:extra-paths []
                   :extra-deps  {eval/test-helpers {:local/root "../../components/test-helpers"}

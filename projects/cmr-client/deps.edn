@@ -4,10 +4,10 @@
         eval/utils {:local/root "../../components/utils"}
         eval/cmr-cli {:local/root "../../bases/cmr-cli"}
 
-        ch.qos.logback/logback-core {:mvn/version "1.2.10"}
-        org.clojure/clojure {:mvn/version "1.10.3"}
-        org.clojure/tools.deps.alpha {:mvn/version "0.12.1109"}
-        org.slf4j/slf4j-nop {:mvn/version "2.0.0-alpha6"}}
+        ch.qos.logback/logback-core {:mvn/version "1.2.11"}
+        org.clojure/clojure {:mvn/version "1.11.0"}
+        org.clojure/tools.deps.alpha {:mvn/version "0.13.1168"}
+        org.slf4j/slf4j-nop {:mvn/version "2.0.0-alpha7"}}
 
  :aliases {:run {:main-opts ["-m" "eval.cmr-cli.core"]}
 
@@ -19,5 +19,5 @@
                   :exec-fn cognitect.test-runner.api/test}
 
            :build {:deps {io.github.seancorfield/build-clj
-                          {:git/tag "v0.6.7" :git/sha "22c2d09"}}
+                          {:git/tag "v0.8.0" :git/sha "9bd8b8a"}}
                    :ns-default build}}}

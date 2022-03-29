@@ -6,7 +6,7 @@
 (def lib 'eval/cmr-playback)
 (def main 'eval.cmr-player.core)
 (def version (format "1.0.%s" (b/git-count-revs nil)))
-(def uber-file (format "target/%s-%s-standalone.jar" (name lib) version))
+(def uber-file (format "target/%s-standalone.jar" (name lib)))
 
 (defn clean
   [opts]
