@@ -6,7 +6,6 @@
  :aliases {:test {:extra-paths []
                   :extra-deps  {eval/test-helpers {:local/root "../../components/test-helpers"}
                                 org.clojure/test.check {:mvn/version "1.1.1"}
-                                io.github.cognitect-labs/test-runner
-                                {:git/tag "v0.5.0" :git/sha "48c3c67"}}
+                                io.github.cognitect-labs/test-runner {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
                   :main-opts ["-m" "cognitect.test-runner"]
                   :exec-fn cognitect.test-runner.api/test}}}

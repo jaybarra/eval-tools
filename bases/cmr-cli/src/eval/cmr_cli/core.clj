@@ -20,8 +20,6 @@
 ;; default handler for integrant
 (defmethod ig/init-key :default [_ _cfg])
 
-(def result-stack (atom []))
-
 (defn config
   "Read the config file and return a value or map.
   If no keys are specified, the entire map will be returned, otherwise
@@ -46,7 +44,7 @@
 
 (defn -main
   "Main entrypoint for the 'cmr-cli' command.
-   
+
   |Supported Options|                               |
   |-----------------|-------------------------------|
   | `search`        | sends a search request to CMR |"
@@ -69,10 +67,7 @@
         (when-let [result (-> (cmr/invoke cmr command)
                               :body
                               (json/read-value json/keyword-keys-object-mapper))]
-          (fipp result)
-          (swap! result-stack conj result))
-        (while (< 10 (count @result-stack)))
-        (swap! result-stack drop 1)
+          (fipp result))
         (catch Exception exception
           (log/error exception
                      "An error occurred while running the command"))))))
@@ -80,10 +75,9 @@
 (comment
   (-main "search" "cmr:sit" "concept-type:collection" "format:json")
   (-main "community-usage-metrics" "cmr:prod")
-  (fipp @result-stack)
-  (-main "ingest" 
-         "cmr:sit" 
-         "concept-type:c" 
+  (-main "ingest"
+         "cmr:sit"
+         "concept-type:c"
          "prov:prov1"
          "nid:sample-native-id"
          "./file/path/collection.iso"

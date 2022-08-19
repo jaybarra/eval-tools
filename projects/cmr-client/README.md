@@ -1,3 +1,3 @@
 # CMR Client
 
-A command line client for CMR.
+A command-line client for CMR.

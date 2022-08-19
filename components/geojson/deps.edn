@@ -1,11 +1,11 @@
 {:paths ["src" "resources"]
- :deps {camel-snake-kebab/camel-snake-kebab {:mvn/version "0.4.2"}
+ :deps {camel-snake-kebab/camel-snake-kebab {:mvn/version "0.4.3"}
         org.clojure/math.numeric-tower {:mvn/version "0.0.5"}
-        org.geotools/gt-epsg-hsql {:mvn/version "27-SNAPSHOT"}
-        org.geotools/gt-geojson {:mvn/version "27-SNAPSHOT"}
-        org.geotools/gt-shapefile {:mvn/version "27-SNAPSHOT"}}
+        org.geotools/gt-epsg-hsql {:mvn/version "28-SNAPSHOT"}
+        org.geotools/gt-geojson {:mvn/version "28-SNAPSHOT"}
+        org.geotools/gt-shapefile {:mvn/version "28-SNAPSHOT"}}
  :aliases {:test {:extra-paths ["test"]
                   :extra-deps {io.github.cognitect-labs/test-runner
-                               {:git/tag "v0.5.0" :git/sha "b3fd0d2"}}
+                               {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
                   :main-opts ["-m" "cognitect.test-runner"]
                   :exec-fn cognitect.test-runner.api/test}}}

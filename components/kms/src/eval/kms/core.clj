@@ -29,7 +29,7 @@
     :sciencekeywords
     :temporalresolutionrange})
 
-(def keyword-scheme->field-names 
+(def keyword-scheme->field-names
   (-> "schemas/cmr-kms-hierarchy-12.edn"
       io/resource
       slurp
@@ -133,11 +133,4 @@
         versions))))
 
 (comment
-  (try
-    (get-scheme "https://gcmd.earthdata.nasa.gov/kms/concepts/concept_scheme/"
-                :platforms "12.2")
-    (catch Exception e
-      (println (ex-data e))))
-  
-  (available-versions "https://gcmd.earthdata.nasa.gov/kms")
-  )
+  (available-versions "https://gcmd.earthdata.nasa.gov/kms"))

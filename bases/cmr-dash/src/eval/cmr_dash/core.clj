@@ -36,7 +36,7 @@
                  (fn [_req]
                    (let [now (Instant/now)
                          {:keys [status headers body error opts] :as resp} @(client/request {:url "https://cmr.earthdata.nasa.gov/search/health"})]
-                     (if error                       
+                     (if error
                        (ok
                         (selmer/render-file "templates/cmr-status.html" {:status "degraded"
                                                                          :instance "PROD"
@@ -63,7 +63,7 @@
    (ring/routes
     (ring/redirect-trailing-slash-handler)
     (ring/create-resource-handler {:path "/"})
-    (ring/create-default-handler 
+    (ring/create-default-handler
      {:not-found (constantly {:status 404
                               :body "Not Found"})}))))
 
@@ -96,6 +96,6 @@
   (restart-server)
   (app {:request-method :get
         :uri "/api"})
-  
+
   (app {:request-method :get
         :uri "/status"}))

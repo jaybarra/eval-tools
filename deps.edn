@@ -3,10 +3,9 @@
  :aliases
  {:dev {:extra-paths ["development/src"
                       "development/resources"]
-        :extra-deps {metosin/malli {:mvn/version "0.8.4"}
-                     org.clojure/clojure {:mvn/version "1.11.0"}
-                     org.clojure/tools.deps.alpha {:mvn/version "0.13.1168"}
-                     org.slf4j/slf4j-nop {:mvn/version "2.0.0-alpha7"}
+        :extra-deps {org.clojure/clojure {:mvn/version "1.11.1"}
+                     org.clojure/tools.deps.alpha {:mvn/version "0.14.1222"}
+                     ch.qos.logback/logback-classic {:mvn/version "1.2.11"}
 
                      ;; Components
                      eval/cmr {:local/root "components/cmr"}
@@ -53,10 +52,10 @@
   :eastwood {:main-opts ["-m"
                          "eastwood.lint"
                          {}]
-             :extra-deps {jonase/eastwood {:mvn/version "1.2.3"}}}
+             :extra-deps {jonase/eastwood {:mvn/version "1.2.4"}}}
 
   :poly {:extra-deps {polylith/clj-poly
                       {:git/url "https://github.com/polyfy/polylith.git"
-                       :sha "25d31bd2dbf038ccff734f7e8cd5b50b75cd2a08"
+                       :sha "ccc261e60f6a875ff30858bf84cf67be105eac6f"
                        :deps/root "projects/poly"}}
          :main-opts  ["-m" "polylith.clj.core.poly-cli.core"]}}}
