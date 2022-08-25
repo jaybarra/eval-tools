@@ -12,7 +12,8 @@
 
 (def cli-options
   [["-u" "--cmr-url URL" "CMR Instance URL"]
-   ["-t" "--token TOKEN" "CMR Authentication Token"]])
+   ["-t" "--token TOKEN" "CMR Authentication Token"]
+   ["-i" "--client-id CLIENT-ID" "Client-ID to identify requests with"]])
 
 (defn load-script
   [f]
@@ -30,9 +31,8 @@
         {:keys [token cmr-url client-id]} options
         script (load-script (first arguments))
         script-relative-root (.getParent (File. (first arguments)))
-        client (client/create-client (merge {:url cmr-url :client-id "CMR-Player"}
-                                            (when client-id
-                                              {:client-id client-id})
+        client (client/create-client (merge {:url cmr-url
+                                             :client-id (or client-id" CMR-Player")}
                                             (when token
                                               {:token token})))
         state {:client client
