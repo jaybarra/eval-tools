@@ -37,4 +37,4 @@
                :script-relative-root script-relative-root}]
     (printf "Playing script %s%n" (first arguments))
     (log/info "Beginning script playback:" (first arguments))
-    (time (runner/play-script state script))))
+    (log/debug "Final State" (runner/play-script state script))))

@@ -19,3 +19,13 @@
   "Returns a query with to fetch the current community usage metrics."
   []
   (search/fetch-community-usage-metrics))
+
+(defn search-post
+  "Returns a query that uses POST."
+  [concept-type query options]
+  (search/search-post concept-type query options))
+
+(defn search-after-post
+  "Returns a serach-after query that uses POST."
+  [concept-type query sa-key options]
+  (search/search-after-post concept-type query sa-key options))
