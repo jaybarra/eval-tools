@@ -27,10 +27,12 @@
 (defn -main
   [& args]
   (let [{:keys [options arguments]} (parse-opts args cli-options)
-        {:keys [token cmr-url]} options
+        {:keys [token cmr-url client-id]} options
         script (load-script (first arguments))
         script-relative-root (.getParent (File. (first arguments)))
-        client (client/create-client (merge {:url cmr-url}
+        client (client/create-client (merge {:url cmr-url :client-id "CMR-Player"}
+                                            (when client-id
+                                              {:client-id client-id})
                                             (when token
                                               {:token token})))
         state {:client client

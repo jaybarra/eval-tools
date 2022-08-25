@@ -135,6 +135,7 @@
 (spec/def ::cmr-formats cmr-formats)
 (spec/def ::concept-type #{:collection :granule :service :tool :concept})
 (spec/def ::url string?)
+(spec/def ::client-id string?)
 (spec/def ::endpoints (spec/keys :opt-un [::access-control
                                           ::bootstrap
                                           ::indexer
@@ -143,9 +144,9 @@
                                           ::metadata-db
                                           ::search]))
 (spec/def ::cmr-cfg (spec/or :url-only (spec/keys :req-un [::url]
-                                                  :opt-un [::endpoints])
+                                                  :opt-un [::endpoints ::client-id])
                              :endpoints-only (spec/keys :req-un [::endpoints]
-                                                        :opt-un [::url])
+                                                        :opt-un [::url ::client-id])
                              :blend (spec/keys :req-un [::url ::endpoints])))
 (spec/def ::method #{:get :post :put :delete :option :head})
 (spec/def ::body any?)
@@ -208,7 +209,7 @@
     ;; return the result chan containing the parsed response
     (<!! result-ch)))
 
-(defrecord HttpClient [url token endpoints]
+(defrecord HttpClient [url token endpoints client-id]
 
   CmrClient
 
@@ -227,8 +228,8 @@
   (when-not (spec/valid? ::cmr-cfg cmr-cfg)
     (throw (ex-info "Invalid CMR configuration"
                     (spec/explain-data ::cmr-cfg cmr-cfg))))
-  (let [{:keys [url token endpoints]} cmr-cfg]
-    (->HttpClient url token endpoints)))
+  (let [{:keys [url token endpoints client-id]} cmr-cfg]
+    (->HttpClient url token endpoints client-id)))
 
 (defn ^:private replace-service-route
   "Replaces the service route from the command URL with the new path."
@@ -271,7 +272,8 @@
                     (spec/explain-data ::command command))))
   (let [{:keys [anonymous? token]} (:opts command)
         {root-url :url
-         endpoints :endpoints}   client
+         client-id :client-id
+         endpoints :endpoints} client
         req-url (get-in command [::request :url])
 
         ;; check if overriding the root-url
@@ -289,7 +291,8 @@
 
         command (if token
                   (assoc-in command [::request :headers :authorization] token)
-                  command)]
+                  command)
+        command (assoc-in command [::request :headers :client-id] (or client-id "CMR-Evaluation-Client"))]
     (-invoke client command)))
 
 (comment

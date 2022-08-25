@@ -135,21 +135,27 @@
   (es/delete-by-query {:url host} index query)
   state)
 
+(defn- print-progress
+  ([current total]
+   (print-progress current total {:width 80}))
+  ([current total opts]
+   (let [width (:width opts)
+         pct-left (int (+ 0.5 (* width (/ current total))))
+         pct-done (int (+ 0.5 (* width (/ (- total current) total))))]
+        ;; TODO does the carriage return always work?
+        (printf "\r[%s%s]"
+                (apply str (repeatedly pct-done (constantly "#")))
+                (apply str (repeatedly pct-left (constantly "-"))))
+        (flush))))
+
 (defn- play-step
   "Executes a script step."
   [state step]
   (loop [state state
          iterations (get step :repeat 1)]
-    (when (true? (:progress step))
-      ;; TODO this is weak to division by zero
-      ;; TODO this may not yield 80 characters all the time
-      (let [pct-left (int (+ 0.5 (* 78 (/ iterations (get step :repeat 1)))))
-            pct-done (int (+ 0.5 (* 78 (/ (- (get step :repeat 1) iterations) (get step :repeat 1)))))]
-        ;; TODO does the carriage return always work?
-        (printf "\r[%s%s]"
-                (apply str (repeatedly pct-done (constantly "#")))
-                (apply str (repeatedly pct-left (constantly "-"))))
-        (flush)))
+    (when (and (pos? (get step :repeat 1))
+               (true? (:progress step)))
+      (print-progress iterations (get step :repeat 1)))
     (if-not (pos? iterations)
       (do
         (when (true? (:progress step)) (printf "%n"))
