@@ -1,10 +1,10 @@
 (ns eval.cmr-player.runner
   (:require
    [clojure.string :as str]
+   [clojure.tools.logging :as log]
    [eval.cmr.interface.ingest :as ingest]
    [eval.cmr.interface.client :as client]
-   [eval.elastic.interface :as es]
-   [taoensso.timbre :as log]))
+   [eval.elastic.interface :as es]))
 
 (defmulti run-step
   (fn [_state step]

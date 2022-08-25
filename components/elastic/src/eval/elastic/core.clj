@@ -2,9 +2,9 @@
   (:require
    [clj-http.client :as client]
    [clojure.string :as str]
+   [clojure.tools.logging :as log]
    [jsonista.core :as json]
-   [slingshot.slingshot :refer [try+ throw+]]
-   [taoensso.timbre :as log]))
+   [slingshot.slingshot :refer [try+ throw+]]))
 
 (defn create-index-template
   [conn label template]
@@ -75,7 +75,7 @@
 
 (defn bulk-index
   "Bulk indexing capability for Elasticsearch.
-  
+
   This function is restricted to indexing operations."
   [conn index docs opts]
   (let [{:keys [id-field]} opts
@@ -85,7 +85,7 @@
                   (str
                    (json/write-value-as-string
                     {:index (merge {:_index index}
-                                   (when-let [id (get doc id-field)] 
+                                   (when-let [id (get doc id-field)]
                                      {:_id id}))})
                    "\n"
                    (json/write-value-as-string doc)))

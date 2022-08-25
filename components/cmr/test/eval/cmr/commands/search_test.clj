@@ -18,8 +18,8 @@
       :variable "/search/variables")))
 
 (deftest scroll-test
-  (is (spec/valid? ::cmr/command (search/scroll :collection 
-                                                {:provider "foo"}  
+  (is (spec/valid? ::cmr/command (search/scroll :collection
+                                                {:provider "foo"}
                                                 "scroll-key")))
   (testing "scroll-id header is set"
     (is (= "1234"
@@ -32,10 +32,10 @@
   (let [command (search/clear-scroll-session "12345")]
     (is (spec/valid? ::cmr/command command))
     (is (= {:method :post
-             :url "/search/clear-scroll"
-             :headers {:content-type "application/json"}
-             :body {:scroll_id "12345"}}
-            (::cmr/request command))))
+            :url "/search/clear-scroll"
+            :headers {:content-type "application/json"}
+            :body {:scroll_id "12345"}}
+           (::cmr/request command))))
 
   (let [command (search/clear-scroll-session 56789)]
     (is (= {::cmr/request {:method :post
@@ -46,4 +46,20 @@
            command))))
 
 (deftest search-after-test
-  (is (spec/valid? ::cmr/command (search/search-after :collection {} "[sa-key, 123, 456]"))))
+  (is (spec/valid? ::cmr/command (search/search-after :collection {} "[\"sa-key\", \"123\", \"456\"]"))))
+
+(deftest search-post
+  (testing "search using POST and multi-part"
+    (is (spec/valid? ::cmr/command (search/search-post
+                                    :collection
+                                    [{:name "shapefile"
+                                      :content (clojure.java.io/file "/tmp/some_file")
+                                      :mime-type "text/plain"}])))))
+
+(deftest search-after-post
+  (is (spec/valid? ::cmr/command (search/search-after-post
+                                  :collection
+                                  [{:name "shapefile"
+                                    :content (clojure.java.io/file "/tmp/some_file")
+                                    :mime-type "text/plain"}]
+                                  "[\"a\", \"b\", \"c\"]"))))

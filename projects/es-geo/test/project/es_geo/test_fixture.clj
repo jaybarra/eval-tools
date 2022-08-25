@@ -1,8 +1,8 @@
 (ns project.es-geo.test-fixture
   (:require
    [clj-http.client :as http]
-   [eval.test-helpers.interface :as test-helpers]
-   [taoensso.timbre :as log])
+   [clojure.tools.logging :as log]
+   [eval.test-helpers.interface :as test-helpers])
   (:import
    [java.net ConnectException]
    [org.apache.http NoHttpResponseException]))
@@ -41,6 +41,6 @@
   (test-helpers/docker-compose-up "./projects/es-geo/resources"
                                   {:detach? true
                                    :wait-fn wait-for-elasticsearch})
-  
+
   (test-helpers/docker-compose-down "./projects/es-geo/resources")
   )

@@ -49,11 +49,6 @@
                        "bases/cmr-player/test"
                        "bases/es-driver/test"]}
 
-  :eastwood {:main-opts ["-m"
-                         "eastwood.lint"
-                         {}]
-             :extra-deps {jonase/eastwood {:mvn/version "1.2.4"}}}
-
   :poly {:extra-deps {polylith/clj-poly
                       {:git/url "https://github.com/polyfy/polylith.git"
                        :sha "ccc261e60f6a875ff30858bf84cf67be105eac6f"

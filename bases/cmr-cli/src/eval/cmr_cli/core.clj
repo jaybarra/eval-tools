@@ -12,7 +12,7 @@
    [fipp.edn :refer [pprint] :rename {pprint fipp}]
    [integrant.core :as ig]
    [jsonista.core :as json]
-   [taoensso.timbre :as log]))
+   [clojure.tools.logging :as log]))
 
 ;; Let Aero know how to read integrant references
 (defmethod aero/reader 'ig/ref [_ _ value] (ig/ref value))
@@ -74,6 +74,7 @@
 
 (comment
   (-main "search" "cmr:sit" "concept-type:collection" "format:json")
+  (-main "search" "cmr:prod" "concept-type:collection" "format:json")
   (-main "community-usage-metrics" "cmr:prod")
   (-main "ingest"
          "cmr:sit"

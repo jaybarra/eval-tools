@@ -6,11 +6,13 @@
    [clojure.spec.alpha :as spec]
    [clojure.string :as str]
    [eval.gdelt.util :as util]
-   [taoensso.timbre :as log])
+   [clojure.tools.logging :as log])
   (:import
    [java.util.zip ZipInputStream]
    [java.time LocalDateTime]
    [java.time.format DateTimeFormatter]))
+
+(def gdelt-latest-update-url "http://data.gdeltproject.org/gdeltv2/lastupdate.txt")
 
 (def ^:private datetime-fmt (DateTimeFormatter/ofPattern "yyyyMMddHHmmss"))
 (def ^:private datetime-rx #"\d{10}(00|15|30|45)00")
@@ -28,7 +30,7 @@
                                #(re-matches datetime-rx %)))
 
 (defn- parse-manifest-line
-  "Parses a gdelt manifest entry into a map."
+  "Parse a gdelt manifest entry into a map."
   [line]
   (let [splits (str/split line #"\s+")
         url (nth splits 2)]
@@ -113,8 +115,8 @@
   (map tsv->event lines))
 
 (defn get-events
-  "Fetches GDelt events for the given timestamp. 
-  The timestamp must correspond to a valid gdelt publishing time."
+  "Fetch GDelt events for the given DATETIME.
+  The DATETIME must correspond to a valid gdelt publishing time."
   [datetime]
   (when-not (spec/valid? ::datetime datetime)
     (throw (ex-info "Invalid datetime" (spec/explain-data ::datetime datetime))))
@@ -131,10 +133,19 @@
 (defn get-latest-events
   "Fetches the latest events from GDelt."
   []
-  (-> (slurp "http://data.gdeltproject.org/gdeltv2/lastupdate.txt")
+  (-> (slurp gdelt-latest-update-url)
       (str/split #"\n")
       first
       parse-manifest-line
       :id
       get-events))
 
+(comment
+  ;; bad datetime example
+  (get-events "today")
+
+  ;; good datetime example
+  (get-events "20220101000000")
+  (log/error "debug")
+
+  (get-latest-events))

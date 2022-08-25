@@ -4,16 +4,14 @@
             <pattern>%d{HH:MM:sss} %-5level %logger{5}/%M - %msg%n</pattern>
         </encoder>
     </appender>
-
+    
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>eval-tools.log</file>
+        <file>cmr-playback.log</file>
         <encoder>
-            <pattern>%date %-5level [%thread] %logger/%M\(%L\) - %msg%n</pattern>
+            <pattern>%date %-5level [%thread] %logger{36}/%M - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <logger name="org.apache.http" level="WARN" />
-    
     <root level="DEBUG">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="FILE" />

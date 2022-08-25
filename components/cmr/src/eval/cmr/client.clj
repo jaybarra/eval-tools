@@ -7,10 +7,10 @@
    [clojure.core.async :refer [>! <! <!! go chan promise-chan]]
    [clojure.spec.alpha :as spec]
    [clojure.string :as str]
+   [clojure.tools.logging :as log]
    [muuntaja.core :as muuntaja]
    [muuntaja.format.core :as fmt-core]
-   [muuntaja.format.json :as json-format]
-   [taoensso.timbre :as log]))
+   [muuntaja.format.json :as json-format]))
 
 ;; ============================================================================
 ;; Muuntaja codec
@@ -29,19 +29,19 @@
    :matches #"^application/((.*)\+)?xml.*"})
 
 (def m
-  "Muuntaja instance for handling CMR content types. 
-   
-  This contains decoders for the following format types. Version information 
+  "Muuntaja instance for handling CMR content types.
+
+  This contains decoders for the following format types. Version information
   may be additionally appended.
   e.g \"Content-Type: application/vnd.nasa.cmr.umm+json;version=1.16.2\"
-  
+
   XML formats:
   * application/dif10+xml
   * application/dif+xml
   * application/echo10+xml
   * application/iso19115+xml
   * application/iso:smap+xml
-  
+
   JSON formats:
   * application/json
   * application/opendata+json
@@ -193,7 +193,7 @@
     (log/info "Sending request to CMR"
               (-> query
                   (redact-headers [:authorization :echo-token])
-                  (dissoc :body)))
+                  (dissoc :body :multipart)))
     ;; Send the request and write the response to an internal chan
     (go (>! response-ch (try
                           (http/request query)
@@ -255,7 +255,7 @@
   where the request should be sent.
 
   Sends a query to CMR over HTTP and returns the response object.
-  
+
   If an authorization-token is available for the provided [[CmrClient]], the token
   will be added to the \"Authorization\" header. This may be ignored by setting
   :anonymous? to true in the options.
