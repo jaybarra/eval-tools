@@ -136,32 +136,58 @@
   state)
 
 (defn- print-progress
-  ([current total]
-   (print-progress current total {:width 80}))
-  ([current total opts]
-   (let [width (:width opts)
-         pct-left (int (+ 0.5 (* width (/ current total))))
-         pct-done (int (+ 0.5 (* width (/ (- total current) total))))]
-        ;; TODO does the carriage return always work?
-        (printf "\r[%s%s]"
-                (apply str (repeatedly pct-done (constantly "#")))
-                (apply str (repeatedly pct-left (constantly "-"))))
-        (flush))))
+  [current total & opts]
+  (let [width (get opts :width 80)
+        ;; TODO limit message length
+        message (get opts :message "")
+        pct-left (int (+ 0.5 (* width (/ current total))))
+        pct-done (int (+ 0.5 (* (- width (count message)) (/ (- total current) total))))]
+    (printf "\r[%s%s%s]"
+            message
+            (apply str (repeatedly pct-done (constantly "#")))
+            (apply str (repeatedly pct-left (constantly "-"))))
+    (flush)))
+
+(defn- duration->ms
+  [duration]
+  (if (seq duration)
+    (let [quantity (Integer/parseInt (or (re-find #"\d+" duration) "0"))
+          unit (str/lower-case (or (re-find #"[a-zA-Z]+" duration) "s"))]
+      (case unit
+        "s" (* quantity 1000)
+        "sec" (* quantity 1000)
+        "second" (* quantity 1000)
+        "seconds" (* quantity 1000)
+        "m" (* quantity 60000)
+        "min" (* quantity 60000)
+        "minute" (* quantity 60000)
+        "minutes" (* quantity 60000)
+        "h" (* quantity 360000)
+        "hour" (* quantity 360000)
+        "hours" (* quantity 360000)
+        ;; default
+        0))
+    0))
 
 (defn- play-step
   "Executes a script step."
   [state step]
-  (loop [state state
-         iterations (get step :repeat 1)]
-    (when (and (pos? (get step :repeat 1))
-               (true? (:progress step)))
-      (print-progress iterations (get step :repeat 1)))
-    (if-not (pos? iterations)
-      (do
-        (when (true? (:progress step)) (printf "%n"))
-        state)
-      (recur (execute-step state step)
-             (dec iterations)))))
+  (let [start (get state :step-start (System/currentTimeMillis))
+        duration (duration->ms (get step :loop))
+        _ (assoc state :step-start start)
+
+        end-state (loop [state state
+                         iterations (get step :repeat 1)]
+                    (when (and (pos? (get step :repeat 1))
+                               (true? (:progress step)))
+                      (print-progress iterations (get step :repeat 1)))
+                    (if-not (pos? iterations)
+                      state
+                      (recur (execute-step state step)
+                             (dec iterations))))]
+    (when (<= (System/currentTimeMillis) (+ start duration)) (play-step end-state step))
+    (when (true? (:progress step)) (printf "%n"))
+    (dissoc end-state :step-start)))
 
 (defn play-script
   "Execute actions in a script sequentally."
@@ -170,7 +196,12 @@
          state (assoc state :step# 1)]
     (if-let [step (first steps)]
       (do
-        (printf "Step [%3d] - %s%n" (:step# state) (:action step))
+        (printf "Step [%d/%d] - %s%s%n"
+                (:step# state)
+                (count (:steps script))
+                (:action step)
+                ;; TODO format step meta more generically
+                (if-let [loop (:loop step)] (format " Looping [%s]" loop) ""))
         (flush)
         (recur (rest steps)
                (-> state

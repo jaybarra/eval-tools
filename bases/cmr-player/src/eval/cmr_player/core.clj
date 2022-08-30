@@ -32,9 +32,8 @@
         script (load-script (first arguments))
         script-relative-root (.getParent (File. (first arguments)))
         client (client/create-client (merge {:url cmr-url
-                                             :client-id (or client-id" CMR-Player")}
-                                            (when token
-                                              {:token token})))
+                                             :client-id (or client-id "CMR-Player")}
+                                            (when token {:token token})))
         state {:client client
                :script-relative-root script-relative-root}]
     (printf "Playing script %s%n" (first arguments))
