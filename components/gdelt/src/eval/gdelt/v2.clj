@@ -34,7 +34,7 @@
   [line]
   (let [splits (str/split line #"\s+")
         url (nth splits 2)]
-    {:id (re-find #"\d{14}" url) ; use the timestamp as the id
+    {:timestamp (re-find #"\d{14}" url) ; use the timestamp as the id
      :size (Integer/valueOf (first splits))
      :hash (second splits)
      :url url}))
@@ -137,7 +137,7 @@
       (str/split #"\n")
       first
       parse-manifest-line
-      :id
+      :timestamp
       get-events))
 
 (comment
