@@ -1,5 +1,5 @@
 (ns eval.shell.core
-  (:require 
+  (:require
    [clojure.string :as str]
    [eval.shell.jline :as jline]
    [eval.user-input.interface :as user-input])
@@ -45,12 +45,12 @@
   [command-executor {:keys [ws-dir ws-file is-tap] :as user-input} workspace-fn workspace color-mode]
   (let [reader (jline/reader)]
     (print-logo color-mode)
-    
+
     (try
       (loop []
         (flush)
         (when-let [line (.readLine reader (prompt))]
-          (let [{:keys [cmd color-mode] :as input} (user-input/extract-params (str/split line #"\S"))]
+          #_(let [{:keys [cmd color-mode] :as input} #_(user-input/extract-params (str/split line #"\S"))]
             (when-not (contains? #{"exit" "quit"} cmd)
               (cond
                 (= "shell" cmd) (println "  Can't start a shell inside another shell.")
