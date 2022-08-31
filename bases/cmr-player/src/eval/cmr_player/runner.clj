@@ -7,9 +7,10 @@
    [eval.cmr.interface.ingest :as ingest]
    [eval.cmr.interface.search :as search]
    [eval.elastic.interface :as es]
-   [fipp.edn :refer [pprint] :rename {pprint fipp}]))
+   [fipp.edn :refer [pprint] :rename {pprint fipp}])
+  (:import
+   java.util.concurrent.Executors))
 
-;; All derived methods should return the STATE
 (defmulti execute-step
   (fn [_state step]
     (:action step)))
@@ -66,11 +67,13 @@
     (if (= 200 status)
       (do
         (when-not silent? (fipp body))
+        (log/info (format "Shapefile search returned with status [%d]" status) headers body)
         (assoc state :search-after (get-in headers ["CMR-Search-After"])))
       (do
+        (log/info (format "Shapefile search failed with status [%d]" status) headers body)
         (printf "Search failed%n")
-        (fipp headers)
-        (fipp body)
+        (when headers (fipp headers))
+        (when body (fipp body))
         state))))
 
 (defmethod execute-step :cmr/ingest
@@ -149,6 +152,8 @@
     (flush)))
 
 (defn- duration->ms
+  "Convert shorthand duration notation to milliseconds.
+  Supported units: sec,min,hour"
   [duration]
   (if (seq duration)
     (let [quantity (Integer/parseInt (or (re-find #"\d+" duration) "0"))
@@ -169,25 +174,53 @@
         0))
     0))
 
+(defn- play-step-runner
+  "Executes action of a STEP."
+  [state step]
+  (loop [state state
+         iterations (get step :repeat 1)]
+    (log/info (format "Playing step [%d/%d]"
+                      (- (get step :repeat 1) iterations)
+                      (get step :repeat 1))
+              step)
+    (when (and (pos? (get step :repeat 1))
+               (true? (:progress step)))
+      (print-progress iterations (get step :repeat 1)))
+    (if-not (pos? iterations)
+      state
+      (recur (execute-step state step)
+             (dec iterations)))))
+
 (defn- play-step
   "Executes a script step."
   [state step]
   (let [start (get state :step-start (System/currentTimeMillis))
         duration (duration->ms (get step :loop))
         _ (assoc state :step-start start)
-
-        end-state (loop [state state
-                         iterations (get step :repeat 1)]
-                    (when (and (pos? (get step :repeat 1))
-                               (true? (:progress step)))
-                      (print-progress iterations (get step :repeat 1)))
-                    (if-not (pos? iterations)
-                      state
-                      (recur (execute-step state step)
-                             (dec iterations))))]
+        end-state (play-step-runner state step)]
     (when (<= (System/currentTimeMillis) (+ start duration)) (play-step end-state step))
     (when (true? (:progress step)) (printf "%n"))
     (dissoc end-state :step-start)))
+
+(defn- play-step-wrapper
+  [state step]
+  ;; TODO validate concurrency is a positive int
+  (let [n#threads (get step :concurrency 1)
+        pool (Executors/newFixedThreadPool n#threads)
+        tasks (map (fn[t]
+                     (fn []
+                       (log/debug (format "Starting step thread [%s][%s]" t (:action step)) )
+                       (play-step state (if (zero? t)
+                                          step
+                                          ;; only print to stdout on the 0th thread, others will go to logs
+                                          (assoc step :silent true)))))
+                   (range n#threads))]
+    (doseq [future (.invokeAll pool tasks)]
+      (.get future))
+    (.shutdown pool)
+    ;; THIS IS NOT THE CORRECT STATE
+    ;; TODO figure out how to merge state updated by concurrent threads, or if that's even necessary
+    state))
 
 (defn play-script
   "Execute actions in a script sequentally."
@@ -201,10 +234,12 @@
                 (count (:steps script))
                 (:action step)
                 ;; TODO format step meta more generically
-                (if-let [loop (:loop step)] (format " Looping [%s]" loop) ""))
+                (str (if-let [loop (:loop step)] (format " Looping [%s]" loop) "")
+                     (if-let [threads (:concurrency step)] (format " Concurrent [%s]" threads) "")))
         (flush)
+        (log/info "Playing step" step)
         (recur (rest steps)
                (-> state
-                   (play-step step)
+                   (play-step-wrapper step)
                    (update :step# inc))))
       (dissoc state :step#))))
