@@ -206,7 +206,7 @@
   (loop [state state
          iterations (get step :repeat 1)]
     (log/info (format "Playing step [%d/%d]"
-                      (- (get step :repeat 1) iterations)
+                      (inc (- (get step :repeat 1) iterations))
                       (get step :repeat 1))
               step)
     (when (and (pos? (get step :repeat 1))
@@ -272,7 +272,7 @@
                 (str (if-let [loop (:loop step)] (format " Looping [%s]" loop) "")
                      (if-let [threads (:concurrency step)] (format " Concurrent [%s]" threads) "")))
         (flush)
-        (log/info "Playing step" step)
+        (log/info "Entering step" step)
         (recur (rest steps)
                (-> state
                    (play-step-wrapper step)
