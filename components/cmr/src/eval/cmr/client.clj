@@ -215,7 +215,6 @@
 
   (-invoke
     [_ command]
-    (log/info "Invoking CMR" (dissoc command ::request))
     (send-request (::request command)))
 
   (-token
