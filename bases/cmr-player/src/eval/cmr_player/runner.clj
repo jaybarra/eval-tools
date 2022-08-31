@@ -34,6 +34,7 @@
    [eval.elastic.interface :as es]
    [fipp.edn :refer [pprint] :rename {pprint fipp}])
   (:import
+   java.time.Instant
    java.util.concurrent.Executors))
 
 (defmulti execute-step
@@ -176,25 +177,25 @@
             (apply str (repeatedly pct-left (constantly "-"))))
     (flush)))
 
-(defn- duration->ms
-  "Convert shorthand duration notation to milliseconds.
+(defn- duration->sec
+  "Convert shorthand duration notation to seconds.
   Supported units: sec,min,hour"
   [duration]
   (if (seq duration)
     (let [quantity (Integer/parseInt (or (re-find #"\d+" duration) "0"))
           unit (str/lower-case (or (re-find #"[a-zA-Z]+" duration) "s"))]
       (case unit
-        "s" (* quantity 1000)
-        "sec" (* quantity 1000)
-        "second" (* quantity 1000)
-        "seconds" (* quantity 1000)
-        "m" (* quantity 60000)
-        "min" (* quantity 60000)
-        "minute" (* quantity 60000)
-        "minutes" (* quantity 60000)
-        "h" (* quantity 360000)
-        "hour" (* quantity 360000)
-        "hours" (* quantity 360000)
+        "s" (* quantity 1)
+        "sec" (* quantity 1)
+        "second" (* quantity 1)
+        "seconds" (* quantity 1)
+        "m" (* quantity 60)
+        "min" (* quantity 60)
+        "minute" (* quantity 60)
+        "minutes" (* quantity 60)
+        "h" (* quantity 3600)
+        "hour" (* quantity 3600)
+        "hours" (* quantity 3600)
         ;; default
         0))
     0))
@@ -219,13 +220,20 @@
 (defn- play-step
   "Executes a script step."
   [state step]
-  (let [start (get state :step-start (System/currentTimeMillis))
-        duration (duration->ms (get step :loop))
-        _ (assoc state :step-start start)
-        end-state (play-step-runner state step)]
-    (when (<= (System/currentTimeMillis) (+ start duration)) (play-step end-state step))
-    (when (true? (:progress step)) (printf "%n"))
-    (dissoc end-state :step-start)))
+  (let [start (get state :step-start (Instant/now))
+        expiration (get state :step-expiration (.plusSeconds start (duration->sec (get step :loop))))
+        state (assoc state
+                     :step-start start
+                     :step-expiration expiration)
+        next-state (play-step-runner state step)]
+
+    (when (pos? (.compareTo expiration (Instant/now)))
+      (play-step next-state step))
+
+    (when (true? (:progress step))
+      (printf "%n"))
+
+    (dissoc next-state :step-start :step-expiration)))
 
 (defn- play-step-wrapper
   [state step]
@@ -270,3 +278,12 @@
                    (play-step-wrapper step)
                    (update :step# inc))))
       (dissoc state :step#))))
+
+(comment
+
+  (let [now (Instant/now)
+        expires (.plusSeconds now 5)
+        expired (.minusSeconds now 5)]
+    (when (neg? (.compareTo expired now)) (println "its expired"))
+    (when (pos? (.compareTo expires now)) (println "its not expired")))
+  )
