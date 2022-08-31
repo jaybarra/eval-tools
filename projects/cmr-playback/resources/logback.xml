@@ -1,27 +1,24 @@
 <configuration>
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/cmr-playback.log</file>
-        
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- daily rollover -->
-            <fileNamePattern>logs/cmr-playback.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-            <timeBasedFileNamingAndTriggeringPolicy
-                class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <!-- or whenever the file size reaches 50MB -->
-                <maxFileSize>50MB</maxFileSize>
-            </timeBasedFileNamingAndTriggeringPolicy>
-            <!-- keep 30 days' worth of history -->
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- rollover daily -->
+            <fileNamePattern>logs/cmr-playback-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- each file should be at most 100MB, keep 30 days worth of history, but at most 10GB -->
+            <maxFileSize>100MB</maxFileSize>
             <maxHistory>30</maxHistory>
+            <totalSizeCap>10GB</totalSizeCap>
         </rollingPolicy>
         <encoder>
             <charset>UTF-8</charset>
-            <pattern>%date %-5level [%thread] %logger{36}/%M - %msg%n</pattern>
+            <pattern>%d{"yyyy-MM-dd HH:mm:ss,SSS 'UTC'", UTC} [%thread] %-5level  %logger{36}/%M - %msg%n</pattern>
         </encoder>
     </appender>
 
     <logger name="org.apache.http" level="WARN" />
 
     <root level="DEBUG">
-        <appender-ref ref="FILE" />
+        <appender-ref ref="ROLLING" />
     </root>
 </configuration>
