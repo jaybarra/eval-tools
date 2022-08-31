@@ -1,4 +1,29 @@
 (ns eval.cmr-player.runner
+  "Namespace for handling commands.
+
+  The hierarchy for scripts should match the following
+  script:
+   [steps]
+     concurrency : threads
+     loop : duration
+     repeat : iterations within a loop
+
+
+  Yielding the following meta hierarchy
+  |- script -----------------------------------|
+  | |---- step ------------------------------| |
+  | | |------ concurrency -----------------| | |
+  | | | |---------- loop ----------------| | | |
+  | | | | |----------- repeat ---------| | | | |
+  | | | | | |------------ action ----| | | | | |
+  | | | | | |                        | | | | | |
+  | | | | | |_______________________ | | | | | |
+  | | | | |____________________________| | | | |
+  | | | |________________________________| | | |
+  | | |____________________________________| | |
+  | |________________________________________| |
+  |____________________________________________|
+  "
   (:require
    [clojure.set :as set]
    [clojure.string :as str]
@@ -213,7 +238,9 @@
                        (play-step state (if (zero? t)
                                           step
                                           ;; only print to stdout on the 0th thread, others will go to logs
-                                          (assoc step :silent true)))))
+                                          (assoc step
+                                                 :silent true
+                                                 :progress false)))))
                    (range n#threads))]
     (doseq [future (.invokeAll pool tasks)]
       (.get future))
