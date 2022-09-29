@@ -5,10 +5,6 @@
         metosin/ring-http-response {:mvn/version "0.9.3"}
 
         ;; relocate to a component
-        selmer/selmer {:mvn/version "1.12.53"}}
+        selmer/selmer {:mvn/version "1.12.55"}}
  :aliases {:test {:extra-paths ["test"]
-                  :extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}}}
-
-           :kaocha {:extra-paths []
-                    :extra-deps {lambdaisland/kaocha {:mvn/version "1.69.1069"}}
-                    :main-opts ["-m" "kaocha.runner"]}}}
+                  :extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}}}}}

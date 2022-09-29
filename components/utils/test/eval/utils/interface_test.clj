@@ -1,6 +1,7 @@
 (ns eval.utils.interface-test
   (:require
    [clojure.data.xml :as xml]
+   [clojure.string :as str]
    [clojure.test :refer [deftest testing is]]
    [eval.utils.interface :as utils]))
 
@@ -32,7 +33,8 @@
                                    :boolean-false false
                                    :number-zero 0}))))
 
-(def ^:private xml-simple "<?xml version= \"1.0\" encoding= \"UTF-8\"?>
+(def xml-simple "
+<?xml version= \"1.0\" encoding= \"UTF-8\"?>
 <orders type=\"array\">
   <order>
     <order_price>test</order_price>
@@ -47,14 +49,18 @@
 </orders>")
 
 (deftest format-edn-as-xml-test--edn-with-array--formats-correctly
-  (is (= (-> xml-simple
-             xml/parse-str
-             xml/indent-str)
-         (xml/indent-str
-          (utils/edn->xml "order" [{:order_price "test"
-                                    :provider_orders [{:reference {:id "test"}}]}])))))
+  (let [data [{:order_price "test"
+               :provider_orders [{:reference {:id "test"}}]}]]
+    (is (= (-> xml-simple
+               str/trim
+               xml/parse-str)
+           (->> data
+                (utils/edn->xml "order")
+                xml/indent-str
+                xml/parse-str)))))
 
-(def ^:private xml-nested "<?xml version=\"1.0\" encoding= \"UTF-8 \"?>
+(def ^:private xml-nested "
+<?xml version=\"1.0\" encoding= \"UTF-8 \"?>
 <orders type= \"array\">
   <order>
     <order_price>test</order_price>
@@ -79,9 +85,15 @@
 
 (deftest format-edn-as-xml-test--edn-with-nested-array--formats-correctly
   (let [xml-doc (-> xml-nested
-                    xml/parse-str
-                    xml/indent-str)]
-    (is (= xml-doc (xml/indent-str
-                    (utils/edn->xml "order" [{:order_price "test"
-                                              :nested1 {:nested2 {:nested3 [{:id "data"}]}}
-                                              :provider_orders [{:reference {:id "test"}}]}]))))))
+                    str/trim
+                    xml/parse-str)]
+    (is (= xml-doc (-> (utils/edn->xml "order" [{:order_price "test"
+                                                :nested1 {:nested2 {:nested3 [{:id "data"}]}}
+                                                 :provider_orders [{:reference {:id "test"}}]}])
+                       xml/indent-str
+                       xml/parse-str)))))
+
+(deftest map-to-test
+  (is (= [[:a "a"]]
+         (utils/maps-to {:a "value" :b "othervalue"}
+                        {"a" "value" "b" "different"}))))

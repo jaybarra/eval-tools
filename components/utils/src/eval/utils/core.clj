@@ -21,7 +21,7 @@
 (defn- dissoc-blank
   [m kv]
   (if (or (nil? (val kv))
-          (and (string? (val kv)) 
+          (and (string? (val kv))
                (str/blank? (val kv))))
     (dissoc m (key kv))
     m))
@@ -30,3 +30,11 @@
   "Removes keys mapping to nil or blank values in a map."
   [m]
   (reduce dissoc-blank m m))
+
+(defn maps-to
+  "Return a list of key-pairs that map to each other by way of matching values."
+  [a b]
+  (for [[ak av] a
+        [bk bv] b
+        :when (= av bv)]
+    [ak bk]))

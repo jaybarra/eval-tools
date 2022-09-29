@@ -3,18 +3,12 @@
    [eval.utils.core :as core]
    [eval.utils.xml :as xml]))
 
-(defn edn->json
-  [edn]
-  (core/edn->json edn))
+(def edn->json core/edn->json)
 
-(defn remove-nil-keys
-  [m]
-  (core/remove-nil-keys m))
+(def remove-nil-keys core/remove-nil-keys)
 
-(defn remove-blank-keys
-  [m]
-  (core/remove-blank-keys m))
+(def remove-blank-keys core/remove-blank-keys)
 
-(defn edn->xml
-  [key-name data]
-  (xml/edn->xml key-name data))
+(def maps-to core/maps-to)
+
+(def edn->xml xml/edn->xml)
