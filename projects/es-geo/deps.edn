@@ -4,7 +4,7 @@
         eval/es-driver {:local/root "../../bases/es-driver"}
 
         org.clojure/clojure {:mvn/version "1.11.0"}
-        org.clojure/tools.deps.alpha {:mvn/version "0.13.1168"}
+        org.clojure/tools.deps.alpha {:mvn/version "0.14.1222"}
         org.clojure/tools.logging {:mvn/version "1.2.4"}
         org.slf4j/slf4j-nop {:mvn/version "2.0.0-alpha7"}}
 
