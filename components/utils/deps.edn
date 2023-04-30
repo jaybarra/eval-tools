@@ -1,5 +1,5 @@
 {:paths ["src" "resources"]
- :deps {metosin/jsonista {:mvn/version "0.3.6"}
+ :deps {metosin/jsonista {:mvn/version "0.3.7"}
         org.clojure/data.xml {:mvn/version "0.0.8"}}
  :aliases {:test {:extra-paths ["test"]
                   :extra-deps {}}}}

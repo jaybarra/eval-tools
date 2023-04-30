@@ -1,7 +1,7 @@
 {:paths ["src" "resources"]
  :deps {camel-snake-kebab/camel-snake-kebab {:mvn/version "0.4.3"}
         clj-http/clj-http {:mvn/version "3.12.3"}
-        metosin/jsonista {:mvn/version "0.3.6"}
+        metosin/jsonista {:mvn/version "0.3.7"}
         org.clojure/data.csv {:mvn/version "1.0.1"}}
  :aliases {:test {:extra-paths ["test"]
                   :extra-deps {}}}}

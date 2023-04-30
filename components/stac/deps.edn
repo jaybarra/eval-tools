@@ -1,6 +1,6 @@
 {:paths ["src" "resources"]
  :deps {clj-http/clj-http {:mvn/version "3.12.3"}
-        metosin/jsonista {:mvn/version "0.3.6"}
+        metosin/jsonista {:mvn/version "0.3.7"}
         metosin/scjsv {:mvn/version "0.6.2"}}
  :aliases {:test {:extra-paths ["test"]
                   :extra-deps {}}}}

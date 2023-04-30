@@ -1,9 +1,9 @@
 {:paths ["src" "resources"]
  :deps {camel-snake-kebab/camel-snake-kebab {:mvn/version "0.4.3"}
         org.clojure/math.numeric-tower {:mvn/version "0.0.5"}
-        org.geotools/gt-epsg-hsql {:mvn/version "28-SNAPSHOT"}
-        org.geotools/gt-geojson {:mvn/version "28-SNAPSHOT"}
-        org.geotools/gt-shapefile {:mvn/version "28-SNAPSHOT"}}
+        org.geotools/gt-epsg-hsql {:mvn/version "30-SNAPSHOT"}
+        org.geotools/gt-geojson {:mvn/version "30-SNAPSHOT"}
+        org.geotools/gt-shapefile {:mvn/version "30-SNAPSHOT"}}
  :aliases {:test {:extra-paths ["test"]
                   :extra-deps {io.github.cognitect-labs/test-runner
                                {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
