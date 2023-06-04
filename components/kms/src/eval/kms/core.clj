@@ -10,8 +10,8 @@
    [clojure.zip :as zip]
    [eval.utils.interface :as util]))
 
-(def ^:private num-header-lines
-  "Number of lines which contain header information in csv files (not the actual keyword values)."
+(def num-header-lines
+  "Number of lines which contain header information in CSV files (not the actual keyword values)."
   2)
 
 (def schemes

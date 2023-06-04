@@ -14,8 +14,8 @@
 
 (def gdelt-latest-update-url "http://data.gdeltproject.org/gdeltv2/lastupdate.txt")
 
-(def ^:private datetime-fmt (DateTimeFormatter/ofPattern "yyyyMMddHHmmss"))
-(def ^:private datetime-rx #"\d{10}(00|15|30|45)00")
+(def datetime-fmt (DateTimeFormatter/ofPattern "yyyyMMddHHmmss"))
+(def datetime-rx #"\d{10}(00|15|30|45)00")
 
 (defn valid-datetime? [dt formatter]
   (try

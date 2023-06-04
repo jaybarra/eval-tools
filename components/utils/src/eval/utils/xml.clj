@@ -1,10 +1,10 @@
 (ns eval.utils.xml
-(:require
- [clojure.data.xml :as xml]
- [clojure.string :as str]))
+  (:require
+   [clojure.data.xml :as xml]
+   [clojure.string :as str]))
 
 (defn edn->xml
-  "Converts an EDN data structure to an equivalent XML."
+  "Convert EDN data to equivalent XML."
   [key-name data]
   (cond
     (= (type data) java.util.Date) (xml/element (name key-name) {} (.toString data))

@@ -7,9 +7,4 @@
  :tag-patterns {:stable "stable-*"
                 :release "v[0-9]*"}
  :projects {"development" {:alias "dev"}
-            "cmr-client" {:alias "cmrcli"}
-            "cmr-dashboard" {:alias "cmrdash"}
-            "cmr-playback" {:alias "playback"}
-            "es-geo" {:alias "geo"
-                      :test {:setup-fn project.es-geo.test-fixture/setup
-                             :teardown-fn project.es-geo.test-fixture/teardown}}}}
+            "cmr-playback" {:alias "playback"}}}

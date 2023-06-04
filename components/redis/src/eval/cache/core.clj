@@ -6,5 +6,4 @@
 (comment
   (car/wcar {:pool {}
              :spec {:uri "redis://localhost:6379"}}
-            (car/get ":kms"))
-  )
+            (car/get ":kms")))

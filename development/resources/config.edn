@@ -1,18 +1,11 @@
 {:log/system {:level :debug}
-
  :app/cmr
  {:instances
-  {:prod {:url "https://cmr.earthdata.nasa.gov"
-          :token #env "CMR_AUTH_HEADER_PROD"}
-   :uat {:url "https://cmr.uat.earthdata.nasa.gov"
-         :token #env "CMR_AUTH_HEADER_UAT"}
-   :sit {:url "https://cmr.sit.earthdata.nasa.gov"
-         :token #env "CMR_AUTH_HEADER_SIT"}
-   :local {:token "mock-echo-system-token"
-           :endpoints {:access-control "http://localhost:3011"
-                       :bootstrap "http://localhost:3006"
-                       :indexer "http://localhost:3004"
-                       :ingest "http://localhost:3002"
-                       :legacy "http://localhost:3012"
-                       :metadata-db "http://localhost:3001"
-                       :search "http://localhost:3003"}}}}}
+  {:local
+   {:endpoints
+    {:access-control "http://localhost:3011"
+     :bootstrap "http://localhost:3006"
+     :indexer "http://localhost:3004"
+     :ingest "http://localhost:3002"
+     :metadata-db "http://localhost:3001"
+     :search "http://localhost:3003"}}}}}

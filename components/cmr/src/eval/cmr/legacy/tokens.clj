@@ -1,16 +1,16 @@
 (ns eval.cmr.legacy.tokens
-  "Actions for interacting with the CMR legacy systems."
+  "Actions for interacting with the CMR Legacy Services."
   {:deprecated true}
   (:require
    [eval.cmr.client :as cmr]))
 
-(defn ^{:deprecated true} echo-token-soap-message
-  "Return a soap message for getting an echo-token from legacy systems.
+(defn echo-token-soap-message
+  "Return a soap message for getting an echo-token from Legacy Services.
 
-  supported options
-  * :ip-address
-  * :act-as
-  * :on-behalf-of"
+  Options
+  `:ip-address`		[string]
+  `:act-as`		[string]
+  `:on-behalf-of`	[string]"
   [username password client-id & [opts]]
   (format
    "<Envelope xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">
@@ -36,7 +36,7 @@
      (format "<behalfOfProvider>%s</behalfOfProvider>" on-behalf-of)
      "")))
 
-(defn ^:private token-xml-request-body
+(defn- token-xml-request-body
   [credentials]
   (format
    "<token>
@@ -50,14 +50,15 @@
    (get credentials :client-id "test-client")
    (get credentials :ip-address "127.0.0.1")))
 
-(defn ^{:deprecated true} get-token
-  "Request a token from CMR legacy services
+(defn get-token
+  "Request a token from CMR Legacy Services
 
   Credentials map:
-  * username - Earthdata username
-  * password - Earthdata password
-  * client-id - optional
-  * ip-address - optional"
+
+  :username	[string]	Earthdata username
+  :password	[string]	Earthdata password
+  :client-id	[string]	Client string
+  :ip-address	[string]	IP address of the client"
   [credentials]
   {::cmr/request
    {:method :post
@@ -66,12 +67,12 @@
     :body (token-xml-request-body credentials)}
    ::cmr/category :legacy})
 
-(defn ^{:deprecated true} get-token-info
+(defn get-token-info
   "Retrieve information about a given token."
-  [token-id]
+  [token]
   {::cmr/request
    {:method :post
     :url "/legacy-services/rest/tokens/get_token_info"
     :headers {"Content-Type" "application/json"}
-    :body {:id token-id}}
+    :body {:id token}}
    ::cmr/category :legacy})

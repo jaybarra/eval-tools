@@ -4,7 +4,7 @@
   This namespace provides basic interaction with a CMR instance through the [[eval.cmr.client/invoke]] function."
   (:require
    [clj-http.client :as http]
-   [clojure.core.async :refer [>! <! <!! go chan promise-chan]]
+   [clojure.core.async :as async :refer [>! <! <!! go chan promise-chan]]
    [clojure.spec.alpha :as spec]
    [clojure.string :as str]
    [clojure.tools.logging :as log]
@@ -118,8 +118,8 @@
 
 (defn format->cmr-url-extension
   "CMR supported search extensions"
-  [fmt]
-  (case fmt
+  [format]
+  (case format
     :atom ".atom"
     :dif ".dif"
     :dif10 ".dif10"
@@ -175,7 +175,7 @@
        (rest headers))
       updated-query)))
 
-(defn ^:private handle-cmr-response
+(defn- handle-cmr-response
   "Do any formatting by content-type here."
   [resp]
   (try
@@ -186,7 +186,7 @@
       {:eval.cmr.client/category :eval.anomalies/fault
        ::exception t})))
 
-(defn ^:private send-request
+(defn- send-request
   "Send a query to CMR and and recieve a response in a promise-chan."
   [query]
   (let [response-ch (chan 1)
@@ -230,7 +230,7 @@
   (let [{:keys [url token endpoints client-id]} cmr-cfg]
     (->HttpClient url token endpoints client-id)))
 
-(defn ^:private replace-service-route
+(defn- replace-service-route
   "Replaces the service route from the command URL with the new path."
   [command new-route]
   (update-in command
@@ -251,24 +251,23 @@
   "Invoke CMR endpoints with a request map and return quit the response.
   Throws with exceptional response status (>= status 400)
 
-  The [[CmrClient]] url will be prefixed to the provided url to determine
+  The [[CmrClient]] URL will be prefixed to the provided URL to determine
   where the request should be sent.
 
   Sends a query to CMR over HTTP and returns the response object.
 
   If an authorization-token is available for the provided [[CmrClient]], the token
-  will be added to the \"Authorization\" header. This may be ignored by setting
+  will be added to the `Authorization` header. This may be ignored by setting
   :anonymous? to true in the options.
 
   ## Options
   |option| type | description|
   |------|------|------------|
-  |`:anonymous?`| optional boolean| When true, no authorization-token will be added to the header |
-  |`:token`| optional string | Authorization token to be used. Should be in the form of \"Bearer EDL-xxxxxx...\"<br>See https://urs.earthdata.nasa.gov for Earthdata Login token generation|"
+  |`:anonymous?`| [boolean|] When true, no authorization-token will be added to the header |
+  |`:token`| [string] | Authorization token to be used. Should be in the form of \"Bearer xxxxxx...\"<br>See https://urs.earthdata.nasa.gov for Earthdata Login token generation or a Launchpad token without the Bearer prefix.|"
   [client command]
   (when-not (spec/valid? ::command command)
-    (throw (ex-info "Invalid CMR command"
-                    (spec/explain-data ::command command))))
+    (throw (ex-info "Invalid CMR command" (spec/explain-data ::command command))))
   (let [{:keys [anonymous? token]} (:opts command)
         {root-url :url
          client-id :client-id

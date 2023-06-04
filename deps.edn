@@ -4,7 +4,7 @@
  {:dev {:extra-paths ["development/src"
                       "development/resources"]
         :extra-deps {org.clojure/clojure {:mvn/version "1.11.1"}
-                     org.clojure/tools.deps.alpha {:mvn/version "0.15.1254"}
+                     org.clojure/tools.deps {:mvn/version "0.18.1354"}
                      org.clojure/tools.namespace {:mvn/version "1.4.4"}
                      ch.qos.logback/logback-classic {:mvn/version "1.4.7"}
 
@@ -24,8 +24,6 @@
                      eval/utils {:local/root "components/utils"}
 
                      ;; Bases
-                     eval/cmr-cli {:local/root "bases/cmr-cli"}
-                     eval/cmr-dash {:local/root "bases/cmr-dash"}
                      eval/cmr-player {:local/root "bases/cmr-player"}
                      eval/es-driver {:local/root "bases/es-driver"}}}
 
@@ -45,13 +43,11 @@
                        "components/utils/test"
 
                        ;; Bases
-                       "bases/cmr-cli/test"
-                       "bases/cmr-dash/test"
                        "bases/cmr-player/test"
                        "bases/es-driver/test"]}
 
   :poly {:extra-deps {polylith/clj-poly
                       {:git/url "https://github.com/polyfy/polylith.git"
-                       :sha "a073b7c8dbea176a8cb39b3c4d7c3d465c99e946"
+                       :sha "928e9ddce6c08889ce36e6b8367b57a6993295c6"
                        :deps/root "projects/poly"}}
          :main-opts  ["-m" "polylith.clj.core.poly-cli.core"]}}}

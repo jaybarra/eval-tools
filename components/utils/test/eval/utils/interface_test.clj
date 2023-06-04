@@ -5,10 +5,10 @@
    [clojure.test :refer [deftest testing is]]
    [eval.utils.interface :as utils]))
 
-(deftest edn->json--happy-path
-  (testing "Given an EDN map"
+(deftest edn->json-test
+  (testing ""
     (let [edn {:foo "bar"}]
-      (testing "When I convert the EDN to JSON"
+      (when "When I convert the EDN to JSON"
         (is (= "{\"foo\":\"bar\"}" (utils/edn->json edn))
             "Then the EDN is converted to JSON correctly")))))
 
@@ -59,7 +59,7 @@
                 xml/indent-str
                 xml/parse-str)))))
 
-(def ^:private xml-nested "
+(def xml-nested "
 <?xml version=\"1.0\" encoding= \"UTF-8 \"?>
 <orders type= \"array\">
   <order>
@@ -88,7 +88,7 @@
                     str/trim
                     xml/parse-str)]
     (is (= xml-doc (-> (utils/edn->xml "order" [{:order_price "test"
-                                                :nested1 {:nested2 {:nested3 [{:id "data"}]}}
+                                                 :nested1 {:nested2 {:nested3 [{:id "data"}]}}
                                                  :provider_orders [{:reference {:id "test"}}]}])
                        xml/indent-str
                        xml/parse-str)))))

@@ -15,3 +15,15 @@
     (conj log {:event event
                :type :stop
                :timestamp (.toString (LocalDateTime/now))})))
+
+(defn intervals
+  [timestamps]
+
+  (map #(LocalDateTime/parse %) timestamps)
+  )
+
+(comment
+  (intervals ["23-May-2023 14:47:47"
+              "23-May-2023 15:13:40"])
+
+  )
