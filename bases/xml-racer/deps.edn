@@ -1,0 +1,6 @@
+{:paths ["src" "resources"]
+ :deps {criterium/criterium {:mvn/version "0.4.6"}
+        org.clojure/data.xml {:mvn/version "0.0.8"}
+        com.fasterxml.woodstox/woodstox-core {:mvn/version "6.5.1"}}
+ :aliases {:test {:extra-paths ["test"]
+                  :extra-deps {}}}}

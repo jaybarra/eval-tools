@@ -7,13 +7,13 @@
   []
   (let [title "EVAL-TOOLS"
         padding (- 80 (count title))
-        lpad (quot padding 2)
-        rpad (- 77 lpad 3)]
+        l#pad (quot padding 2)
+        r#pad (- 77 l#pad 3)]
     (if-let [banner (io/resource "banner.txt")]
       (println (slurp banner))
       (printf (str (apply str (repeat 80 "*"))
-                   (str "%n***%" lpad "s")
-                   (str (str/join (repeat rpad " ")) "***%n")
+                   (str "%n***%" l#pad "s")
+                   (str (apply str (repeat r#pad " ")) "***%n")
                    (apply str (repeat 80 "*"))
                    "%n")
               title))))
